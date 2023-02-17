@@ -98,7 +98,8 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
     private fun initListener() {
         connectClickBtn.setOnClickListener {
             if (NetworkUtil.get().isNetworkAvailable || NetworkUtil.isNetSystemUsable(activity)) toggle()
-            else Toast.makeText(activity, getString(R.string.network_error), Toast.LENGTH_LONG).show()
+            else Toast.makeText(activity, getString(R.string.network_error), Toast.LENGTH_LONG)
+                .show()
         }
         serversContainer.setOnClickListener {
             val intent = Intent(activity, ServersListActivity::class.java)
@@ -217,7 +218,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
     }
 
     override fun onServiceConnected(service: IShadowsocksService) {
-        Timber.e("lixiang---onServiceConnected-- ${service.state}")
+        Timber.tag(AppConstant.TAG).e("-onServiceConnected-${service.state}")
         changeState(
             try {//传入连接状态
                 BaseService.State.values()[service.state]
