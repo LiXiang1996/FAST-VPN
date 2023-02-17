@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/server_item_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/server_item_bg">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/server_item_icon"
+        android:layout_width="43dp"
+        android:layout_height="43dp"
+        android:scaleType="centerInside"
+        android:layout_marginVertical="16dp"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="25dp"
+        tools:src="@mipmap/icon_country_unitedstates" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/server_item_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="21dp"
+        android:layout_toEndOf="@id/server_item_icon"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        tools:text="Super Fast Server" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/server_item_check_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="35.4dp"
+        android:src="@mipmap/checked_server_icon" />
+
+</RelativeLayout>

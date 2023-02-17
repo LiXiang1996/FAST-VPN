@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:id="@+id/server_connect_container"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:fitsSystemWindows="true"
+    android:background="@drawable/server_connect_bg"
+    android:layout_height="match_parent">
+
+
+    <com.example.test.ui.widget.TitleView
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:id="@+id/sever_state_title_view"
+        app:leftImg="@mipmap/icon_back_arrow"
+        />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="21.7dp"
+        android:layout_gravity="center_horizontal"
+        android:src="@mipmap/server_connect_robot_img"
+        android:id="@+id/server_connect_robot_img"/>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="19.5dp"
+        android:textSize="20.5sp"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        tools:text="Connected！"
+        android:id="@+id/server_connect_state_text"
+        android:layout_gravity="center_horizontal"/>
+
+
+    <RelativeLayout
+        android:background="@drawable/server_item_state_bg"
+        android:layout_width="match_parent"
+        android:layout_marginStart="18.3dp"
+        android:layout_marginEnd="12.6dp"
+        android:layout_height="78dp"
+        android:layout_marginTop="44.5dp">
+        
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="43dp"
+            android:layout_height="43dp"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="22.8dp"
+            tools:src="@mipmap/icon_country_unitedstates"
+            android:id="@+id/server_connect_country_img"
+            />
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/server_connect_country_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:textColor="@color/white"
+            android:textSize="17sp"
+            tools:text="United States"
+            android:layout_marginStart="15dp"
+            android:layout_toEndOf="@id/server_connect_country_img"
+            />
+
+        <Chronometer
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            tools:text="00:01:08"
+            android:textColor="#7AFFFFFF"
+            android:layout_marginEnd="13.7dp"
+            android:id="@+id/server_connect_time_text"/>
+
+<!--        <androidx.appcompat.widget.AppCompatTextView-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_alignParentEnd="true"-->
+<!--            android:layout_centerVertical="true"-->
+<!--            tools:text="00:01:08"-->
+<!--            android:textColor="#7AFFFFFF"-->
+<!--            android:layout_marginEnd="13.7dp"-->
+<!--            android:id="@+id/server_connect_time_text"/>-->
+        
+        
+    </RelativeLayout>
+        
+</LinearLayout>

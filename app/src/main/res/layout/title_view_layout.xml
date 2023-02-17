@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="64dp"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleType="centerInside"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="18.3dp"
+        android:id="@+id/title_view_left_icon"
+        android:src="@mipmap/icon_back_arrow"
+        android:layout_centerVertical="true"/>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:textColor="@color/white"
+        android:textSize="18.3sp"
+        android:id="@+id/title_view_title"
+        tools:text = "Title"
+        />
+    <androidx.appcompat.widget.AppCompatTextView
+        android:layout_width="wrap_content"
+        android:id="@+id/title_view_right_text"
+        android:layout_height="wrap_content"
+        android:textColor="@color/white"
+        android:textSize="18.3sp"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="8dp"
+        android:layout_toStartOf="@id/title_view_right_icon"
+        tools:text = "Title"
+        />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/title_view_right_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="18.3dp"
+        android:visibility="gone"
+        android:layout_centerVertical="true"/>
+
+
+</RelativeLayout>

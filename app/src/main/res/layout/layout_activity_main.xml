@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/container"
+    android:background="@color/white"
+    android:orientation="vertical">
+
+
+
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/fragment_container_viewpager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_above="@id/nav_tab_layout"
+        app:layout_constraintBottom_toTopOf="@id/nav_tab_layout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/nav_tab_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@color/tab_color"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:tabMode="fixed"
+        android:alpha="1"
+        app:tabRippleColor="@android:color/transparent"
+        tools:layout_height="50dp" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="gone"
+        android:alpha="0.1"
+        android:id="@+id/frame_layout"
+        android:background="#000000"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

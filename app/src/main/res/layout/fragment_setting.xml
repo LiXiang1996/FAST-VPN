@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/primaryColor"
+    tools:context=".ui.activity.MainActivity">
+    
+    <androidx.appcompat.widget.AppCompatImageView
+        android:layout_width="85dp"
+        android:layout_height="56dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:src="@mipmap/setting_robot"
+        android:layout_marginTop="75dp"
+        android:id="@+id/setting_icon"
+        />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:textSize="18sp"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        android:id="@+id/setting_name"
+        android:layout_marginTop="14dp"
+        app:layout_constraintTop_toBottomOf="@id/setting_icon"
+        android:text="@string/fast_vpn"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="60.5dp"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@id/setting_name"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginHorizontal="46dp"
+        >
+
+        <com.example.test.ui.widget.SettingItemView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:title="@string/contact_us"
+            android:id="@+id/setting_contact_us"
+            app:icon="@mipmap/icon_contact_us"
+            />
+        <com.example.test.ui.widget.SettingItemView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:title="@string/privacy_policy"
+            app:icon="@mipmap/icon_privicy_policy"
+            android:layout_marginTop="18.3dp"
+            android:id="@+id/setting_privacy_policy"
+
+            />
+        <com.example.test.ui.widget.SettingItemView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:title="@string/share"
+            app:icon="@mipmap/icon_share"
+            android:layout_marginTop="18.3dp"
+            android:id="@+id/setting_share"
+
+            />
+        <com.example.test.ui.widget.SettingItemView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:title="@string/upgrade"
+            app:icon="@mipmap/icon_upgrade"
+            android:id="@+id/setting_upgrade"
+            android:layout_marginTop="18.3dp"
+            />
+
+
+
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

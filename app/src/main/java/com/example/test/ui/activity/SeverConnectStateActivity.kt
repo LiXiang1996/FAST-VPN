@@ -1,0 +1,105 @@
+package com.example.test.ui.activity
+
+import android.graphics.Color
+import android.os.Bundle
+import android.os.RemoteException
+import android.view.KeyEvent
+import android.widget.Chronometer
+import android.widget.LinearLayout
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatImageView
+import androidx.appcompat.widget.AppCompatTextView
+import com.bumptech.glide.Glide
+import com.example.test.R
+import com.example.test.base.AppConstant
+import com.example.test.base.AppVariable
+import com.example.test.base.bar.StatusBarUtil
+import com.example.test.base.data.CountryUtils
+import com.example.test.base.utils.NetworkPing
+import com.example.test.base.utils.SharedPreferencesUtils
+import com.example.test.ui.widget.TitleView
+import com.github.shadowsocks.Core
+import com.github.shadowsocks.aidl.IShadowsocksService
+import com.github.shadowsocks.aidl.ShadowsocksConnection
+import com.github.shadowsocks.bg.BaseService
+import com.github.shadowsocks.database.Profile
+import com.github.shadowsocks.database.ProfileManager
+import com.github.shadowsocks.utils.StartService
+import kotlinx.coroutines.*
+import timber.log.Timber
+import java.text.SimpleDateFormat
+import java.util.*
+
+
+class SeverConnectStateActivity : AppCompatActivity() {
+    private lateinit var container: LinearLayout
+    private lateinit var countryImg: AppCompatImageView
+    private lateinit var countryName: AppCompatTextView
+    lateinit var connectText: AppCompatTextView
+    private lateinit var connectTime: Chronometer
+    lateinit var titleView: TitleView
+    private var connectTotalTime: String? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_server_connect_state_layout)
+        container = findViewById(R.id.server_connect_container)
+        titleView = findViewById(R.id.sever_state_title_view)
+        countryImg = findViewById(R.id.server_connect_country_img)
+        countryName = findViewById(R.id.server_connect_country_text)
+        connectText = findViewById(R.id.server_connect_state_text)
+        connectTime = findViewById(R.id.server_connect_time_text)
+        connectTime.text = "00:00:00"
+        StatusBarUtil.setTranslucentStatus(this)
+        initListener()
+
+        val country = AppVariable.country
+        countryName.text =
+            if (country == AppConstant.DEFAULT || country.isBlank()) getString(R.string.super_fast_server) else country
+        Glide.with(this).load(CountryUtils.getCountrySource(country)).circleCrop().into(countryImg)
+    }
+
+    private fun initListener() {
+        titleView.leftImg.setOnClickListener {
+            finish()
+        }
+        connectTime.onChronometerTickListener = Chronometer.OnChronometerTickListener { cArg ->
+            val time = System.currentTimeMillis() - cArg.base
+            val d = Date(time)
+            val sdf = SimpleDateFormat("HH:mm:ss", Locale.US)
+            sdf.timeZone = TimeZone.getTimeZone("UTC")
+            connectTime.text = sdf.format(d)
+        }
+        setConnectTime(AppVariable.state)
+    }
+
+
+    private fun setConnectTime(state: BaseService.State) {
+        when (state) {
+            BaseService.State.Connected -> {
+                connectTime.setTextColor(Color.parseColor("#FFFFFF"))
+                connectTime.base = System.currentTimeMillis()
+                connectTime.start()
+                connectText.text = getString(R.string.connection_succeed)
+                container.setBackgroundResource(R.drawable.server_connect_bg)
+            }
+            BaseService.State.Stopped -> {
+                connectTime.setTextColor(Color.parseColor("#80FFFFFF"))
+                connectTime.text = AppVariable.connectTotalTime
+                connectText.text = getString(R.string.disconnected)
+                container.setBackgroundResource(R.drawable.server_disconnect_bg)
+                ServersListProfile.getServersList().forEach { it.isChecked = false }
+            }
+            else -> {}
+        }
+
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (event?.keyCode == KeyEvent.KEYCODE_BACK) {
+            finish()
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+}
