@@ -1,14 +1,13 @@
-plugins {
+﻿plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
 }
 
 android {
-    namespace 'com.example.test'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.example.test"
+        applicationId "com.privateinternetaccess.fast"
         minSdk 24
         targetSdk 33
         versionCode 1
