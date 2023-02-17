@@ -1,6 +1,8 @@
 ﻿plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'com.google.firebase.crashlytics'
+    id 'com.google.gms.google-services'
 }
 
 android {
@@ -50,8 +52,10 @@ dependencies {
         exclude group: "com.android.support"
     }
     implementation 'org.greenrobot:eventbus:3.1.1'
-
-
     annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
+
+    implementation platform('com.google.firebase:firebase-bom:31.2.2')
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+    implementation 'com.google.firebase:firebase-config-ktx'
 
 }
