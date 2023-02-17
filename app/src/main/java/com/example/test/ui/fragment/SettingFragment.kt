@@ -83,8 +83,7 @@ class SettingFragment : Fragment() {
 
 
     private fun showMarket() {
-        // TODO: 更换包名 
-        val appPackageName = "com.example.test"
+        val appPackageName = context?.packageName
         try {
             val launchIntent = Intent()
             launchIntent.data = Uri.parse("market://details?id=$appPackageName")

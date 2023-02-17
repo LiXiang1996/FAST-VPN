@@ -4,7 +4,6 @@ plugins {
 }
 
 android {
-    namespace 'com.example.test'
     compileSdk 33
 
     defaultConfig {
