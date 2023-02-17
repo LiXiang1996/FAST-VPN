@@ -57,8 +57,8 @@ class SettingFragment : Fragment() {
     private fun toSendMail() {
         val uri: Uri = Uri.parse("mailto:2459141797@qq.com")
         val intent = Intent(Intent.ACTION_SENDTO, uri)
-        intent.putExtra(Intent.EXTRA_SUBJECT, "这是邮件的主题部分") // 主题
-        intent.putExtra(Intent.EXTRA_TEXT, "这是邮件的正文部分") // 正文
+        intent.putExtra(Intent.EXTRA_SUBJECT, "") // 主题
+        intent.putExtra(Intent.EXTRA_TEXT, "") // 正文
         startActivity(Intent.createChooser(intent, ""))
     }
 
@@ -74,8 +74,7 @@ class SettingFragment : Fragment() {
     private fun toShare() {
         val sendIntent = Intent()
         sendIntent.action = Intent.ACTION_SEND
-        sendIntent.putExtra(Intent.EXTRA_TEXT, "要分享的文本")
-        sendIntent.putExtra(Intent.EXTRA_TITLE, "我是标题")
+        sendIntent.putExtra(Intent.EXTRA_TEXT, "https://play.google.com/store/apps/details?id=${context?.packageName}")
         sendIntent.type = "text/plain"
         val shareIntent = Intent.createChooser(sendIntent, null)
         startActivity(shareIntent)
