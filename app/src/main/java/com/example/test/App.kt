@@ -3,15 +3,17 @@ package com.example.test
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
+import com.example.test.base.data.ListProfile
 import com.example.test.ui.activity.MainActivity
+import com.example.test.ui.activity.ServersListProfile
 import com.github.shadowsocks.Core
+import com.github.shadowsocks.database.Profile
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.ktx.initialize
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfig
+import com.google.gson.Gson
 
-@SuppressLint("StaticFieldLeak")
-val remoteConfig: FirebaseRemoteConfig = Firebase.remoteConfig
 
 class App : Application() {
 
@@ -30,10 +32,16 @@ class App : Application() {
     }
 
     private fun getRemoteConfig() {
+        val remoteConfig: FirebaseRemoteConfig = Firebase.remoteConfig
         remoteConfig.fetchAndActivate()
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    remoteConfig.getString("axxxxxx")
+                   val list =  remoteConfig.getString("axxxxxx")
+                    val gson = Gson()
+                    val resultBean: ListProfile = gson.fromJson(list, ListProfile::class.java)
+                    if ((resultBean.profileList?.size ?: 0) > 0){
+                        resultBean.profileList?.let { ServersListProfile.getServersList().addAll(it) }
+                    }
                 }
             }
     }
