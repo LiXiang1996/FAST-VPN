@@ -49,6 +49,7 @@ import java.util.*
 
 class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
 
+    var aa = 0
     private lateinit var serversContainer: RelativeLayout
     private lateinit var connectStateImg: AppCompatImageView
     private lateinit var countryIcon: AppCompatImageView
