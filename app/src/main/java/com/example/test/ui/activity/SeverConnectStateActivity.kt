@@ -35,11 +35,11 @@ import java.util.*
 class SeverConnectStateActivity : AppCompatActivity() {
     private lateinit var container: LinearLayout
     private lateinit var countryImg: AppCompatImageView
+    private lateinit var robotImg: AppCompatImageView
     private lateinit var countryName: AppCompatTextView
     lateinit var connectText: AppCompatTextView
     private lateinit var connectTime: Chronometer
     lateinit var titleView: TitleView
-    private var connectTotalTime: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,6 +47,7 @@ class SeverConnectStateActivity : AppCompatActivity() {
         container = findViewById(R.id.server_connect_container)
         titleView = findViewById(R.id.sever_state_title_view)
         countryImg = findViewById(R.id.server_connect_country_img)
+        robotImg = findViewById(R.id.server_connect_robot_img)
         countryName = findViewById(R.id.server_connect_country_text)
         connectText = findViewById(R.id.server_connect_state_text)
         connectTime = findViewById(R.id.server_connect_time_text)
@@ -83,6 +84,7 @@ class SeverConnectStateActivity : AppCompatActivity() {
                 connectTime.start()
                 connectText.text = getString(R.string.connection_succeed)
                 container.setBackgroundResource(R.drawable.server_connect_bg)
+                robotImg.setImageDrawable(getDrawable(R.mipmap.server_connect_robot_img))
             }
             BaseService.State.Stopped -> {
                 connectTime.setTextColor(Color.parseColor("#80FFFFFF"))
@@ -90,6 +92,7 @@ class SeverConnectStateActivity : AppCompatActivity() {
                 connectText.text = getString(R.string.disconnected)
                 container.setBackgroundResource(R.drawable.server_disconnect_bg)
                 ServersListProfile.getServersList().forEach { it.isChecked = false }
+                robotImg.setImageDrawable(getDrawable(R.mipmap.server_disconnect_robot_img))
             }
             else -> {}
         }

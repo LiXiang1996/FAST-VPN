@@ -3,7 +3,6 @@ package com.example.test.ui.activity
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.view.Gravity
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -27,7 +26,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var settingFragment: SettingFragment
     private lateinit var viewPager: ViewPager
     private lateinit var tabLayout: TabLayout
-     lateinit var frameLayout: FrameLayout
+    lateinit var frameLayout: FrameLayout
     private lateinit var fragments: Array<Fragment>
     var isShowDialog = false
 
@@ -41,13 +40,13 @@ class MainActivity : AppCompatActivity() {
     private fun initView() {
         isShowDialog = intent.getBooleanExtra(AppConstant.SHOW_DIALOG, false)
         if (isShowDialog) showTipDialog(this)
+        else showGuide()
         homeFragment = HomeFragment()
         settingFragment = SettingFragment()
         fragments = arrayOf(homeFragment, settingFragment)
         viewPager = findViewById(R.id.fragment_container_viewpager)
         tabLayout = findViewById(R.id.nav_tab_layout)
         frameLayout = findViewById(R.id.frame_layout)
-
         tabLayout.setupWithViewPager(viewPager)
         tabLayout.setSelectedTabIndicator(null)
         viewPager.adapter = object :
@@ -69,6 +68,10 @@ class MainActivity : AppCompatActivity() {
         tabLayout.getTabAt(1)?.icon = ContextCompat.getDrawable(this, R.mipmap.tab_setting_unselect)
         tabLayout.tabIconTint = null
 
+    }
+
+    private fun showGuide() {
+        TODO("Not yet implemented")
     }
 
     private fun initListener() {
@@ -116,7 +119,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        finish()
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            moveTaskToBack(false)
+            return true
+        }
         return super.onKeyDown(keyCode, event)
     }
 

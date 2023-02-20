@@ -22,6 +22,7 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.airbnb.lottie.LottieAnimationView
 import com.bumptech.glide.Glide
 import com.example.test.R
 import com.example.test.base.AppConstant
@@ -51,13 +52,17 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
 
     private lateinit var serversContainer: RelativeLayout
     private lateinit var connectStateImg: AppCompatImageView
+    private lateinit var connectRobotImg: AppCompatImageView
+    private lateinit var lottieAnimationView: LottieAnimationView
     private lateinit var countryIcon: AppCompatImageView
     private lateinit var connectClickBtn: LinearLayout
     private lateinit var countryName: AppCompatTextView
     lateinit var connectTimeTv: Chronometer
     private lateinit var context: MainActivity
+    var animationRotate: Animation? = null
     private val connection = ShadowsocksConnection(true)
-    var isJump = false
+    private var isJump = false
+    var isToConnect = false
 
 
     override fun onCreateView(
@@ -79,20 +84,35 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
 
     override fun onResume() {
         super.onResume()
-        countryName.text =
-            if (AppVariable.country == AppConstant.DEFAULT || AppVariable.country.isBlank()) "Super Fast Server" else AppVariable.country
-        Glide.with(this).load(CountryUtils.getCountrySource(AppVariable.country)).circleCrop()
-            .into(countryIcon)
+        isToConnect = AppVariable.state == BaseService.State.Stopped
+//        countryName.text =
+//            if (AppVariable.country == AppConstant.DEFAULT || AppVariable.country.isBlank()) "Super Fast Server" else AppVariable.country
+//        Glide.with(this).load(CountryUtils.getCountrySource(AppVariable.country)).circleCrop()
+//            .into(countryIcon)
+//        if(AppVariable.state == BaseService.State.Stopped){
+//
+//        }
+        setData()
+
     }
 
     private fun initView(view: View) {
         connectClickBtn = view.findViewById(R.id.main_connection_toggle_btn)
         serversContainer = view.findViewById(R.id.server_connect_to_servers_container)
         connectStateImg = view.findViewById(R.id.main_connection_toggle_img)
+        connectRobotImg = view.findViewById(R.id.main_connection_animate)
+        lottieAnimationView = view.findViewById(R.id.main_connection_animate_lottie)
         connectTimeTv = view.findViewById(R.id.main_connection_time_tv)
         countryIcon = view.findViewById(R.id.service_country_icon)
         connectTimeTv.text = "00:00:00"
         countryName = view.findViewById(R.id.service_country_name)
+        lottieAnimationView.imageAssetsFolder = "images"
+        lottieAnimationView.setAnimation("data.json")
+        lottieAnimationView.loop(true)
+        animationRotate = AnimationUtils.loadAnimation(activity, R.anim.loading_rotate)
+        animationRotate?.repeatCount = Animation.INFINITE
+
+
     }
 
     private fun initListener() {
@@ -117,7 +137,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
 
     private fun toggle() {
         isJump = true
-        (activity as MainActivity).frameLayout.visibility = View.VISIBLE
+        (activity as MainActivity)?.let { it.frameLayout.visibility = View.VISIBLE }
         if (AppVariable.state.canStop) Core.stopService()
         else {
             lifecycleScope.launch {
@@ -132,15 +152,17 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
     }
 
     private val permission = registerForActivityResult(StartService()) {
-        if (it) Toast.makeText(
-            context,
-            getString(com.github.shadowsocks.core.R.string.vpn_permission_denied),
-            Toast.LENGTH_LONG
-        ).show() else {
+        if (it) {
+            Toast.makeText(
+                context,
+                getString(com.github.shadowsocks.core.R.string.vpn_permission_denied),
+                Toast.LENGTH_LONG
+            ).show()
+            (activity as MainActivity)?.let { it.frameLayout.visibility = View.GONE }
+        } else {
             val data = ServersListProfile.getServerProfile(AppVariable.host).copy()
-            val find =
-                ProfileManager.getAllProfiles()?.find { it1 -> it1.host == AppVariable.host }
-                    ?: Profile()
+            val find = ProfileManager.getAllProfiles()?.find { it1 -> it1.host == AppVariable.host }
+                ?: Profile()
             val id: Long
             if (find.id == 0L) {
                 id = ProfileManager.createProfile(find).id
@@ -166,56 +188,62 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         AppVariable.connectTotalTime = connectTimeTv.text.toString()
         setConnectTime(state)
         Timber.tag(AppConstant.TAG).e("-ServiceState-$state")
-        val animation: Animation? = AnimationUtils.loadAnimation(activity, R.anim.loading_rotate)
         when (state) {
             BaseService.State.Connecting -> {
-                connectStateImg.setImageDrawable(
-                    ContextCompat.getDrawable(
-                        context,
-                        R.mipmap.home_toggle_btn_loading
-                    )
-                )
-                animation?.repeatCount = -1
-                connectStateImg.startAnimation(animation)
+                connectingAndStoppingAnimation()
             }
             BaseService.State.Connected -> {
-                animation?.cancel()
-                connectStateImg.clearAnimation()
                 connectClickBtn.setBackgroundResource(R.mipmap.main_btn_open_bg)
                 connectStateImg.setImageDrawable(
                     ContextCompat.getDrawable(
                         context, R.mipmap.home_toggle_btn_open
                     )
                 )
-                if (isJump) result()
+                connectRobotImg.setImageDrawable(context.getDrawable(R.mipmap.home_robot_connect))
+                connectedAndStoppedAnimation()
             }
             BaseService.State.Stopped -> {
-                connectStateImg.clearAnimation()
-                animation?.cancel()
                 connectClickBtn.setBackgroundResource(R.mipmap.main_btn_stop_bg)
                 connectStateImg.setImageDrawable(
                     ContextCompat.getDrawable(
                         context, R.mipmap.home_toggle_btn_close
                     )
                 )
-                if (isJump) result()
+                connectRobotImg.setImageDrawable(context.getDrawable(R.mipmap.home_robot_disconnect))
+                connectedAndStoppedAnimation()
+
+
             }
             BaseService.State.Stopping -> {
-                connectStateImg.setImageDrawable(
-                    ContextCompat.getDrawable(
-                        context, R.mipmap.home_toggle_btn_loading
-                    )
-                )
-                animation?.repeatCount = -1
-                connectStateImg.startAnimation(animation)
+                connectingAndStoppingAnimation()
             }
             else -> {
 
             }
-
         }
-
     }
+
+    private fun connectingAndStoppingAnimation() {
+        connectRobotImg.visibility = View.INVISIBLE
+        lottieAnimationView.visibility = View.VISIBLE
+        lottieAnimationView.playAnimation()
+        connectStateImg.setImageDrawable(
+            ContextCompat.getDrawable(
+                context, R.mipmap.home_toggle_btn_loading
+            )
+        )
+        connectStateImg.startAnimation(animationRotate)
+    }
+
+    private fun connectedAndStoppedAnimation() {
+        connectRobotImg.visibility = View.VISIBLE
+        lottieAnimationView.visibility = View.INVISIBLE
+        lottieAnimationView.cancelAnimation()
+        animationRotate?.cancel()
+        connectStateImg.clearAnimation()
+        if (isJump) result()
+    }
+
 
     override fun onServiceConnected(service: IShadowsocksService) {
         Timber.tag(AppConstant.TAG).e("-onServiceConnected-${service.state}")
@@ -253,7 +281,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                 } else if (AppVariable.state == BaseService.State.Stopped) {
                     Toast.makeText(activity, "Connecting", Toast.LENGTH_LONG).show()
                 }
-                val isToConnect = AppVariable.state == BaseService.State.Stopped
+
                 lifecycleScope.launch {
                     if (isToConnect && AppVariable.isFast) launch {
                         NetworkPing.toFastToggle { ip ->
@@ -270,9 +298,24 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
 
 
     private fun result() {
-        (activity as MainActivity).frameLayout.visibility = View.GONE
+        (activity as MainActivity)?.let { it.frameLayout.visibility = View.GONE }
         val intent = Intent(activity, SeverConnectStateActivity::class.java)
         activity?.startActivity(intent)
     }
 
+    fun setData() {
+        if (AppVariable.temporaryProfile != null && AppVariable.state == BaseService.State.Stopped) {//判断要进行断开操作，并且断开后返回主界面
+            AppVariable.host = AppVariable.temporaryProfile?.host ?: AppConstant.DEFAULT
+            AppVariable.country = AppVariable.temporaryProfile?.name ?: AppConstant.DEFAULT
+            AppVariable.temporaryProfile = null
+        }
+        countryName.text =
+            if (AppVariable.country == AppConstant.DEFAULT || AppVariable.country.isBlank()) "Super Fast Server" else AppVariable.country
+        Glide.with(this).load(
+            CountryUtils.getCountrySource(
+                AppVariable.country ?: AppConstant.DEFAULT
+            )
+        ).circleCrop()
+            .into(countryIcon)
+    }
 }

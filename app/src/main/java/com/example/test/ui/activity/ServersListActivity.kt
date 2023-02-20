@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.LayoutParams
 import com.bumptech.glide.Glide
 import com.example.test.R
+import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
 import com.example.test.base.data.CountryUtils
 import com.example.test.base.utils.DpUtils
@@ -64,7 +65,7 @@ class ServersListActivity : AppCompatActivity() {
         if (AppVariable.isFast && AppVariable.state == BaseService.State.Connected)
             getServersList()[0].isChecked = true
         else getServersList().find { it.host == AppVariable.host && AppVariable.state == BaseService.State.Connected }
-                .apply { this?.isChecked = true }
+            .apply { this?.isChecked = true }
         list.addAll(getServersList())
         recyclerViewAdapter?.setData(list)
         recyclerViewAdapter?.notifyDataSetChanged()
@@ -72,7 +73,7 @@ class ServersListActivity : AppCompatActivity() {
 }
 
 /**
- * 本地配置节点列表
+ * 本地配置节点列表 todo
  */
 class ServersListProfile {
     companion object {
@@ -116,11 +117,11 @@ class ServersListProfile {
             val mutableList = mutableListOf<Profile>()
             mutableList.add(fastProfile)
             mutableList.add(australiaProfile)
-//            mutableList.add(japanProfile)
-//            mutableList.add(norwayProfile)
-//            mutableList.add(chinaProfile)
-//            mutableList.add(indiaProfile)
-//            mutableList.add(irelandProfile)
+            mutableList.add(japanProfile)
+            mutableList.add(norwayProfile)
+            mutableList.add(chinaProfile)
+            mutableList.add(indiaProfile)
+            mutableList.add(irelandProfile)
             return mutableList
         }
 
@@ -193,7 +194,8 @@ class RecyclerViewAdapter(context: Context?) : Adapter<RecyclerViewAdapter.MyVie
             AppVariable.isFast = isFast
             (context as ServersListActivity).setResult(100, intent)
             context.finish()
-        } else Toast.makeText(context, context.getString(R.string.network_error), Toast.LENGTH_LONG).show()
+        } else Toast.makeText(context, context.getString(R.string.network_error), Toast.LENGTH_LONG)
+            .show()
     }
 
     override fun getItemCount(): Int {
@@ -228,6 +230,7 @@ class RecyclerViewAdapter(context: Context?) : Adapter<RecyclerViewAdapter.MyVie
         }
         confirmTv.setOnClickListener {
             val find = getServersList().find { it.isChecked }
+            AppVariable.temporaryProfile = data
             toJump(context, find, false)
             dialog.dismiss()
         }
