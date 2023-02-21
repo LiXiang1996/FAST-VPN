@@ -150,7 +150,7 @@
 
         </LinearLayout>
 
-        <LinearLayout
+        <com.airbnb.lottie.LottieAnimationView
             android:id="@+id/main_connection_toggle_bg"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="@id/main_connection_toggle_btn"
@@ -158,11 +158,12 @@
             android:layout_width="wrap_content"
             android:layout_height="69dp"
             android:layout_marginEnd="16dp"
-            android:orientation="horizontal"
-            android:background="@mipmap/guide_toggle"
+            app:lottie_fileName="guide.json"
+            app:lottie_loop="true"
+            app:lottie_autoPlay="false"
             android:gravity="center">
 
-        </LinearLayout>
+        </com.airbnb.lottie.LottieAnimationView>
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

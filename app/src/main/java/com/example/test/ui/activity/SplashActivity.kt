@@ -40,7 +40,8 @@ class SplashActivity : BaseActivity() {
             )
         }
         isShowDialog =
-            countryCode.toLowerCase() == "ir" || Locale.getDefault().country.toLowerCase() == "irn"
+//            countryCode.toLowerCase() == "ir" || Locale.getDefault().country.toLowerCase() == "irn"
+            countryCode.toLowerCase() == "usa" || Locale.getDefault().country.toLowerCase() == "us"
     }
 
 
@@ -58,7 +59,8 @@ class SplashActivity : BaseActivity() {
                         val data: IPBean? = response.body()
                         Timber.tag(AppConstant.TAG).e("-okhttp- ${data?.country_code}")
                         isShowDialog =
-                            data?.country_code?.lowercase() == "ir" || data?.country_code?.lowercase() == "irn"
+                            data?.country_code?.lowercase() == "us" || data?.country_code?.lowercase() == "usa"
+//                            data?.country_code?.lowercase() == "ir" || data?.country_code?.lowercase() == "irn"
                         if (data?.country_code?.isNotBlank() == true)
                             SharedPreferencesUtils.setParam(
                                 this@SplashActivity,

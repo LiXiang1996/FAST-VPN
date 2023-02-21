@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter
 import com.example.test.R
 import com.example.test.base.AppConstant
+import com.example.test.base.utils.ScreenSizeUtils
 import com.example.test.ui.fragment.HomeFragment
 import com.example.test.ui.fragment.SettingFragment
 import com.example.test.ui.widget.NoScrollViewPager
@@ -34,7 +35,6 @@ class MainActivity : AppCompatActivity() {
     var isShowDialog = false
     private var builder: GuideBuilder? = null
     var guide: Guide? = null
-    var mGestureDetector: GestureDetector? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -115,15 +115,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showTipDialog(context: Context) {
-        val dialog = Dialog(context)
+        val dialog = Dialog(context, R.style.NormalDialogStyle)
         val localView = LayoutInflater.from(context)
-            .inflate(R.layout.common_global_volume_dialog, null) //设置自定义的弹窗UI
+            .inflate(R.layout.common_global_volume_dialog, null)
         dialog.setContentView(localView)
         val window = dialog.window
         dialog.setCancelable(false)
         window?.setLayout(-2, -2) //-2 其实就是WRAP_CONTENT
         val localLayoutParams = window?.attributes
-        localLayoutParams?.gravity = Gravity.BOTTOM
+        localLayoutParams?.gravity = Gravity.CENTER
+        localLayoutParams?.width = (ScreenSizeUtils.getInstance(context).screenWidth * 0.75).toInt()
+        localLayoutParams?.height =
+            (ScreenSizeUtils.getInstance(context).screenHeight * 0.3).toInt()
         window?.attributes = localLayoutParams
         val confirmTv = dialog.findViewById<AppCompatTextView>(R.id.volume_text_confirm)
         confirmTv.setOnClickListener {
@@ -157,7 +160,7 @@ class MainActivity : AppCompatActivity() {
     fun showGuideView() {
         builder = GuideBuilder()
         homeFragment.connectClickGuideBtn.post {
-            builder?.setTargetView(homeFragment.connectClickGuideBtn)
+            builder?.setTargetView(homeFragment.connectClickBtn)
                 ?.setAlpha(150)
                 ?.setHighTargetCorner(20)
                 ?.setHighTargetPadding(10)
@@ -171,8 +174,8 @@ class MainActivity : AppCompatActivity() {
 
                 override fun onDismiss() {
                     homeFragment.connectClickGuideBtn.visibility = View.GONE
+                    homeFragment.connectClickGuideBtn.cancelAnimation()
                 }
-
             })
             guide = builder?.createGuide()
             guide?.show(this)

@@ -53,7 +53,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
     private lateinit var lottieAnimationView: LottieAnimationView
     private lateinit var countryIcon: AppCompatImageView
     lateinit var connectClickBtn: LinearLayout
-    lateinit var connectClickGuideBtn: LinearLayout
+    lateinit var connectClickGuideBtn: LottieAnimationView
     private lateinit var countryName: AppCompatTextView
     lateinit var connectTimeTv: Chronometer
     private lateinit var context: MainActivity
@@ -101,6 +101,12 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         lottieAnimationView.imageAssetsFolder = "images"
         lottieAnimationView.setAnimation("data.json")
         lottieAnimationView.loop(true)
+
+        connectClickGuideBtn.imageAssetsFolder = "images"
+        connectClickGuideBtn.setAnimation("guide.json")
+        connectClickGuideBtn.loop(true)
+        connectClickGuideBtn.playAnimation()
+
         animationRotate = AnimationUtils.loadAnimation(activity, R.anim.loading_rotate)
         animationRotate?.repeatCount = Animation.INFINITE
 
@@ -116,6 +122,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
             if (isShowGuideDialog){
                 isShowGuideDialog = false
                 connectClickGuideBtn.visibility = View.GONE
+                connectClickGuideBtn.cancelAnimation()
                 (activity as MainActivity).guide?.dismiss()
                 (activity as MainActivity).viewPager.setCanScroll(true)
                 val tabStrip = (activity as MainActivity).tabLayout.getChildAt(0) as LinearLayout
