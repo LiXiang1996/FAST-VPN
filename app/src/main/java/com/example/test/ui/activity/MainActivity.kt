@@ -19,6 +19,7 @@ import com.example.test.ui.fragment.SettingFragment
 import com.example.test.ui.widget.NoScrollViewPager
 import com.example.test.ui.widget.guideview.Guide
 import com.example.test.ui.widget.guideview.GuideBuilder
+import com.github.shadowsocks.bg.BaseService
 import com.google.android.material.tabs.TabLayout
 import kotlin.system.exitProcess
 
@@ -65,17 +66,20 @@ class MainActivity : BaseActivity() {
         tabLayout.getTabAt(1)?.icon = ContextCompat.getDrawable(this, R.mipmap.tab_setting_unselect)
         tabLayout.tabIconTint = null
 
-
         if (AppVariable.isShowBanedIpDialog) showTipDialog(this)
         else showGuide()
-
     }
 
     private fun showGuide() {
-        homeFragment.isShowGuideDialog = true
-        val tabStrip = tabLayout.getChildAt(0) as LinearLayout
-        for (i in 0 until tabStrip.childCount) {
-            tabStrip.getChildAt(i).setOnTouchListener { v, event -> true }
+        if (AppVariable.state != BaseService.State.Connected) {
+            homeFragment.isShowGuideDialog = true
+            val tabStrip = tabLayout.getChildAt(0) as LinearLayout
+            for (i in 0 until tabStrip.childCount) {
+                tabStrip.getChildAt(i).setOnTouchListener { v, event -> true }
+            }
+        }else {
+            homeFragment.isShowGuideDialog = false
+            viewPager.setCanScroll(true)
         }
     }
 
@@ -83,7 +87,6 @@ class MainActivity : BaseActivity() {
         frameLayout.setOnClickListener { }
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
-                if (homeFragment.isShowGuideDialog) return
                 viewPager.currentItem = tab?.position ?: 0
                 if (tab?.position == 0) {
                     tab.setIcon(R.mipmap.tab_home_select)
@@ -91,9 +94,7 @@ class MainActivity : BaseActivity() {
                     tab?.setIcon(R.mipmap.tab_setting_select)
                 }
             }
-
             override fun onTabUnselected(tab: TabLayout.Tab?) {
-                if (homeFragment.isShowGuideDialog) return
                 if (tab?.position == 0) {
                     tab.setIcon(R.mipmap.tab_home_unselect)
                 } else {

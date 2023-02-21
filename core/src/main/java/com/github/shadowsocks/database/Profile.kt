@@ -77,8 +77,7 @@ data class Profile(
     var rx: Long = 0,
     var userOrder: Long = 0,
     //lix
-    var country_code: String = "default",
-    var city: String = "default",
+    var city: String = "",
     var isChecked: Boolean = false,
 
     @Ignore // not persisted in db, only used by direct boot

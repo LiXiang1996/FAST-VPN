@@ -1,5 +1,6 @@
 package com.example.test.ui.activity
 
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
@@ -25,6 +26,8 @@ import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
 import com.example.test.base.BaseActivity
 import com.example.test.base.data.CountryUtils
+import com.example.test.base.data.RemoteProfile
+import com.example.test.base.data.ToProfile
 import com.example.test.base.utils.DpUtils
 import com.example.test.base.utils.LinearLayoutDivider
 import com.example.test.base.utils.NetworkUtil
@@ -41,8 +44,6 @@ class ServersListActivity : BaseActivity() {
     private lateinit var serverTitle: TitleView
     private var recyclerViewAdapter: RecyclerViewAdapter? = null
     override var layoutId: Int = R.layout.activity_server_list
-
-
     override fun initListener() {
         serverTitle.leftImg.setOnClickListener {
             finish()
@@ -59,8 +60,8 @@ class ServersListActivity : BaseActivity() {
         decoration.mDividerHeight = DpUtils.dip2px(this, 12F)
         serverList.addItemDecoration(decoration)
         val list = mutableListOf<Profile>()
-        if (AppVariable.isFast && AppVariable.state == BaseService.State.Connected)
-            getServersList()[0].isChecked = true
+        if (AppVariable.isFast && AppVariable.state == BaseService.State.Connected) getServersList()[0].isChecked =
+            true
         else getServersList().find { it.host == AppVariable.host && AppVariable.state == BaseService.State.Connected }
             .apply { this?.isChecked = true }
         list.addAll(getServersList())
@@ -69,69 +70,6 @@ class ServersListActivity : BaseActivity() {
     }
 }
 
-/**
- * 本地配置节点列表 todo
- */
-class ServersListProfile {
-    companion object {
-        private val fastProfile = Profile(name = "Fast Super Server")
-        private val australiaProfile = Profile(
-            name = "Dallas",
-            host = "34.213.182.172",
-            remotePort = 800,
-            password = "tvX1v#NSFP_LG_bJ",
-            method = "chacha20-ietf-poly1305",
-            country_code = "as",
-        )
-        private val japanProfile = Profile(
-            name = "Japan",
-            host = "13.107.21.200",
-            remotePort = 8389,
-            password = "u1rRWTssNv0p",
-            method = "aes-256-cfb",
-            country_code = "jp",
-        )
-        private val norwayProfile = Profile(
-            name = "Norway",
-            remotePort = 8389,
-            host = "13.107.21.201",
-            password = "u1rRWTssNv0p",
-            method = "aes-256-cfb",
-            country_code = "jp",
-        )
-
-        private val chinaProfile = Profile(
-            name = "China", host = "116.179.32.99"
-        )
-        private val indiaProfile = Profile(
-            name = "India", host = "192.168.1.1"
-        )
-        private val irelandProfile = Profile(
-            name = "IreLand", host = "116.179.32.98"
-        )
-
-        fun getServersList(): MutableList<Profile> {
-            val mutableList = mutableListOf<Profile>()
-            mutableList.add(fastProfile)
-            mutableList.add(australiaProfile)
-            mutableList.add(japanProfile)
-            mutableList.add(norwayProfile)
-            mutableList.add(chinaProfile)
-            mutableList.add(indiaProfile)
-            mutableList.add(irelandProfile)
-            return mutableList
-        }
-
-        fun getServerProfile(host: String): Profile {
-            val list = ArrayList(getServersList()).apply { removeAt(0) }
-            val data = list.find { it.host == host }
-            return if (data == null) list[0] else data
-        }
-
-    }
-
-
-}
 
 class RecyclerViewAdapter(context: Context?) : Adapter<RecyclerViewAdapter.MyViewHolder>() {
     private var data: List<Profile>? = null
@@ -155,8 +93,11 @@ class RecyclerViewAdapter(context: Context?) : Adapter<RecyclerViewAdapter.MyVie
         return MyViewHolder(itemView)
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        holder.countryText.text = data?.get(position)?.name
+        if (!data?.get(position)?.city.isNullOrBlank() && position != 0) {
+            holder.countryText.text = data?.get(position)?.name + "-" + data?.get(position)?.city
+        } else holder.countryText.text = data?.get(position)?.name
         context?.let { it ->
             Glide.with(it).load(data?.get(position)?.let { it1 ->
                 it1.name.let { it2 -> CountryUtils.getCountrySource(it2 ?: "") }
@@ -233,6 +174,51 @@ class RecyclerViewAdapter(context: Context?) : Adapter<RecyclerViewAdapter.MyVie
         }
         dialog.show()
     }
+}
+
+class ServersListProfile {
+    companion object {
+        private val fastProfile = Profile(name = "Fast Super Server")
+
+        private val defaultProfile1 = ToProfile.remoteProfileToProfile(
+            RemoteProfile(
+                robvn_pwd = "11",
+                robvn_account = "111",
+                robvn_city = "Chengdu",
+                robvn_ip = "11111",
+                robvn_country = "Ja p an",
+                robvn_port = 1
+            )
+        )
+        private val defaultProfile2 = ToProfile.remoteProfileToProfile(
+            RemoteProfile(
+                robvn_pwd = "22222",
+                robvn_account = "22222",
+                robvn_city = "Tokyo",
+                robvn_ip = "22222",
+                robvn_country = "ja p an    ",
+                robvn_port = 2
+            )
+        )
+         var defaultList = mutableListOf(defaultProfile1, defaultProfile2)
+
+        fun getServersList(): MutableList<Profile> {
+            val mutableList = mutableListOf<Profile>()
+            mutableList.add(fastProfile)
+            mutableList.addAll(defaultList)
+            return mutableList
+        }
+
+
+        fun getServerProfile(host: String): Profile {
+            val list = ArrayList(getServersList()).apply { removeAt(0) }
+            val data = list.find { it.host == host }
+            return if (data == null) list[0] else data
+        }
+
+    }
+
+
 }
 
 
