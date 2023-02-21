@@ -3,17 +3,14 @@ package com.example.test.ui.activity
 import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
-import android.os.Bundle
 import android.view.*
 import android.widget.FrameLayout
 import android.widget.LinearLayout
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter
 import com.example.test.R
-import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
 import com.example.test.base.BaseActivity
 import com.example.test.base.utils.ScreenSizeUtils
@@ -157,7 +154,8 @@ class MainActivity : BaseActivity() {
 
     fun showGuideView() {
         builder = GuideBuilder()
-        homeFragment.connectClickGuideBtn.post {
+        homeFragment.connectClickGuideLottie.post {
+            homeFragment.connectClickGuideLottie.visibility = View.VISIBLE
             builder?.setTargetView(homeFragment.connectClickBtn)
                 ?.setAlpha(150)
                 ?.setHighTargetCorner(20)
@@ -171,8 +169,8 @@ class MainActivity : BaseActivity() {
                 }
 
                 override fun onDismiss() {
-                    homeFragment.connectClickGuideBtn.visibility = View.GONE
-                    homeFragment.connectClickGuideBtn.cancelAnimation()
+                    homeFragment.connectClickGuideLottie.visibility = View.GONE
+                    homeFragment.connectClickGuideLottie.cancelAnimation()
                 }
             })
             guide = builder?.createGuide()

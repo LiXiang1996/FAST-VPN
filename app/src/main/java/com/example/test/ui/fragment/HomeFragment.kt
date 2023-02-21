@@ -53,7 +53,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
     private lateinit var lottieAnimationView: LottieAnimationView
     private lateinit var countryIcon: AppCompatImageView
     lateinit var connectClickBtn: LinearLayout
-    lateinit var connectClickGuideBtn: LottieAnimationView
+    lateinit var connectClickGuideLottie: LottieAnimationView
     private lateinit var countryName: AppCompatTextView
     lateinit var connectTimeTv: Chronometer
     private lateinit var context: MainActivity
@@ -89,7 +89,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
 
     private fun initView(view: View) {
         connectClickBtn = view.findViewById(R.id.main_connection_toggle_btn)
-        connectClickGuideBtn = view.findViewById(R.id.main_connection_toggle_bg)
+        connectClickGuideLottie = view.findViewById(R.id.main_connection_toggle_bg)
         serversContainer = view.findViewById(R.id.server_connect_to_servers_container)
         connectStateImg = view.findViewById(R.id.main_connection_toggle_img)
         connectRobotImg = view.findViewById(R.id.main_connection_animate)
@@ -101,17 +101,14 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         lottieAnimationView.imageAssetsFolder = "images"
         lottieAnimationView.setAnimation("data.json")
         lottieAnimationView.loop(true)
-
-        connectClickGuideBtn.imageAssetsFolder = "images"
-        connectClickGuideBtn.setAnimation("guide.json")
-        connectClickGuideBtn.loop(true)
-        connectClickGuideBtn.playAnimation()
-
+        connectClickGuideLottie.imageAssetsFolder = "images"
+        connectClickGuideLottie.setAnimation("guide.json")
+        connectClickGuideLottie.loop(true)
+        connectClickGuideLottie.playAnimation()
         animationRotate = AnimationUtils.loadAnimation(activity, R.anim.loading_rotate)
         animationRotate?.repeatCount = Animation.INFINITE
 
-
-        if (isShowGuideDialog) {
+        if (isShowGuideDialog&&AppVariable.state != BaseService.State.Connected) {
             (activity as MainActivity).showGuideView()
         }
 
@@ -121,8 +118,8 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         connectClickBtn.setOnClickListener {
             if (isShowGuideDialog){
                 isShowGuideDialog = false
-                connectClickGuideBtn.visibility = View.GONE
-                connectClickGuideBtn.cancelAnimation()
+                connectClickGuideLottie.visibility = View.GONE
+                connectClickGuideLottie.cancelAnimation()
                 (activity as MainActivity).guide?.dismiss()
                 (activity as MainActivity).viewPager.setCanScroll(true)
                 val tabStrip = (activity as MainActivity).tabLayout.getChildAt(0) as LinearLayout
@@ -316,13 +313,15 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
 
 
     private fun result() {
-        (activity as MainActivity)?.let { it.frameLayout.visibility = View.GONE }
-        val intent = Intent(activity, SeverConnectStateActivity::class.java)
-        activity?.startActivity(intent)
+        if (activity is MainActivity){
+            (activity as MainActivity).frameLayout.visibility = View.GONE
+            val intent = Intent(activity, SeverConnectStateActivity::class.java)
+            activity?.startActivity(intent)
+        }
     }
 
     private fun setData() {
-        if (AppVariable.temporaryProfile != null && AppVariable.state == BaseService.State.Stopped) {//判断要进行断开操作，并且断开后返回主界面
+        if (AppVariable.temporaryProfile != null && AppVariable.state == BaseService.State.Stopped) {
             AppVariable.host = AppVariable.temporaryProfile?.host ?: AppConstant.DEFAULT
             AppVariable.country = AppVariable.temporaryProfile?.name ?: AppConstant.DEFAULT
             AppVariable.temporaryProfile = null
@@ -331,7 +330,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
             if (AppVariable.country == AppConstant.DEFAULT || AppVariable.country.isBlank()) "Super Fast Server" else AppVariable.country
         Glide.with(this).load(
             CountryUtils.getCountrySource(
-                AppVariable.country ?: AppConstant.DEFAULT
+                AppVariable.country
             )
         ).circleCrop()
             .into(countryIcon)
