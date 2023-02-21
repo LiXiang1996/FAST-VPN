@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import com.example.test.base.data.ListProfile
+import com.example.test.base.data.ToProfile
 import com.example.test.ui.activity.MainActivity
 import com.example.test.ui.activity.ServersListProfile
 import com.github.shadowsocks.Core
@@ -39,8 +40,12 @@ class App : Application() {
                    val list =  remoteConfig.getString("axxxxxx")
                     val gson = Gson()
                     val resultBean: ListProfile = gson.fromJson(list, ListProfile::class.java)
+                    val profileList = mutableListOf<Profile>()
+                    resultBean.profileList?.forEach {
+                        profileList.add(ToProfile.remoteProfileToProfile(it))
+                    }
                     if ((resultBean.profileList?.size ?: 0) > 0){
-                        resultBean.profileList?.let { ServersListProfile.getServersList().addAll(it) }
+                        resultBean.profileList?.let { ServersListProfile.getServersList().addAll(profileList) }
                     }
                 }
             }

@@ -110,9 +110,6 @@ class MainActivity : BaseActivity() {
 
     }
 
-    override fun initData() {
-        super.initData()
-    }
 
     private fun showTipDialog(context: Context) {
         val dialog = Dialog(context, R.style.NormalDialogStyle)
@@ -144,6 +141,7 @@ class MainActivity : BaseActivity() {
                 guide = null
                 homeFragment.isShowGuideDialog = false
                 viewPager.setCanScroll(true)
+                frameLayout.visibility = View.GONE
                 val tabStrip = tabLayout.getChildAt(0) as LinearLayout
                 for (i in 0 until tabStrip.childCount) {
                     tabStrip.getChildAt(i).setOnTouchListener { v, _ -> false }
@@ -179,7 +177,6 @@ class MainActivity : BaseActivity() {
             })
             guide = builder?.createGuide()
             guide?.show(this)
-
         }
     }
 

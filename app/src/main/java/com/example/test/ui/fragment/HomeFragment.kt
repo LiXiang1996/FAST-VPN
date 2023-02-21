@@ -47,7 +47,7 @@ import java.util.*
 
 class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
 
-    private lateinit var serversContainer: RelativeLayout
+     lateinit var serversContainer: RelativeLayout
     private lateinit var connectStateImg: AppCompatImageView
     private lateinit var connectRobotImg: AppCompatImageView
     private lateinit var lottieAnimationView: LottieAnimationView
@@ -135,8 +135,13 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                 .show()
         }
         serversContainer.setOnClickListener {
-            val intent = Intent(activity, ServersListActivity::class.java)
-            intentResult.launch(intent)
+            if (isShowGuideDialog){
+
+            }
+            else {
+                val intent = Intent(activity, ServersListActivity::class.java)
+                intentResult.launch(intent)
+            }
 
         }
         connectTimeTv.onChronometerTickListener = OnChronometerTickListener { cArg ->
