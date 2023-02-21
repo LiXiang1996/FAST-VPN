@@ -2,6 +2,7 @@ package com.example.test.base.utils
 
 import com.example.test.base.AppConstant
 import com.example.test.ui.activity.ServersListProfile
+import com.google.errorprone.annotations.Keep
 import kotlinx.coroutines.*
 import okhttp3.internal.wait
 import timber.log.Timber
@@ -58,6 +59,6 @@ object NetworkPing {
         return 10000.0
     }
 }
-
+@Keep
 data class PingBean(var host: String?, var avg: Double)
 

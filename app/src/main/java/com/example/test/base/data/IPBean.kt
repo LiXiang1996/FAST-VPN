@@ -1,5 +1,8 @@
 package com.example.test.base.data
 
+import com.google.errorprone.annotations.Keep
+
+@Keep
 data class IPBean(
     var ip:String,
     var continent_code:String,

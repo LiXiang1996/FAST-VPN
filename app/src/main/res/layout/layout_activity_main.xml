@@ -8,9 +8,7 @@
     android:background="@color/white"
     android:orientation="vertical">
 
-
-
-    <androidx.viewpager.widget.ViewPager
+    <com.example.test.ui.widget.NoScrollViewPager
         android:id="@+id/fragment_container_viewpager"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -37,8 +35,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:visibility="gone"
-        android:alpha="0.1"
         android:id="@+id/frame_layout"
-        android:background="#000000"/>
+        android:background="@android:color/transparent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
