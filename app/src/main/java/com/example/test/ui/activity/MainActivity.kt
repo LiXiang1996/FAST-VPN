@@ -14,6 +14,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter
 import com.example.test.R
 import com.example.test.base.AppConstant
+import com.example.test.base.AppVariable
+import com.example.test.base.BaseActivity
 import com.example.test.base.utils.ScreenSizeUtils
 import com.example.test.ui.fragment.HomeFragment
 import com.example.test.ui.fragment.SettingFragment
@@ -24,7 +26,7 @@ import com.google.android.material.tabs.TabLayout
 import kotlin.system.exitProcess
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
 
     private lateinit var homeFragment: HomeFragment
     private lateinit var settingFragment: SettingFragment
@@ -32,19 +34,13 @@ class MainActivity : AppCompatActivity() {
     lateinit var tabLayout: TabLayout
     lateinit var frameLayout: FrameLayout
     private lateinit var fragments: Array<Fragment>
-    var isShowDialog = false
     private var builder: GuideBuilder? = null
     var guide: Guide? = null
+    override var layoutId: Int = R.layout.layout_activity_main
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.layout_activity_main)
-        initView()
-        initListener()
-    }
 
-    private fun initView() {
-        isShowDialog = intent.getBooleanExtra(AppConstant.SHOW_DIALOG, false)
+
+    override fun initView() {
         homeFragment = HomeFragment()
         settingFragment = SettingFragment()
         fragments = arrayOf(homeFragment, settingFragment)
@@ -73,7 +69,7 @@ class MainActivity : AppCompatActivity() {
         tabLayout.tabIconTint = null
 
 
-        if (isShowDialog) showTipDialog(this)
+        if (AppVariable.isShowBanedIpDialog) showTipDialog(this)
         else showGuide()
 
     }
@@ -86,7 +82,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun initListener() {
+    override fun initListener() {
         frameLayout.setOnClickListener { }
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
@@ -112,6 +108,10 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+    }
+
+    override fun initData() {
+        super.initData()
     }
 
     private fun showTipDialog(context: Context) {

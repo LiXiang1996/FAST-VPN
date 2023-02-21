@@ -289,12 +289,12 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
     private val intentResult =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == 100) {
+                (activity as MainActivity).frameLayout.visibility = View.VISIBLE
                 if (AppVariable.state == BaseService.State.Connected) {
                     Toast.makeText(activity, "Disconnecting", Toast.LENGTH_LONG).show()
                 } else if (AppVariable.state == BaseService.State.Stopped) {
                     Toast.makeText(activity, "Connecting", Toast.LENGTH_LONG).show()
                 }
-
                 lifecycleScope.launch {
                     if (isToConnect && AppVariable.isFast) launch {
                         NetworkPing.toFastToggle { ip ->

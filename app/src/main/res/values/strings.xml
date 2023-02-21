@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Robot vpn</string>
-    <string name="fast_vpn">FAST VPN</string>
     <string name="connection_time">connection time</string>
     <string name="connection_succeed">Connection succeed</string>
     <string name="disconnected">Disconnected!</string>

@@ -14,6 +14,7 @@ import com.bumptech.glide.Glide
 import com.example.test.R
 import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
+import com.example.test.base.BaseActivity
 import com.example.test.base.bar.StatusBarUtil
 import com.example.test.base.data.CountryUtils
 import com.example.test.base.utils.NetworkPing
@@ -32,7 +33,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 
-class SeverConnectStateActivity : AppCompatActivity() {
+class SeverConnectStateActivity : BaseActivity() {
     private lateinit var container: LinearLayout
     private lateinit var countryImg: AppCompatImageView
     private lateinit var robotImg: AppCompatImageView
@@ -40,10 +41,10 @@ class SeverConnectStateActivity : AppCompatActivity() {
     lateinit var connectText: AppCompatTextView
     private lateinit var connectTime: Chronometer
     lateinit var titleView: TitleView
+    override var layoutId: Int =R.layout.activity_server_connect_state_layout
+    override fun initView() {
+        super.initView()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_server_connect_state_layout)
         container = findViewById(R.id.server_connect_container)
         titleView = findViewById(R.id.sever_state_title_view)
         countryImg = findViewById(R.id.server_connect_country_img)
@@ -53,15 +54,13 @@ class SeverConnectStateActivity : AppCompatActivity() {
         connectTime = findViewById(R.id.server_connect_time_text)
         connectTime.text = "00:00:00"
         StatusBarUtil.setTranslucentStatus(this)
-        initListener()
 
         val country = AppVariable.country
         countryName.text =
             if (country == AppConstant.DEFAULT || country.isBlank()) getString(R.string.super_fast_server) else country
         Glide.with(this).load(CountryUtils.getCountrySource(country)).circleCrop().into(countryImg)
     }
-
-    private fun initListener() {
+    override fun initListener() {
         titleView.leftImg.setOnClickListener {
             finish()
         }

@@ -19,6 +19,7 @@ class AppConstant {
          const val TAG = "lixiang"
 
 
+
     }
 
 }

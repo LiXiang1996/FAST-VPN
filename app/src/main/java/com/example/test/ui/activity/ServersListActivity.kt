@@ -23,6 +23,7 @@ import com.bumptech.glide.Glide
 import com.example.test.R
 import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
+import com.example.test.base.BaseActivity
 import com.example.test.base.data.CountryUtils
 import com.example.test.base.utils.DpUtils
 import com.example.test.base.utils.LinearLayoutDivider
@@ -34,26 +35,21 @@ import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.database.Profile
 
 
-class ServersListActivity : AppCompatActivity() {
+class ServersListActivity : BaseActivity() {
 
     private lateinit var serverList: RecyclerView
     private lateinit var serverTitle: TitleView
     private var recyclerViewAdapter: RecyclerViewAdapter? = null
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_server_list)
-        initData()
-        initListener()
+    override var layoutId: Int = R.layout.activity_server_list
 
-    }
 
-    private fun initListener() {
+    override fun initListener() {
         serverTitle.leftImg.setOnClickListener {
             finish()
         }
     }
 
-    private fun initData() {
+    override fun initView() {
         serverTitle = findViewById(R.id.servers_title)
         serverList = findViewById(R.id.servers_recycle_view)
         recyclerViewAdapter = RecyclerViewAdapter(this)
@@ -174,13 +170,13 @@ class RecyclerViewAdapter(context: Context?) : Adapter<RecyclerViewAdapter.MyVie
             holder.iconIsChecked.isVisible = false
             holder.countryText.setTextColor(Color.parseColor("#FFFFFF"))
         }
-        holder.container.isClickable = data?.get(position)?.isChecked == false
 
         holder.container.setOnClickListener {
             val isHaveChecked: Int = data?.indexOfFirst { it.isChecked } ?: -1
-            if (isHaveChecked > -1)
+            if (isHaveChecked > -1) {
+                if (AppVariable.state == BaseService.State.Connected && isHaveChecked == position) return@setOnClickListener
                 showTipsDialog(holder.itemView.context, data?.get(position))
-            else {
+            } else {
                 val isFastVpn = position == 0
                 toJump(holder.itemView.context, data?.get(position), isFastVpn)
             }
