@@ -8,9 +8,7 @@
     android:background="@color/white"
     android:orientation="vertical">
 
-
-
-    <androidx.viewpager.widget.ViewPager
+    <com.example.test.ui.widget.NoScrollViewPager
         android:id="@+id/fragment_container_viewpager"
         android:layout_width="match_parent"
         android:layout_height="0dp"

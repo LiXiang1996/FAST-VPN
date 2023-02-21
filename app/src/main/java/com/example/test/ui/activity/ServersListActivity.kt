@@ -44,6 +44,7 @@ class ServersListActivity : AppCompatActivity() {
         setContentView(R.layout.activity_server_list)
         initData()
         initListener()
+
     }
 
     private fun initListener() {

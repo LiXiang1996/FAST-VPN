@@ -11,11 +11,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.widget.Chronometer
+import android.widget.*
 import android.widget.Chronometer.OnChronometerTickListener
-import android.widget.LinearLayout
-import android.widget.RelativeLayout
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
@@ -55,7 +52,8 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
     private lateinit var connectRobotImg: AppCompatImageView
     private lateinit var lottieAnimationView: LottieAnimationView
     private lateinit var countryIcon: AppCompatImageView
-    private lateinit var connectClickBtn: LinearLayout
+    lateinit var connectClickBtn: LinearLayout
+    lateinit var connectClickGuideBtn: LinearLayout
     private lateinit var countryName: AppCompatTextView
     lateinit var connectTimeTv: Chronometer
     private lateinit var context: MainActivity
@@ -63,6 +61,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
     private val connection = ShadowsocksConnection(true)
     private var isJump = false
     var isToConnect = false
+    var isShowGuideDialog = false
 
 
     override fun onCreateView(
@@ -85,19 +84,12 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
     override fun onResume() {
         super.onResume()
         isToConnect = AppVariable.state == BaseService.State.Stopped
-//        countryName.text =
-//            if (AppVariable.country == AppConstant.DEFAULT || AppVariable.country.isBlank()) "Super Fast Server" else AppVariable.country
-//        Glide.with(this).load(CountryUtils.getCountrySource(AppVariable.country)).circleCrop()
-//            .into(countryIcon)
-//        if(AppVariable.state == BaseService.State.Stopped){
-//
-//        }
         setData()
-
     }
 
     private fun initView(view: View) {
         connectClickBtn = view.findViewById(R.id.main_connection_toggle_btn)
+        connectClickGuideBtn = view.findViewById(R.id.main_connection_toggle_bg)
         serversContainer = view.findViewById(R.id.server_connect_to_servers_container)
         connectStateImg = view.findViewById(R.id.main_connection_toggle_img)
         connectRobotImg = view.findViewById(R.id.main_connection_animate)
@@ -113,10 +105,24 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         animationRotate?.repeatCount = Animation.INFINITE
 
 
+        if (isShowGuideDialog) {
+            (activity as MainActivity).showGuideView()
+        }
+
     }
 
     private fun initListener() {
         connectClickBtn.setOnClickListener {
+            if (isShowGuideDialog){
+                isShowGuideDialog = false
+                connectClickGuideBtn.visibility = View.GONE
+                (activity as MainActivity).guide?.dismiss()
+                (activity as MainActivity).viewPager.setCanScroll(true)
+                val tabStrip = (activity as MainActivity).tabLayout.getChildAt(0) as LinearLayout
+                for (i in 0 until tabStrip.childCount) {
+                    tabStrip.getChildAt(i).setOnTouchListener { _, _ -> false }
+                }
+            }
             if (NetworkUtil.get().isNetworkAvailable || NetworkUtil.isNetSystemUsable(activity)) toggle()
             else Toast.makeText(activity, getString(R.string.network_error), Toast.LENGTH_LONG)
                 .show()
@@ -303,7 +309,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         activity?.startActivity(intent)
     }
 
-    fun setData() {
+    private fun setData() {
         if (AppVariable.temporaryProfile != null && AppVariable.state == BaseService.State.Stopped) {//判断要进行断开操作，并且断开后返回主界面
             AppVariable.host = AppVariable.temporaryProfile?.host ?: AppConstant.DEFAULT
             AppVariable.country = AppVariable.temporaryProfile?.name ?: AppConstant.DEFAULT
@@ -318,4 +324,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         ).circleCrop()
             .into(countryIcon)
     }
+
+
+
 }
