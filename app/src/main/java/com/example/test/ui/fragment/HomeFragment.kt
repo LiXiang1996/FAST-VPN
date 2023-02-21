@@ -176,7 +176,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                 ?: Profile()
             val id: Long
             if (find.id == 0L) {
-                id = ProfileManager.createProfile(find).id
+                id = ProfileManager.createProfile(data).id
             } else {
                 id = find.id
                 data.id = id
