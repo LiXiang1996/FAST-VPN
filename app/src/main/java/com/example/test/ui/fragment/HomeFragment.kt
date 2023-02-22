@@ -47,7 +47,7 @@ import java.util.*
 
 class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
 
-     lateinit var serversContainer: RelativeLayout
+    lateinit var serversContainer: RelativeLayout
     private lateinit var connectStateImg: AppCompatImageView
     private lateinit var connectRobotImg: AppCompatImageView
     private lateinit var lottieAnimationView: LottieAnimationView
@@ -108,7 +108,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         animationRotate = AnimationUtils.loadAnimation(activity, R.anim.loading_rotate)
         animationRotate?.repeatCount = Animation.INFINITE
 
-        if (isShowGuideDialog&&AppVariable.state != BaseService.State.Connected) {
+        if (isShowGuideDialog && AppVariable.state != BaseService.State.Connected) {
             (activity as MainActivity).showGuideView()
         }
 
@@ -116,7 +116,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
 
     private fun initListener() {
         connectClickBtn.setOnClickListener {
-            if (isShowGuideDialog){
+            if (isShowGuideDialog) {
                 isShowGuideDialog = false
                 connectClickGuideLottie.visibility = View.GONE
                 connectClickGuideLottie.cancelAnimation()
@@ -132,14 +132,10 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                 .show()
         }
         serversContainer.setOnClickListener {
-            if (isShowGuideDialog){
-
-            }
-            else {
+            if (!isShowGuideDialog) {
                 val intent = Intent(activity, ServersListActivity::class.java)
                 intentResult.launch(intent)
             }
-
         }
         connectTimeTv.onChronometerTickListener = OnChronometerTickListener { cArg ->
             val time = System.currentTimeMillis() - cArg.base
@@ -180,7 +176,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                 ?: Profile()
             val id: Long
             if (find.id == 0L) {
-                id = ProfileManager.createProfile(find).id
+                id = ProfileManager.createProfile(data).id
             } else {
                 id = find.id
                 data.id = id
@@ -313,7 +309,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
 
 
     private fun result() {
-        if (activity is MainActivity){
+        if (activity is MainActivity) {
             (activity as MainActivity).frameLayout.visibility = View.GONE
             val intent = Intent(activity, SeverConnectStateActivity::class.java)
             activity?.startActivity(intent)
@@ -335,7 +331,6 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         ).circleCrop()
             .into(countryIcon)
     }
-
 
 
 }

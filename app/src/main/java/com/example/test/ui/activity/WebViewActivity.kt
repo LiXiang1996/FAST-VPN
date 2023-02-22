@@ -46,11 +46,11 @@ class WebViewActivity : AppCompatActivity() {
             override fun shouldOverrideUrlLoading(
                 view: WebView?, request: WebResourceRequest?
             ): Boolean {
-                view?.loadUrl("https://bbs.csdn.net/topics/390442564")
+                view?.loadUrl("https://sites.google.com/view/robot-vpn-privacy/home")
                 return true
             }
         }
-        webView.loadUrl("https://bbs.csdn.net/topics/390442564")
+        webView.loadUrl("https://sites.google.com/view/robot-vpn-privacy/home")
     }
 
 

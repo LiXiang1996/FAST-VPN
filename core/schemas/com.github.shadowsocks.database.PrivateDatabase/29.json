@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 29,
-    "identityHash": "11e71fb935e7965dd60521be8cbc0a86",
+    "identityHash": "df5dacfcf2191ab1c1a65138d41a4d17",
     "entities": [
       {
         "tableName": "Profile",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `host` TEXT NOT NULL, `remotePort` INTEGER NOT NULL, `password` TEXT NOT NULL, `method` TEXT NOT NULL, `route` TEXT NOT NULL, `remoteDns` TEXT NOT NULL, `proxyApps` INTEGER NOT NULL, `bypass` INTEGER NOT NULL, `udpdns` INTEGER NOT NULL, `ipv6` INTEGER NOT NULL, `metered` INTEGER NOT NULL, `individual` TEXT NOT NULL, `plugin` TEXT, `udpFallback` INTEGER, `subscription` INTEGER NOT NULL, `tx` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `userOrder` INTEGER NOT NULL, `country_code` TEXT NOT NULL, `city` TEXT NOT NULL, `isChecked` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `host` TEXT NOT NULL, `remotePort` INTEGER NOT NULL, `password` TEXT NOT NULL, `method` TEXT NOT NULL, `route` TEXT NOT NULL, `remoteDns` TEXT NOT NULL, `proxyApps` INTEGER NOT NULL, `bypass` INTEGER NOT NULL, `udpdns` INTEGER NOT NULL, `ipv6` INTEGER NOT NULL, `metered` INTEGER NOT NULL, `individual` TEXT NOT NULL, `plugin` TEXT, `udpFallback` INTEGER, `subscription` INTEGER NOT NULL, `tx` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `userOrder` INTEGER NOT NULL, `city` TEXT NOT NULL, `isChecked` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -129,12 +129,6 @@
             "notNull": true
           },
           {
-            "fieldPath": "country_code",
-            "columnName": "country_code",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
             "fieldPath": "city",
             "columnName": "city",
             "affinity": "TEXT",
@@ -192,7 +186,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '11e71fb935e7965dd60521be8cbc0a86')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'df5dacfcf2191ab1c1a65138d41a4d17')"
     ]
   }
 }

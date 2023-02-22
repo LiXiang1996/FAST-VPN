@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "399216618947",
+    "project_id": "robot-vpn-ee977",
+    "storage_bucket": "robot-vpn-ee977.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:399216618947:android:a4a852a293b302f5046176",
+        "android_client_info": {
+          "package_name": "com.privateinternetaccess.fast"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "399216618947-u23p96qui2idt2pc1rlofb6m22pgbj2c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCifqugT4Cg9O9wlXWx5wHoCSYr4pvlvc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "399216618947-u23p96qui2idt2pc1rlofb6m22pgbj2c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

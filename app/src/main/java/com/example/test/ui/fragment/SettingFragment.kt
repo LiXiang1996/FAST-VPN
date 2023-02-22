@@ -55,7 +55,7 @@ class SettingFragment : Fragment() {
      * Call the system mailbox to contact us
      */
     private fun toSendMail() {
-        val uri: Uri = Uri.parse("mailto:2459141797@qq.com")
+        val uri: Uri = Uri.parse("mailto:miamurar209@gmail.com")
         val intent = Intent(Intent.ACTION_SENDTO, uri)
         intent.putExtra(Intent.EXTRA_SUBJECT, "") // 主题
         intent.putExtra(Intent.EXTRA_TEXT, "") // 正文

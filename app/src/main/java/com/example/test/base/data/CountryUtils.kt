@@ -5,7 +5,8 @@ import com.example.test.R
 
 object CountryUtils {
     fun getCountrySource(country: String): Int {
-        when (country.lowercase()) {
+        val a = country.trim().replace(" ", "").lowercase()
+        when (a) {
             "australia" -> return R.mipmap.australia
             "belgium" -> return R.mipmap.belgium
             "brazil" -> return R.mipmap.brazil
@@ -16,7 +17,7 @@ object CountryUtils {
             "ireland" -> return R.mipmap.ireland
             "italy" -> return R.mipmap.italy
             "japan" -> return R.mipmap.japan
-            "koreasouth" -> return R.mipmap.koreasouth
+            "southkorea" -> return R.mipmap.koreasouth
             "netherlands" -> return R.mipmap.netherlands
             "newzealand" -> return R.mipmap.newzealand
             "norway" -> return R.mipmap.norway

@@ -4,9 +4,6 @@ import com.github.shadowsocks.database.Profile
 
 import com.google.errorprone.annotations.Keep
 @Keep
-data class ListProfile(var profileList: MutableList<RemoteProfile>? = null)
-
-@Keep
 data class RemoteProfile(
     var robvn_pwd: String,
     var robvn_account: String,
@@ -23,6 +20,7 @@ object ToProfile {
             this.city = remoteProfile.robvn_city
             this.password = remoteProfile.robvn_pwd
             this.remotePort = remoteProfile.robvn_port
+            this.method = remoteProfile.robvn_account
         }
         return profile
     }
