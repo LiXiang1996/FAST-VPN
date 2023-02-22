@@ -28,6 +28,7 @@ import android.os.Build
 import android.os.IBinder
 import android.os.RemoteCallbackList
 import android.os.RemoteException
+import android.util.Log
 import com.github.shadowsocks.BootReceiver
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.Core.app
@@ -315,6 +316,7 @@ object BaseService {
             val data = data
             if (data.state != State.Stopped) return Service.START_NOT_STICKY
             val expanded = Core.currentProfile
+            Log.e("TAG", "onStartCommand: ${expanded?.main?.host}", )
             this as Context
             if (expanded == null) {
                 // gracefully shutdown: https://stackoverflow.com/q/47337857/2245107

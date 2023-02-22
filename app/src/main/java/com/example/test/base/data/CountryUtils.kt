@@ -17,7 +17,7 @@ object CountryUtils {
             "ireland" -> return R.mipmap.ireland
             "italy" -> return R.mipmap.italy
             "japan" -> return R.mipmap.japan
-            "koreasouth" -> return R.mipmap.koreasouth
+            "southkorea" -> return R.mipmap.koreasouth
             "netherlands" -> return R.mipmap.netherlands
             "newzealand" -> return R.mipmap.newzealand
             "norway" -> return R.mipmap.norway

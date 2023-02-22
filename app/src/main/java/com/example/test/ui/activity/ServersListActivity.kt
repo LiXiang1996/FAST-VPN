@@ -182,12 +182,12 @@ class ServersListProfile {
 
         private val defaultProfile1 = ToProfile.remoteProfileToProfile(
             RemoteProfile(
-                robvn_pwd = "11",
-                robvn_account = "111",
+                robvn_pwd = "tvX1v#NSFP_LG_bJ",
+                robvn_account = "chacha20-ietf-poly1305",
                 robvn_city = "Chengdu",
-                robvn_ip = "11111",
-                robvn_country = "Ja p an",
-                robvn_port = 1
+                robvn_ip = "34.213.182.172",
+                robvn_country = "Japan",
+                robvn_port = 810
             )
         )
         private val defaultProfile2 = ToProfile.remoteProfileToProfile(
