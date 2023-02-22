@@ -57,8 +57,7 @@ abstract class BaseActivity : AppCompatActivity(), InitInterface, NetStateChange
                         val data: IPBean? = response.body()
                         Timber.tag(AppConstant.TAG).e("-okhttp- ${data?.country_code}")
                         AppVariable.isShowBanedIpDialog =
-                            data?.country_code?.lowercase() == "us" || data?.country_code?.lowercase() == "usa"
-//                            data?.country_code?.lowercase() == "cn" || data?.country_code?.lowercase() == "cn"
+                            data?.country_code?.lowercase() == "ir" || data?.country_code?.lowercase() == "irn"
                         if (AppVariable.isShowBanedIpDialog && this@BaseActivity !is SplashActivity)
                             showTipDialog(context)
                         if (data?.country_code?.isNotBlank() == true)

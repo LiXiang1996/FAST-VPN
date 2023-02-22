@@ -40,8 +40,7 @@ class SplashActivity : BaseActivity() {
             )
         }
         AppVariable.isShowBanedIpDialog =
-//            countryCode.toLowerCase() == "ir" || Locale.getDefault().country.toLowerCase() == "irn"
-            countryCode.toLowerCase() == "us" || Locale.getDefault().country.toLowerCase() == "usa"
+            countryCode.toLowerCase() == "ir" || Locale.getDefault().country.toLowerCase() == "irn"
     }
 
 
