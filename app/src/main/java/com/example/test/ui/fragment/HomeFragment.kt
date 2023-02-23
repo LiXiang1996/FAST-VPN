@@ -1,16 +1,19 @@
 package com.example.test.ui.fragment
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.os.RemoteException
 import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
-import android.view.animation.AnimationUtils
+import android.view.animation.LinearInterpolator
+import android.view.animation.RotateAnimation
 import android.widget.*
 import android.widget.Chronometer.OnChronometerTickListener
 import androidx.activity.result.contract.ActivityResultContracts
@@ -22,6 +25,7 @@ import androidx.lifecycle.lifecycleScope
 import com.airbnb.lottie.LottieAnimationView
 import com.bumptech.glide.Glide
 import com.example.test.R
+import com.example.test.ad.utils.*
 import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
 import com.example.test.base.data.CountryUtils
@@ -38,12 +42,17 @@ import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.utils.StartService
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.*
 
+
+// TODO: Home页面 4.5 插屏策略（1）
+//- connecting/disconnecting动画至少展示1s
+//- 最长等待广告请求时间为10s，超过10s未返回广告直接进入结果页，之后返回的广告缓存下来
 
 class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
 
@@ -57,11 +66,16 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
     private lateinit var countryName: AppCompatTextView
     lateinit var connectTimeTv: Chronometer
     private lateinit var context: MainActivity
-    var animationRotate: Animation? = null
+    var animationRotate: RotateAnimation? = null
     private val connection = ShadowsocksConnection(true)
     private var isJump = false
     var isToConnect = false
+    var countDownTimer: CountDownTimer? = null
     var isShowGuideDialog = false
+
+    private lateinit var interstitialAdManager: InterstitialAdManager
+    private lateinit var nativeAdManager: NativeAdManager
+    private lateinit var nativeAdContainer: FrameLayout
 
 
     override fun onCreateView(
@@ -88,6 +102,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
     }
 
     private fun initView(view: View) {
+        nativeAdContainer = view.findViewById(R.id.main_native_ad_frame)
         connectClickBtn = view.findViewById(R.id.main_connection_toggle_btn)
         connectClickGuideLottie = view.findViewById(R.id.main_connection_toggle_bg)
         serversContainer = view.findViewById(R.id.server_connect_to_servers_container)
@@ -105,13 +120,25 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         connectClickGuideLottie.setAnimation("guide.json")
         connectClickGuideLottie.loop(true)
         connectClickGuideLottie.playAnimation()
-        animationRotate = AnimationUtils.loadAnimation(activity, R.anim.loading_rotate)
+        animationRotate = RotateAnimation(
+            0f,
+            360f,
+            Animation.RELATIVE_TO_SELF,
+            0.5f,
+            Animation.RELATIVE_TO_SELF,
+            0.5f
+        )
+        animationRotate?.interpolator = object : LinearInterpolator() {}
         animationRotate?.repeatCount = Animation.INFINITE
+        animationRotate?.duration = 3000
+        animationRotate?.fillBefore = true
 
         if (isShowGuideDialog && AppVariable.state != BaseService.State.Connected) {
             (activity as MainActivity).showGuideView()
         }
-
+        interstitialAdManager = InterstitialAdManager()
+        nativeAdManager = NativeAdManager()
+        showNativeAD()
     }
 
     private fun initListener() {
@@ -127,8 +154,10 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                     tabStrip.getChildAt(i).setOnTouchListener { _, _ -> false }
                 }
             }
-            if (NetworkUtil.get().isNetworkAvailable || NetworkUtil.isNetSystemUsable(activity)) toggle()
-            else Toast.makeText(activity, getString(R.string.network_error), Toast.LENGTH_LONG)
+            if (NetworkUtil.get().isNetworkAvailable || NetworkUtil.isNetSystemUsable(activity)) {
+//                activity?.let { it1 -> loadInterAd(it1) }
+                toggle()
+            } else Toast.makeText(activity, getString(R.string.network_error), Toast.LENGTH_LONG)
                 .show()
         }
         serversContainer.setOnClickListener {
@@ -223,7 +252,6 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                 connectRobotImg.setImageDrawable(context.getDrawable(R.mipmap.home_robot_disconnect))
                 connectedAndStoppedAnimation()
 
-
             }
             BaseService.State.Stopping -> {
                 connectingAndStoppingAnimation()
@@ -243,15 +271,16 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                 context, R.mipmap.home_toggle_btn_loading
             )
         )
-        connectStateImg.startAnimation(animationRotate)
+        connectStateImg.animation = animationRotate
+        connectStateImg.animation.start()
+        animationRotate?.start()
     }
 
     private fun connectedAndStoppedAnimation() {
         connectRobotImg.visibility = View.VISIBLE
         lottieAnimationView.visibility = View.INVISIBLE
-        lottieAnimationView.cancelAnimation()
+        lottieAnimationView.clearAnimation()
         animationRotate?.cancel()
-        connectStateImg.clearAnimation()
         if (isJump) result()
     }
 
@@ -289,23 +318,48 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
             if (it.resultCode == 100) {
                 (activity as MainActivity).frameLayout.visibility = View.VISIBLE
                 if (AppVariable.state == BaseService.State.Connected) {
-                    Toast.makeText(activity, "Disconnecting", Toast.LENGTH_LONG).show()
+                    Toast.makeText(activity, "Disconnecting", Toast.LENGTH_SHORT).show()
                 } else if (AppVariable.state == BaseService.State.Stopped) {
-                    Toast.makeText(activity, "Connecting", Toast.LENGTH_LONG).show()
+                    Toast.makeText(activity, "Connecting", Toast.LENGTH_SHORT).show()
                 }
                 lifecycleScope.launch {
-                    if (isToConnect && AppVariable.isFast) launch {
-                        NetworkPing.toFastToggle { ip ->
-                            AppVariable.host = ip
+                    if (isToConnect && AppVariable.isFast)
+                        launch {
+                            NetworkPing.toFastToggle { ip ->
+                                AppVariable.host = ip
+                            }
                         }
-                    }
                     launch {
-                        delay(3000)
-                        toggle()
+                        delay(1000)
+                        loadInterAd(activity as Activity)
                     }
                 }
             }
         }
+
+    private fun loadInterAd(activity: Activity) {
+        countDownTimer = null
+        connectingAndStoppingAnimation()
+        interstitialAdManager.showInterstitial(activity as MainActivity, object :
+            OnShowAdCompleteListener {
+            override fun onShowAdComplete() {
+                toggle()
+            }
+
+        })
+        countDownTimer = object : CountDownTimer(9000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+
+            }
+
+            override fun onFinish() {
+                toggle()
+            }
+
+        }
+        countDownTimer?.start()
+
+    }
 
 
     private fun result() {
@@ -333,4 +387,21 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
     }
 
 
+    override fun onPause() {
+        interstitialAdManager.countdownTimer?.cancel()
+        super.onPause()
+    }
+
+    override fun onStop() {
+        countDownTimer?.cancel()
+        super.onStop()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+    }
+
+    private fun showNativeAD() {
+        activity?.let { nativeAdManager.refreshAd(it, nativeAdContainer) }
+    }
 }

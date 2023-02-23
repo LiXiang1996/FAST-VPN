@@ -1,0 +1,87 @@
+<com.google.android.gms.ads.nativead.NativeAdView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="#FFFFFF"
+        android:orientation="vertical">
+        <com.google.android.gms.ads.nativead.MediaView
+            android:id="@+id/native_ad_media"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:maxHeight="215dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/native_ad_header"
+            android:layout_width="41dp"
+            android:layout_height="41dp"
+            android:layout_marginStart="11.5dp"
+            android:layout_marginBottom="12.5dp"
+            android:layout_marginTop="9.1dp"
+            tools:src="@mipmap/home_robot_disconnect"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/native_ad_media" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_marginStart="9.1dp"
+            android:id="@+id/ad_title1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLength="24"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textColor="#333333"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/native_ad_header"
+            app:layout_constraintTop_toTopOf="@id/native_ad_header"
+            tools:text="High School Escape 2 aniefkawejfnaefnajw" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_marginStart="9.1dp"
+            android:id="@+id/ad_title2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLength="30"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textColor="#797979"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="@id/native_ad_header"
+            app:layout_constraintStart_toEndOf="@id/native_ad_header"
+            app:layout_constraintTop_toBottomOf="@id/ad_title1"
+            tools:text="Press the spacebar and nfasjnafienfaefaefoaenfia" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_marginEnd="10.3dp"
+            android:id="@+id/ad_call_to_action"
+            android:layout_width="100dp"
+            android:layout_height="41dp"
+            android:background="@drawable/native_action_bg"
+            android:gravity="center"
+            android:textSize="12sp"
+            tools:text="install"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="@id/native_ad_header"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toEndOf="@id/ad_title1"
+            app:layout_constraintTop_toTopOf="@id/native_ad_header"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <TextView
+            style="@style/AdAttribution"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.gms.ads.nativead.NativeAdView>

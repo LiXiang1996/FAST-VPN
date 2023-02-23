@@ -1,8 +1,18 @@
 package com.example.test
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.Application
 import android.content.Context
+import android.os.Build
+import android.os.Bundle
+import android.webkit.WebView
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.ProcessLifecycleOwner
+import com.example.test.ad.utils.AppOpenAdManager
+import com.example.test.ad.utils.OnShowAdCompleteListener
 import com.example.test.base.AppConstant
 import com.example.test.base.data.RemoteProfile
 import com.example.test.base.data.ToProfile
@@ -10,6 +20,8 @@ import com.example.test.ui.activity.MainActivity
 import com.example.test.ui.activity.ServersListProfile
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.database.Profile
+import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.RequestConfiguration
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.ktx.initialize
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
@@ -17,41 +29,74 @@ import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import timber.log.Timber
+import java.util.*
 
 
-class App : Application() {
-
+class App : Application(),Application.ActivityLifecycleCallbacks, LifecycleObserver {
     companion object {
         @SuppressLint("StaticFieldLeak")
         var context: Context? = null
             private set
     }
+    private lateinit var appOpenAdManager: AppOpenAdManager
+    private var currentActivity: Activity? = null
 
     override fun onCreate() {
         super.onCreate()
+        fixWebViewDataDirectoryBug()
+        Firebase.initialize(this)
+        MobileAds.initialize(this) {}
+        registerActivityLifecycleCallbacks(this)
         context = applicationContext
         Core.init(this, MainActivity::class)
-        Firebase.initialize(this)
+        ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+        appOpenAdManager = AppOpenAdManager()
+        RequestConfiguration.Builder().setTestDeviceIds(listOf("1632B27F26C7337301F620C5BE220833"))
 //        getRemoteConfig()
     }
 
 
-    private fun getRemoteConfig() {
-        val remoteConfig: FirebaseRemoteConfig = Firebase.remoteConfig
-        var list: String? = ""
-        remoteConfig.fetchAndActivate()
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    list = remoteConfig.getString("axxxxxx")
-                    list?.let { getDataList(it) }
-                }
+    fun fixWebViewDataDirectoryBug() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            val processName = getProcessName()
+            val packageName = this.packageName
+            if (packageName != processName) {
+                WebView.setDataDirectorySuffix(processName)
             }
-        if (list?.isEmpty() == true && list?.isBlank() == true) {
-            list = remoteConfig.getString("axxxxxx")
-            if (list?.isEmpty() == true || list?.isBlank() == true) ServersListProfile.getServersList()
-            else { list?.let { getDataList(it) } }
         }
     }
+    /** LifecycleObserver method that shows the app open ad when the app moves to foreground. */
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    fun onMoveToForeground() {
+        currentActivity?.let { appOpenAdManager.showAdIfAvailable(it) }
+    }
+
+    /** ActivityLifecycleCallback methods. */
+    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
+
+    override fun onActivityStarted(activity: Activity) {
+        if (!appOpenAdManager.isShowingAd) {
+            currentActivity = activity
+        }
+    }
+
+    override fun onActivityResumed(activity: Activity) {}
+
+    override fun onActivityPaused(activity: Activity) {}
+
+    override fun onActivityStopped(activity: Activity) {}
+
+    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
+
+    override fun onActivityDestroyed(activity: Activity) {}
+
+    /**
+     * Shows an app open ad.
+     */
+    fun showAdIfAvailable(activity: Activity, onShowAdCompleteListener: OnShowAdCompleteListener) {
+        appOpenAdManager.showAdIfAvailable(activity, onShowAdCompleteListener)
+    }
+
     private fun getDataList(list: String) {
         try {
             val gson = Gson()
@@ -73,6 +118,24 @@ class App : Application() {
             }
         } catch (e: Exception) {
             Timber.tag(AppConstant.TAG).e(e)
+        }
+    }
+
+
+    private fun getRemoteConfig() {
+        val remoteConfig: FirebaseRemoteConfig = Firebase.remoteConfig
+        var list: String? = ""
+        remoteConfig.fetchAndActivate()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    list = remoteConfig.getString("axxxxxx")
+                    list?.let { getDataList(it) }
+                }
+            }
+        if (list?.isEmpty() == true && list?.isBlank() == true) {
+            list = remoteConfig.getString("axxxxxx")
+            if (list?.isEmpty() == true || list?.isBlank() == true) ServersListProfile.getServersList()
+            else { list?.let { getDataList(it) } }
         }
     }
 

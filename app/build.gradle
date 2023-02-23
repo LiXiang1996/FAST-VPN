@@ -41,6 +41,7 @@ android {
 }
 
 dependencies {
+    implementation 'androidx.lifecycle:lifecycle-process:2.4.1'//new 2.22 App
     def lifecycle_version = "2.5.1"
     implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
@@ -66,5 +67,8 @@ dependencies {
 
     implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation 'com.google.firebase:firebase-config-ktx'
+    //admob
+    implementation 'com.google.android.gms:play-services-ads:21.5.0'
+
 
 }

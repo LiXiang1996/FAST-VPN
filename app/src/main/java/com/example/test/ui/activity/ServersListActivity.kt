@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.LayoutParams
 import com.bumptech.glide.Glide
 import com.example.test.R
+import com.example.test.ad.utils.InterstitialAdManager
 import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
 import com.example.test.base.BaseActivity
@@ -38,11 +39,14 @@ import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.database.Profile
 
 
+// TODO: 服务器返回首页不做
 class ServersListActivity : BaseActivity() {
 
     private lateinit var serverList: RecyclerView
     private lateinit var serverTitle: TitleView
     private var recyclerViewAdapter: RecyclerViewAdapter? = null
+    private lateinit var interstitialAdManager: InterstitialAdManager
+
     override var layoutId: Int = R.layout.activity_server_list
     override fun initListener() {
         serverTitle.leftImg.setOnClickListener {
@@ -67,6 +71,9 @@ class ServersListActivity : BaseActivity() {
         list.addAll(getServersList())
         recyclerViewAdapter?.setData(list)
         recyclerViewAdapter?.notifyDataSetChanged()
+
+        interstitialAdManager = InterstitialAdManager()
+
     }
 }
 

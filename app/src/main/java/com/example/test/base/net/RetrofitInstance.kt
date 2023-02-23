@@ -19,7 +19,6 @@ object RetrofitInstance {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
-
     val api: SimpleApi by lazy {
         retrofit.create(SimpleApi::class.java)
     }
@@ -32,9 +31,6 @@ object RetrofitInstance {
         //添加拦截器
         .readTimeout(30, TimeUnit.SECONDS).retryOnConnectionFailure(true)
         .build()
-
-
-
 }
 
 class NetInterceptor : Interceptor {

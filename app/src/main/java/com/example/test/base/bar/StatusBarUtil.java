@@ -56,15 +56,12 @@ public class StatusBarUtil {
             decorView.setSystemUiVisibility(option);
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.setStatusBarColor(Color.TRANSPARENT);
-            //导航栏颜色也可以正常设置
-            //window.setNavigationBarColor(Color.TRANSPARENT);
         }
     }
 
 
     /**
      *  代码实现android:fitsSystemWindows
-     *
      * @param activity
      */
     public static void setRootViewFitsSystemWindows(Activity activity, boolean fitSystemWindows) {
@@ -85,22 +82,14 @@ public class StatusBarUtil {
      * 设置状态栏深色浅色切换
      */
     public static boolean setStatusBarDarkTheme(Activity activity, boolean dark) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                setStatusBarFontIconDark(activity, TYPE_M, dark);
-            }
-//            else if (OSUtils.isMiui()) {
-//                setStatusBarFontIconDark(activity, TYPE_MIUI, dark);
-//            } else if (OSUtils.isFlyme()) {
-//                setStatusBarFontIconDark(activity, TYPE_FLYME, dark);
-//            }
-            else {//其他情况
-                return false;
-            }
-
-            return true;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {//大于11版本
+            setStatusBarFontIconDark(activity, TYPE_M, dark);
         }
-        return false;
+        else {//其他情况
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -120,7 +109,7 @@ public class StatusBarUtil {
 
     //设置6.0 状态栏深色浅色切换
     public static boolean setCommonUI(Activity activity, boolean dark) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {//6.0
             View decorView = activity.getWindow().getDecorView();
             if (decorView != null) {
                 int vis = decorView.getSystemUiVisibility();
@@ -188,8 +177,8 @@ public class StatusBarUtil {
     //获取状态栏高度
     public static int getStatusBarHeight(Context context) {
         int result = 0;
-        @SuppressLint("InternalInsetResource") int resourceId = context.getResources().getIdentifier(
-                "status_bar_height", "dimen", "android");
+        @SuppressLint({"InternalInsetResource", "DiscouragedApi"})
+        int resourceId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
         if (resourceId > 0) {
             result = context.getResources().getDimensionPixelSize(resourceId);
         }
