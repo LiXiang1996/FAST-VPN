@@ -1,104 +1,104 @@
 {
-    "show":45,
-    "click":10,
+    "robvn_sm":45,
+    "robvn_cm":10,
     "robvn_o_open":[
         {
-            "sour":"admob",
-            "weight":2,
-            "type":"open",
-            "adid":"ca-app-pub-3940256099942544/3419835294",
+            "robvn_s":"admob",
+            "robvn_p":3,
+            "robvn_l":"open",
+            "robvn_id":"ca-app-pub-3940256099942544/3419835294x",
             "time":3000
         },
         {
-            "sour":"admob",
-            "weight":3,
-            "type":"open",
-            "adid":"ca-app-pub-3940256099942544/3419835294x",
+            "robvn_s":"admob",
+            "robvn_p":2,
+            "robvn_l":"open",
+            "robvn_id":"ca-app-pub-3940256099942544/3419835294",
             "time":3000
         },
         {
-            "sour":"admob",
-            "weight":1,
-            "type":"inter",
-            "adid":"ca-app-pub-3940256099942544/1033173712",
+            "robvn_s":"admob",
+            "robvn_p":1,
+            "robvn_l":"inter",
+            "robvn_id":"ca-app-pub-3940256099942544/1033173712",
             "time":3000
         }
     ],
     "robvn_i_2R":[
         {
-            "sour":"admob",
-            "weight":1,
-            "type":"inter",
-            "adid":"ca-app-pub-3940256099942544/1033173712",
+            "robvn_s":"admob",
+            "robvn_p":1,
+            "robvn_l":"inter",
+            "robvn_id":"ca-app-pub-3940256099942544/1033173712",
             "time":3000
         },
         {
-            "sour":"admob",
-            "weight":3,
-            "type":"inter",
-            "adid":"ca-app-pub-3940256099942544/1033173712x",
+            "robvn_s":"admob",
+            "robvn_p":3,
+            "robvn_l":"inter",
+            "robvn_id":"ca-app-pub-3940256099942544/1033173712x",
             "time":3000
         },
         {
-            "sour":"admob",
-            "weight":2,
-            "type":"inter",
-            "adid":"ca-app-pub-3940256099942544/8691691433",
+            "robvn_s":"admob",
+            "robvn_p":2,
+            "robvn_l":"inter",
+            "robvn_id":"ca-app-pub-3940256099942544/8691691433",
             "time":3000
         }
     ],
     "robvn_n_home":[
         {
-            "sour":"admob",
-            "weight":2,
-            "type":"native",
-            "adid":"ca-app-pub-3940256099942544/2247696110x",
+            "robvn_s":"admob",
+            "robvn_p":2,
+            "robvn_l":"native",
+            "robvn_id":"ca-app-pub-3940256099942544/2247696110x",
             "time":3000
         },
         {
-            "sour":"admob",
-            "weight":1,
-            "type":"native",
-            "adid":"ca-app-pub-3940256099942544/2247696110",
+            "robvn_s":"admob",
+            "robvn_p":1,
+            "robvn_l":"native",
+            "robvn_id":"ca-app-pub-3940256099942544/2247696110",
             "time":3000
         }
     ],
     "robvn_n_result":[
         {
-            "sour":"admob",
-            "weight":2,
-            "type":"native",
-            "adid":"ca-app-pub-3940256099942544/2247696110x",
+            "robvn_s":"admob",
+            "robvn_p":2,
+            "robvn_l":"native",
+            "robvn_id":"ca-app-pub-3940256099942544/2247696110x",
             "time":3000
         },
         {
-            "sour":"admob",
-            "weight":1,
-            "type":"native",
-            "adid":"ca-app-pub-3940256099942544/2247696110",
+            "robvn_s":"admob",
+            "robvn_p":1,
+            "robvn_l":"native",
+            "robvn_id":"ca-app-pub-3940256099942544/2247696110",
             "time":3000
         }
     ],
     "pt_translate_ad":[
         {
-            "sour":"admob",
-            "weight":3,
-            "type":"inter",
-            "adid":"ca-app-pub-3940256099942544/1033173712x",
+            "robvn_s":"admob",
+            "robvn_p":3,
+            "robvn_l":"inter",
+            "robvn_id":"ca-app-pub-3940256099942544/1033173712x",
             "time":3000
         },
         {
-            "sour":"admob",
-            "weight":2,
-            "type":"inter",
-            "adid":"ca-app-pub-3940256099942544/1033173712",
+            "robvn_s":"admob",
+            "robvn_p":2,
+            "robvn_l":"inter",
+            "robvn_id":"ca-app-pub-3940256099942544/1033173712",
             "time":3000
         },
         {
-            "sour":"admob",
-            "weight":1,
-            "type":"inter",
-            "adid":"ca-app-pub-3940256099942544/8691691433",
+            "robvn_s":"admob",
+            "robvn_p":1,
+            "robvn_l":"inter",
+            "robvn_id":"ca-app-pub-3940256099942544/8691691433",
             "time":3000
         }
     ]

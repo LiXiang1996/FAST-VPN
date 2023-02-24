@@ -3,29 +3,23 @@ package com.example.test.ui.activity
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.CountDownTimer
-import android.util.Log
 import android.widget.ProgressBar
-import androidx.lifecycle.lifecycleScope
 import com.example.test.App
 import com.example.test.R
 import com.example.test.ad.data.ADListBean
 import com.example.test.ad.data.GetJsonData
+import com.example.test.ad.utils.AppOpenAdManager
 import com.example.test.ad.utils.OnShowAdCompleteListener
 import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
 import com.example.test.base.BaseActivity
 import com.example.test.base.bar.StatusBarUtil
-import com.example.test.base.data.IPBean
-import com.example.test.base.net.RetrofitInstance
 import com.example.test.base.utils.SharedPreferencesUtils
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import timber.log.Timber
-import java.util.Locale
+import java.util.*
 
 
 @SuppressLint("CustomSplashScreen")
@@ -50,7 +44,7 @@ class SplashActivity : BaseActivity() {
             )
         }
         AppVariable.isShowBanedIpDialog =
-            countryCode.toLowerCase() == "ir" || Locale.getDefault().country.toLowerCase() == "irn"
+            countryCode.lowercase() == "ir" || Locale.getDefault().country.lowercase() == "irn"
     }
 
 
@@ -64,10 +58,16 @@ class SplashActivity : BaseActivity() {
         //获取ad数据
         val ad: ADListBean? = GetJsonData.getData(this)
         if (ad != null) {
-            Timber.tag(AppConstant.TAG).e("click"+"${ad.click} show ${ad.show} robvn_n_home size ${ad.robvn_n_home.size}")
-            AppVariable.openADList = ad.robvn_o_open.sortedByDescending { it.ADLevel }
-            AppVariable.interADList = ad.robvn_i_2R.sortedByDescending { it.ADLevel }
-            AppVariable.nativeADList = ad.robvn_n_home.sortedByDescending { it.ADLevel }
+            Timber.tag(AppConstant.TAG)
+                .e("click" + "${ad.robvn_cm} show ${ad.robvn_sm} robvn_n_home size ${ad.robvn_n_home.size}")
+            AppVariable.openADList =
+                ad.robvn_o_open.sortedByDescending { it.robvn_p } as MutableList<ADListBean.ADBean>
+            AppVariable.interADList =
+                ad.robvn_i_2R.sortedByDescending { it.robvn_p } as MutableList<ADListBean.ADBean>
+            AppVariable.nativeHomeADList =
+                ad.robvn_n_home.sortedByDescending { it.robvn_p } as MutableList<ADListBean.ADBean>
+            AppVariable.nativeResultADList =
+                ad.robvn_n_result.sortedByDescending { it.robvn_p } as MutableList<ADListBean.ADBean>
         } else {
             Timber.tag(AppConstant.TAG).e("AD DATA NULL")
         }
@@ -97,10 +97,15 @@ class SplashActivity : BaseActivity() {
             countDownADTimer.start()
             Timber.tag(AppConstant.TAG + "Splash").e("isBackGround: ${AppVariable.isBackGround}")
             if (AppVariable.isBackGroundToSplash) {
-                delay(3000);
+                delay(3000)
             } else delay(1000)
             showAD()
         }
+    }
+
+    override fun onStop() {
+        countDownADTimer.cancel()
+        super.onStop()
     }
 
     override fun onDestroy() {
@@ -115,26 +120,42 @@ class SplashActivity : BaseActivity() {
             nextTo()
             return
         }
-        GetJsonData.getData(this)?.robvn_n_home?.let {
-            application.showAdIfAvailable(
-                this@SplashActivity, it,
-            object : OnShowAdCompleteListener {
-                override fun onShowAdComplete() {
-                    nextTo()
-                }
-            })
+        AppVariable.openADList?.let {
+            if (AppOpenAdManager.appOpenAd == null) application.loadAD(this@SplashActivity, it) {
+                countDownADTimer.cancel()
+                application.showAdIfAvailable(
+                    this@SplashActivity, it,
+                    object : OnShowAdCompleteListener {
+                        override fun onShowAdComplete() {
+                            val intent = Intent(this@SplashActivity, MainActivity::class.java)
+                            this@SplashActivity.startActivity(intent)
+                            finish()
+                        }
+                    })
+            }
+            else {
+                countDownADTimer.cancel()
+                application.showAdIfAvailable(
+                    this@SplashActivity, it,
+                    object : OnShowAdCompleteListener {
+                        override fun onShowAdComplete() {
+                            val intent = Intent(this@SplashActivity, MainActivity::class.java)
+                            this@SplashActivity.startActivity(intent)
+                            finish()
+                        }
+                    })
+            }
         }
     }
 
     fun nextTo() {
         if (AppVariable.isBackGroundToSplash) {
             AppVariable.isBackGroundToSplash = false
-        } else {
-            if (canJump) {
-                val intent = Intent(this@SplashActivity, MainActivity::class.java)
-                this@SplashActivity.startActivity(intent)
-            }
         }
-        finish()
+        if (canJump) {
+            val intent = Intent(this@SplashActivity, MainActivity::class.java)
+            this@SplashActivity.startActivity(intent)
+            finish()
+        }
     }
 }

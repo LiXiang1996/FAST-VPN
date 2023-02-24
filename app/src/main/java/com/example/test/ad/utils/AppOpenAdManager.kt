@@ -31,10 +31,11 @@ import java.util.*
  */
 class AppOpenAdManager {
 
-    companion object{
+    companion object {
         var appOpenAd: AppOpenAd? = null
 
     }
+
     private var isLoadingAd = false
     var isShowingAd = false
     private var TAG = AppConstant.TAG + "OpenAD"
@@ -43,39 +44,48 @@ class AppOpenAdManager {
     private var loadTime: Long = 0
 
     /**
-     * Load an ad.
-     * @param context the context of the activity that loads the ad
+     * Load an ad. 生成广告对象
      */
-    fun loadAd(context: Context, openADID: List<ADListBean.ADBean>, position: Int = 0) {
-        if (isLoadingAd)
-            Timber.tag(TAG).e("AppOpen 此时没有正在loading的广告 $isLoadingAd  ")
-        // 如果有未使用的广告或已在加载的广告，不加载广告
+    fun loadAd(
+        context: Context,
+        openADID: List<ADListBean.ADBean>,
+        position: Int = 0,
+        result: () -> Unit
+    ) {
+        Timber.tag(TAG).e("AppOpen 是否正在loading广告 $isLoadingAd  ")
+//        if (isLoadingAd || isAdAvailable()) {
+//            Timber.tag(TAG).e("AppOpen 是否有正在loading的广告 $isLoadingAd appOpenAd是否为空${appOpenAd==null}  isAdAvailable ${isAdAvailable()}")
+//            return
+//        }
         if (isLoadingAd || appOpenAd != null) {
-            AdRequest.ERROR_CODE_NO_FILL
             Timber.tag(TAG)
-                .e("AppOpen 是否有正在loading的广告 $isLoadingAd  isAdAvailable ${isAdAvailable()}")
+                .e("AppOpen 是否有正在loading的广告 $isLoadingAd appOpenAd是否为空${appOpenAd == null}  isAdAvailable ${isAdAvailable()}")
             return
         }
         isLoadingAd = true
         val request = AdRequest.Builder().build()
         AppOpenAd.load(
             context,
-            openADID[position].ADid,
+            openADID[position].robvn_id,
             request,
             object : AppOpenAd.AppOpenAdLoadCallback() {
                 override fun onAdLoaded(ad: AppOpenAd) {
                     appOpenAd = ad
                     isLoadingAd = false
                     loadTime = Date().time
-                    Timber.tag(TAG).e("onAdLoaded. $appOpenAd")
+                    Timber.tag(TAG).e("onAdLoaded. $appOpenAd" + "id${openADID[position].robvn_id}")
+                    result.invoke()
                 }
 
                 @SuppressLint("BinaryOperationInTimber")
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                     isLoadingAd = false
-                    if (position < openADID.size) loadAd(context, openADID, position + 1)
+                    if (position < openADID.size) loadAd(context, openADID, position + 1, result)
                     Timber.tag(TAG)
-                        .e("onAdFailedToLoad: %s", loadAdError.message + "code " + loadAdError.code)
+                        .e(
+                            "onAdFailedToLoad: %s",
+                            loadAdError.message + "code " + loadAdError.code + "   id${openADID[position].robvn_id}"
+                        )
                 }
             }
         )
@@ -93,27 +103,7 @@ class AppOpenAdManager {
         return appOpenAd != null && wasLoadTimeLessThanNHoursAgo(1)
     }
 
-    /**
-     * Show the ad if one isn't already showing.
-     *
-     * @param activity the activity that shows the app open ad
-     */
-    fun showAdIfAvailable(activity: Activity, openADID: List<ADListBean.ADBean>) {
-        showAdIfAvailable(
-            activity, openADID,
-            object : OnShowAdCompleteListener {
-                override fun onShowAdComplete() {
-                }
-            }
-        )
-    }
 
-    /**
-     * Show the ad if one isn't already showing.
-     *
-     * @param activity the activity that shows the app open ad
-     * @param onShowAdCompleteListener the listener to be notified when an app open ad is complete
-     */
     fun showAdIfAvailable(
         activity: Activity,
         openADID: List<ADListBean.ADBean>,
@@ -123,9 +113,16 @@ class AppOpenAdManager {
             Timber.tag(TAG).e("The app open ad is already showing.")
             return
         }
+//        if (!isAdAvailable()) {
+//            Timber.tag(TAG).e("ad对象为空或者广告一小时前展示过")
+//            loadAd(activity, openADID)
+//            return
+//        }
         if (appOpenAd == null) {
-            Timber.tag(TAG).e("The app open ad is not ready yet.需要去给appOpenAd赋值")
-            loadAd(activity, openADID)
+            Timber.tag(TAG).e("ad对象为空或者广告一小时前展示过")
+            // TODO:
+//            onShowAdCompleteListener.onShowAdComplete()
+            loadAd(activity, openADID) {}
             return
         }
         Timber.tag(TAG).e("Will show ad.")
@@ -143,8 +140,9 @@ class AppOpenAdManager {
             override fun onAdDismissedFullScreenContent() {
                 appOpenAd = null
                 isShowingAd = false
+                onShowAdCompleteListener.onShowAdComplete()
                 Timber.tag(TAG).e("onAdDismissedFullScreenContent.")
-                loadAd(activity, openADID)
+                loadAd(activity, openADID) {}
             }
 
             @SuppressLint("BinaryOperationInTimber")
@@ -155,7 +153,8 @@ class AppOpenAdManager {
                     "onAdFailedToShowFullScreenContent: %s",
                     adError.message + "code" + adError.code
                 )
-                loadAd(activity, openADID)
+                onShowAdCompleteListener.onShowAdComplete()
+                loadAd(activity, openADID) {}
             }
 
             override fun onAdShowedFullScreenContent() {

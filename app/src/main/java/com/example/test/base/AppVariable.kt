@@ -17,10 +17,8 @@ object AppVariable {
     var isShowBanedIpDialog = false
     var isBackGround = false
     var isBackGroundToSplash = false
-    var openADList: List<ADListBean.ADBean>? = null
-    var interADList: List<ADListBean.ADBean>? = null
-    var nativeADList: List<ADListBean.ADBean>? = null
-    var cacheAppOpenAd: AppOpenAd? = null
-    var cacheNativeAd: NativeAd? = null
-    var cacheInterstitialAd: InterstitialAd? = null
+    var openADList: MutableList<ADListBean.ADBean>? = null
+    var interADList: MutableList<ADListBean.ADBean>? = null
+    var nativeHomeADList: MutableList<ADListBean.ADBean>? = null
+    var nativeResultADList: MutableList<ADListBean.ADBean>? = null
 }

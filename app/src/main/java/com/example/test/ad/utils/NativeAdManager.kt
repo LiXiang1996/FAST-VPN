@@ -9,16 +9,18 @@ import android.widget.Toast
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import com.example.test.R
+import com.example.test.ad.data.ADListBean
 import com.example.test.base.AppConstant
+import com.example.test.base.AppVariable
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.nativead.MediaView
 import com.google.android.gms.ads.nativead.NativeAd
+import com.google.android.gms.ads.nativead.NativeAdOptions
 import com.google.android.gms.ads.nativead.NativeAdView
 import timber.log.Timber
+import java.text.FieldPosition
 
-
-const val ADMOB_AD_UNIT_ID = "ca-app-pub-3940256099942544/2247696110"
-const val TAG = AppConstant.TAG+" NativeAD"
+const val TAG = AppConstant.TAG + " NativeAD"
 
 object NativeAdView1 {
     var adMedia: MediaView? = null
@@ -42,12 +44,7 @@ class NativeAdManager {
     companion object {
         var currentNativeAd: NativeAd? = null
     }
-    /**
-     * Populates a [NativeAdView] object with data from a given [NativeAd].
-     *
-     * @param nativeAd the object containing the ad's assets
-     * @param adView the binding object of the layout that has NativeAdView as the root view
-     */
+
     private fun populateNativeAdView(nativeAd: NativeAd, adView: View) {
         val nativeAdView: NativeAdView = adView.rootView as NativeAdView
         nativeAdView.mediaView = NativeAdView1.adMedia
@@ -97,13 +94,9 @@ class NativeAdManager {
         }
     }
 
-    /**
-     * Creates a request for a new native ad based on the boolean parameters and calls the
-     * corresponding "populate" method when one is successfully returned.
-     */
-    fun refreshAd(activity: Activity, frameLayout: FrameLayout) {
-        Timber.tag(TAG).e("加载NativeAD")
-        val builder = AdLoader.Builder(activity, ADMOB_AD_UNIT_ID)
+    fun refreshAd(activity: Activity, frameLayout: FrameLayout,position: Int = 0,nativeListAD: MutableList<ADListBean.ADBean>) {
+        Timber.tag(TAG).e("加载NativeAD $position")
+        val builder = AdLoader.Builder(activity, nativeListAD[position].robvn_id)
         builder.forNativeAd { nativeAd ->
             if (activity.isDestroyed || activity.isFinishing || activity.isChangingConfigurations) {
                 nativeAd.destroy()
@@ -117,11 +110,10 @@ class NativeAdManager {
             frameLayout.addView(adView.rootView)
         }
 
-//        val videoOptions =
-//            VideoOptions.Builder().setStartMuted(mainActivityBinding.startMutedCheckbox.isChecked)
-//                .build()
-//        val adOptions = NativeAdOptions.Builder().setVideoOptions(videoOptions).build()
-//        builder.withNativeAdOptions(adOptions)
+        val videoOptions =
+            VideoOptions.Builder().setStartMuted(true).build()
+        val adOptions = NativeAdOptions.Builder().setVideoOptions(videoOptions).build()
+        builder.withNativeAdOptions(adOptions)
 
         val adLoader = builder.withAdListener(object : AdListener() {
             override fun onAdClicked() {
@@ -148,10 +140,10 @@ class NativeAdManager {
                 Timber.tag(TAG).e("ad onAdImpression")
                 super.onAdImpression()
             }
+
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                val error =
-                    """domain: ${loadAdError.domain}, code: ${loadAdError.code}, message: ${loadAdError.message}""""
-                Timber.tag(TAG).e(error)
+                Timber.tag(TAG).e("domain: ${loadAdError.domain}, code: ${loadAdError.code}, message: ${loadAdError.message}")
+                refreshAd(activity,frameLayout, position+1, nativeListAD)
             }
         }
         ).build()

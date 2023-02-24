@@ -36,9 +36,13 @@ abstract class BaseActivity : AppCompatActivity(), InitInterface, NetStateChange
         NetStateChangeReceiver.registerReceiver(this)
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onStart() {
         canJump = true
+        super.onStart()
+    }
+    override fun onResume() {
+        canJump = true
+        super.onResume()
     }
 
     override fun onDestroy() {
@@ -106,13 +110,13 @@ abstract class BaseActivity : AppCompatActivity(), InitInterface, NetStateChange
     }
 
     override fun onPause() {
-        super.onPause()
         canJump = false
+        super.onPause()
     }
 
     override fun onStop() {
-        super.onStop()
         canJump = false
+        super.onStop()
     }
 
     override fun initView() {

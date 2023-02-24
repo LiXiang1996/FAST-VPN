@@ -118,5 +118,10 @@ class SeverConnectStateActivity : BaseActivity() {
 
 
     private fun showNativeAD() {
-        nativeAdManager.refreshAd(this, nativeAdContainer) }
+        AppVariable.nativeResultADList?.let {
+            nativeAdManager.refreshAd(this, nativeAdContainer,0,
+                it
+            )
+        }
+    }
 }

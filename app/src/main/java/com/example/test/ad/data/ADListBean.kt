@@ -10,18 +10,18 @@ import java.io.InputStreamReader
 
 //广告相关数据类
 data class ADListBean(
-    var show: Int = 0,
-    var click: Int = 0,
-    var robvn_o_open: List<ADBean>,//OpenAd
-    var robvn_i_2R: List<ADBean>,//Interstitial
-    var robvn_n_home: List<ADBean>,//Native
-    var robvn_n_result: List<ADBean>,//Native
+    var robvn_sm: Int = 0,
+    var robvn_cm: Int = 0,
+    var robvn_o_open: MutableList<ADBean>,//OpenAd
+    var robvn_i_2R: MutableList<ADBean>,//Interstitial
+    var robvn_n_home: MutableList<ADBean>,//Native
+    var robvn_n_result: MutableList<ADBean>,//Native
 ) {
     data class ADBean(
-        var sour: String = "admob",
-        var ADType: String = "",
-        var ADLevel: Int = 0,
-        var ADid: String = "",
+        var robvn_s: String = "admob",
+        var robvn_l: String = "",
+        var robvn_p: Int = 0,
+        var robvn_id: String = "",
     )
 }
 

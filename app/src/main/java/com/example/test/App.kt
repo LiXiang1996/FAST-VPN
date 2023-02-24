@@ -115,6 +115,11 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
     fun showAdIfAvailable(activity: Activity, openADId:List<ADListBean.ADBean>,onShowAdCompleteListener: OnShowAdCompleteListener) {
         appOpenAdManager.showAdIfAvailable(activity, openADId,onShowAdCompleteListener)
     }
+    fun loadAD(activity: Activity, openADId:List<ADListBean.ADBean>,result:()->Unit) {
+        appOpenAdManager.loadAd(activity, openADId){
+            result.invoke()
+        }
+    }
 
     private fun getDataList(list: String) {
         try {

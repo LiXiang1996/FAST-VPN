@@ -28,6 +28,7 @@ import com.example.test.R
 import com.example.test.ad.utils.*
 import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
+import com.example.test.base.BaseActivity
 import com.example.test.base.data.CountryUtils
 import com.example.test.base.utils.NetworkPing
 import com.example.test.base.utils.NetworkUtil
@@ -141,6 +142,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         nativeAdManager = NativeAdManager()
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun initListener() {
         connectClickBtn.setOnClickListener {
             if (isShowGuideDialog) {
@@ -337,26 +339,43 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
     private fun loadInterAd(activity: Activity) {
         (activity as MainActivity).frameLayout.visibility = View.VISIBLE
         connectingAndStoppingAnimation()
-
         MainScope().launch {
             delay(1000)//延迟一秒后再执行下面代码
         }
         countDownTimer = null
-        interstitialAdManager.showInterstitial(activity, object :
-            OnShowAdCompleteListener {
-            override fun onShowAdComplete() {
-                toggle()
-            }
-        })
+        showInterAD(activity)
         countDownTimer = object : CountDownTimer(9000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
-
             }
+
             override fun onFinish() {
-                if(!interstitialAdManager.adIsImpression)toggle()
+                //这儿用是否展示广告来判断倒计时结束时是否跳转
+                if (!interstitialAdManager.adIsImpression) toggle()
             }
         }
         countDownTimer?.start()
+    }
+
+    private fun showInterAD(activity: BaseActivity) {
+        AppVariable.interADList?.let { data ->
+            if (InterstitialAdManager.interstitialAd == null) {
+                interstitialAdManager.loadAd(activity, data, 0) {
+                    if (it) interstitialAdManager.showInterstitial(activity, data, object :
+                        OnShowAdCompleteListener {
+                        override fun onShowAdComplete() {
+                            toggle()
+                        }
+                    })
+                }
+            } else interstitialAdManager.showInterstitial(activity, data, object :
+                OnShowAdCompleteListener {
+                override fun onShowAdComplete() {
+                    toggle()
+                }
+            })
+
+        }
+
     }
 
 
@@ -400,6 +419,14 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
     }
 
     private fun showNativeAD() {
-        activity?.let { nativeAdManager.refreshAd(it, nativeAdContainer) }
+        activity?.let {
+            AppVariable.nativeHomeADList?.let { it1 ->
+                nativeAdManager.refreshAd(
+                    it,
+                    nativeAdContainer,
+                    0,it1
+                )
+            }
+        }
     }
 }
