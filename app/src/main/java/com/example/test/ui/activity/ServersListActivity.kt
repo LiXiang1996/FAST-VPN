@@ -22,8 +22,6 @@ import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.LayoutParams
 import com.bumptech.glide.Glide
 import com.example.test.R
-import com.example.test.ad.utils.InterstitialAdManager
-import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
 import com.example.test.base.BaseActivity
 import com.example.test.base.data.CountryUtils
@@ -39,13 +37,11 @@ import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.database.Profile
 
 
-// TODO: 服务器返回首页不做
 class ServersListActivity : BaseActivity() {
 
     private lateinit var serverList: RecyclerView
     private lateinit var serverTitle: TitleView
     private var recyclerViewAdapter: RecyclerViewAdapter? = null
-    private lateinit var interstitialAdManager: InterstitialAdManager
 
     override var layoutId: Int = R.layout.activity_server_list
     override fun initListener() {
@@ -71,9 +67,6 @@ class ServersListActivity : BaseActivity() {
         list.addAll(getServersList())
         recyclerViewAdapter?.setData(list)
         recyclerViewAdapter?.notifyDataSetChanged()
-
-        interstitialAdManager = InterstitialAdManager()
-
     }
 }
 
@@ -193,21 +186,12 @@ class ServersListProfile {
                 robvn_account = "chacha20-ietf-poly1305",
                 robvn_city = "Chengdu",
                 robvn_ip = "34.213.182.172",
-                robvn_country = "Japan",
+                robvn_country = "CN",
                 robvn_port = 810
             )
         )
-        private val defaultProfile2 = ToProfile.remoteProfileToProfile(
-            RemoteProfile(
-                robvn_pwd = "22222",
-                robvn_account = "22222",
-                robvn_city = "Tokyo",
-                robvn_ip = "22222",
-                robvn_country = "ja p an    ",
-                robvn_port = 2
-            )
-        )
-         var defaultList = mutableListOf(defaultProfile1, defaultProfile2)
+
+         var defaultList = mutableListOf(defaultProfile1)
 
         fun getServersList(): MutableList<Profile> {
             val mutableList = mutableListOf<Profile>()

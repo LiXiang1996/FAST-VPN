@@ -57,16 +57,18 @@ class SeverConnectStateActivity : BaseActivity() {
         connectText = findViewById(R.id.server_connect_state_text)
         connectTime = findViewById(R.id.server_connect_time_text)
         nativeAdContainer = findViewById(R.id.server_connect_state_native_ad_frame)
-
         connectTime.text = "00:00:00"
         StatusBarUtil.setTranslucentStatus(this)
-
         val country = AppVariable.country
         countryName.text =
             if (country == AppConstant.DEFAULT || country.isBlank()) getString(R.string.super_fast_server) else country
         Glide.with(this).load(CountryUtils.getCountrySource(country)).circleCrop().into(countryImg)
         nativeAdManager = NativeAdManager()
+    }
+
+    override fun onResume() {
         showNativeAD()
+        super.onResume()
     }
     override fun initListener() {
         titleView.leftImg.setOnClickListener {

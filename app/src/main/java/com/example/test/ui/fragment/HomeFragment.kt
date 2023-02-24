@@ -337,8 +337,9 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
     private fun loadInterAd(activity: Activity) {
         (activity as MainActivity).frameLayout.visibility = View.VISIBLE
         connectingAndStoppingAnimation()
+
         MainScope().launch {
-            delay(1000)
+            delay(1000)//延迟一秒后再执行下面代码
         }
         countDownTimer = null
         interstitialAdManager.showInterstitial(activity, object :

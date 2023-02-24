@@ -12,8 +12,9 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import timber.log.Timber
 
 class InterstitialAdManager {
-
-    private var interstitialAd: InterstitialAd? = null
+    companion object{
+         var interstitialAd: InterstitialAd? = null
+    }
     private val testADid = "ca-app-pub-3940256099942544/1033173712"
     var countdownTimer: CountDownTimer? = null
     var adIsLoading: Boolean = false
@@ -25,7 +26,6 @@ class InterstitialAdManager {
     ) {
         if (interstitialAd != null) {
             interstitialAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
-
                 override fun onAdClicked() {
                     Timber.tag(interADTAG).e("Ad was onAdClicked.")
                     adIsImpression = false
@@ -40,7 +40,7 @@ class InterstitialAdManager {
                 }
 
                 override fun onAdDismissedFullScreenContent() {
-                    Timber.tag(interADTAG).e("Ad was onAdImpression.")
+                    Timber.tag(interADTAG).e("Ad was onAdDismissedFullScreenContent.")
                     interstitialAd = null
                     loadAd(activity)
                     onShowAdCompleteListener.onShowAdComplete()
@@ -67,12 +67,10 @@ class InterstitialAdManager {
         val adRequest = AdRequest.Builder().build()
         InterstitialAd.load(activity, testADid, adRequest, object : InterstitialAdLoadCallback() {
             override fun onAdFailedToLoad(adError: LoadAdError) {
-                Timber.tag(interADTAG).e(adError.message)
                 interstitialAd = null
                 adIsLoading = false
-                val error =
-                    "domain: ${adError.domain}, code: ${adError.code}, " + "message: ${adError.message}"
-                Timber.tag(interADTAG).e(error)
+                val error = "domain: ${adError.domain}, code: ${adError.code}, " + "message: ${adError.message}"
+                Timber.tag(interADTAG).e("onAdFailedToLoad----$error")
             }
 
             override fun onAdLoaded(ad: InterstitialAd) {

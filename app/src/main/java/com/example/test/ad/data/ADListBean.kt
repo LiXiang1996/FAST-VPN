@@ -1,6 +1,7 @@
 package com.example.test.ad.data
 
 import android.content.Context
+import com.google.android.gms.ads.appopen.AppOpenAd
 import com.google.gson.Gson
 import org.json.JSONObject
 import java.io.BufferedReader
@@ -24,8 +25,21 @@ data class ADListBean(
     )
 }
 
+
 object GetJsonData {
     var adListData :ADListBean?=null
+
+    private fun getRemoteConfigData(context: Context): ADListBean? {
+        return null
+    }
+
+    fun getData(context: Context):ADListBean?{
+        if (getRemoteConfigData(context)!= null){
+            return getRemoteConfigData(context)
+        }else{
+            return getJson(context)
+        }
+    }
     fun getJson(context: Context) :ADListBean?{
         var inputStreamReader: InputStreamReader? = null
         var br: BufferedReader? = null

@@ -12,6 +12,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
+import com.example.test.ad.data.ADListBean
 import com.example.test.ad.utils.AppOpenAdManager
 import com.example.test.ad.utils.OnShowAdCompleteListener
 import com.example.test.base.AppConstant
@@ -35,14 +36,16 @@ import timber.log.Timber
 import java.util.*
 
 
-class App : Application(),Application.ActivityLifecycleCallbacks, LifecycleObserver {
+class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObserver {
 
     private var activityCount = 0
+
     companion object {
         @SuppressLint("StaticFieldLeak")
         var context: Context? = null
             private set
     }
+
     private lateinit var appOpenAdManager: AppOpenAdManager
     private var currentActivity: Activity? = null
 
@@ -70,11 +73,7 @@ class App : Application(),Application.ActivityLifecycleCallbacks, LifecycleObser
             }
         }
     }
-    /** LifecycleObserver method that shows the app open ad when the app moves to foreground. */
-    @OnLifecycleEvent(Lifecycle.Event.ON_START)
-    fun onMoveToForeground() {
-        currentActivity?.let { appOpenAdManager.showAdIfAvailable(it) }
-    }
+
 
     /** ActivityLifecycleCallback methods. */
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
@@ -83,11 +82,13 @@ class App : Application(),Application.ActivityLifecycleCallbacks, LifecycleObser
         if (!appOpenAdManager.isShowingAd) {
             currentActivity = activity
         }
-        if (AppVariable.isBackGround){
+        if (AppVariable.isBackGround) {
             AppVariable.isBackGround = false
-            AppVariable.isBackGroundToSplash = true
-            val intent = Intent(activity,SplashActivity::class.java)
-            activity.startActivity(intent)
+            if (activity !is SplashActivity) {//不在启屏页做重复跳转
+                AppVariable.isBackGroundToSplash = true
+                val intent = Intent(activity, SplashActivity::class.java)
+                activity.startActivity(intent)
+            }
         }
         activityCount++
 
@@ -99,7 +100,7 @@ class App : Application(),Application.ActivityLifecycleCallbacks, LifecycleObser
 
     override fun onActivityStopped(activity: Activity) {
         activityCount--
-        if(activityCount ==0){
+        if (activityCount == 0 ) {
             AppVariable.isBackGround = true
         }
     }
@@ -111,8 +112,8 @@ class App : Application(),Application.ActivityLifecycleCallbacks, LifecycleObser
     /**
      * Shows an app open ad.
      */
-    fun showAdIfAvailable(activity: Activity, onShowAdCompleteListener: OnShowAdCompleteListener) {
-        appOpenAdManager.showAdIfAvailable(activity, onShowAdCompleteListener)
+    fun showAdIfAvailable(activity: Activity, openADId:List<ADListBean.ADBean>,onShowAdCompleteListener: OnShowAdCompleteListener) {
+        appOpenAdManager.showAdIfAvailable(activity, openADId,onShowAdCompleteListener)
     }
 
     private fun getDataList(list: String) {
@@ -153,7 +154,9 @@ class App : Application(),Application.ActivityLifecycleCallbacks, LifecycleObser
         if (list?.isEmpty() == true && list?.isBlank() == true) {
             list = remoteConfig.getString("axxxxxx")
             if (list?.isEmpty() == true || list?.isBlank() == true) ServersListProfile.getServersList()
-            else { list?.let { getDataList(it) } }
+            else {
+                list?.let { getDataList(it) }
+            }
         }
     }
 

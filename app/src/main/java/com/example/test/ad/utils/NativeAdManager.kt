@@ -39,7 +39,9 @@ object NativeAdView1 {
 
 class NativeAdManager {
 
-    var currentNativeAd: NativeAd? = null
+    companion object {
+        var currentNativeAd: NativeAd? = null
+    }
     /**
      * Populates a [NativeAdView] object with data from a given [NativeAd].
      *
@@ -103,9 +105,6 @@ class NativeAdManager {
         Timber.tag(TAG).e("加载NativeAD")
         val builder = AdLoader.Builder(activity, ADMOB_AD_UNIT_ID)
         builder.forNativeAd { nativeAd ->
-            // OnUnifiedNativeAdLoadedListener 实现。
-            //    如果此回调发生在活动销毁后，则必须调用
-            //    销毁并返回，否则您可能会遇到内存泄漏。
             if (activity.isDestroyed || activity.isFinishing || activity.isChangingConfigurations) {
                 nativeAd.destroy()
                 return@forNativeAd
@@ -152,7 +151,6 @@ class NativeAdManager {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                 val error =
                     """domain: ${loadAdError.domain}, code: ${loadAdError.code}, message: ${loadAdError.message}""""
-//                            mainActivityBinding.refreshButton.isEnabled = true
                 Timber.tag(TAG).e(error)
             }
         }

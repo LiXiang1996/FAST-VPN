@@ -61,13 +61,18 @@ class SplashActivity : BaseActivity() {
     override fun initData() {
         super.initData()
 
-        val ad: ADListBean? = GetJsonData.getJson(this)
+        //获取ad数据
+        val ad: ADListBean? = GetJsonData.getData(this)
         if (ad != null) {
-            Timber.tag(AppConstant.TAG).e("${ad.click} show  size ${ad.robvn_n_home.size}")
+            Timber.tag(AppConstant.TAG).e("click"+"${ad.click} show ${ad.show} robvn_n_home size ${ad.robvn_n_home.size}")
+            AppVariable.openADList = ad.robvn_o_open.sortedByDescending { it.ADLevel }
+            AppVariable.interADList = ad.robvn_i_2R.sortedByDescending { it.ADLevel }
+            AppVariable.nativeADList = ad.robvn_n_home.sortedByDescending { it.ADLevel }
         } else {
             Timber.tag(AppConstant.TAG).e("AD DATA NULL")
         }
 
+        //progress
         countDownTimer = object : CountDownTimer(3000L, 300) {
             override fun onTick(p0: Long) {
                 progress.progress = ((3000 - p0) / 30).toInt() + 1
@@ -78,26 +83,22 @@ class SplashActivity : BaseActivity() {
         }
         countDownTimer.start()
 
+        //ad Timer
         countDownADTimer = object : CountDownTimer(10000L, 1000) {
             override fun onTick(p0: Long) {
             }
 
             override fun onFinish() {
-                if (canJump) {
-                    val intent = Intent(this@SplashActivity, MainActivity::class.java)
-                    this@SplashActivity.startActivity(intent)
-                }
-                finish()
+                nextTo()
             }
         }
 
         MainScope().launch {
             countDownADTimer.start()
-            Timber.tag(AppConstant.TAG+"Splash").e("isBackGround: ${AppVariable.isBackGround}")
-            if (AppVariable.isBackGroundToSplash){
-                delay(3000);AppVariable.isBackGroundToSplash = false
-            }
-            else delay(1000)
+            Timber.tag(AppConstant.TAG + "Splash").e("isBackGround: ${AppVariable.isBackGround}")
+            if (AppVariable.isBackGroundToSplash) {
+                delay(3000);
+            } else delay(1000)
             showAD()
         }
     }
@@ -111,25 +112,29 @@ class SplashActivity : BaseActivity() {
     private fun showAD() {
         val application = application as? App
         if (application == null) {
+            nextTo()
+            return
+        }
+        GetJsonData.getData(this)?.robvn_n_home?.let {
+            application.showAdIfAvailable(
+                this@SplashActivity, it,
+            object : OnShowAdCompleteListener {
+                override fun onShowAdComplete() {
+                    nextTo()
+                }
+            })
+        }
+    }
+
+    fun nextTo() {
+        if (AppVariable.isBackGroundToSplash) {
+            AppVariable.isBackGroundToSplash = false
+        } else {
             if (canJump) {
                 val intent = Intent(this@SplashActivity, MainActivity::class.java)
                 this@SplashActivity.startActivity(intent)
             }
-            finish()
-            return
         }
-        application.showAdIfAvailable(
-            this@SplashActivity,
-            object : OnShowAdCompleteListener {
-                override fun onShowAdComplete() {
-                    if (canJump) {
-                        val intent = Intent(this@SplashActivity, MainActivity::class.java)
-                        this@SplashActivity.startActivity(intent)
-                        finish()
-                    }
-                }
-            })
+        finish()
     }
-
-
 }
