@@ -99,6 +99,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         super.onResume()
         isToConnect = AppVariable.state == BaseService.State.Stopped
         setData()
+        showNativeAD()
     }
 
     private fun initView(view: View) {
@@ -138,7 +139,6 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         }
         interstitialAdManager = InterstitialAdManager()
         nativeAdManager = NativeAdManager()
-        showNativeAD()
     }
 
     private fun initListener() {
@@ -155,8 +155,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                 }
             }
             if (NetworkUtil.get().isNetworkAvailable || NetworkUtil.isNetSystemUsable(activity)) {
-//                activity?.let { it1 -> loadInterAd(it1) }
-                toggle()
+                activity?.let { it1 -> loadInterAd(it1) }
             } else Toast.makeText(activity, getString(R.string.network_error), Toast.LENGTH_LONG)
                 .show()
         }
@@ -177,7 +176,6 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
 
     private fun toggle() {
         isJump = true
-        (activity as MainActivity)?.let { it.frameLayout.visibility = View.VISIBLE }
         if (AppVariable.state.canStop) Core.stopService()
         else {
             lifecycleScope.launch {
@@ -330,7 +328,6 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                             }
                         }
                     launch {
-                        delay(1000)
                         loadInterAd(activity as Activity)
                     }
                 }
@@ -338,27 +335,27 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         }
 
     private fun loadInterAd(activity: Activity) {
-        countDownTimer = null
+        (activity as MainActivity).frameLayout.visibility = View.VISIBLE
         connectingAndStoppingAnimation()
-        interstitialAdManager.showInterstitial(activity as MainActivity, object :
+        MainScope().launch {
+            delay(1000)
+        }
+        countDownTimer = null
+        interstitialAdManager.showInterstitial(activity, object :
             OnShowAdCompleteListener {
             override fun onShowAdComplete() {
                 toggle()
             }
-
         })
         countDownTimer = object : CountDownTimer(9000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
 
             }
-
             override fun onFinish() {
-                toggle()
+                if(!interstitialAdManager.adIsImpression)toggle()
             }
-
         }
         countDownTimer?.start()
-
     }
 
 

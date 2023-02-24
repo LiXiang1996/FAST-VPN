@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.webkit.WebView
@@ -14,10 +15,12 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import com.example.test.ad.utils.AppOpenAdManager
 import com.example.test.ad.utils.OnShowAdCompleteListener
 import com.example.test.base.AppConstant
+import com.example.test.base.AppVariable
 import com.example.test.base.data.RemoteProfile
 import com.example.test.base.data.ToProfile
 import com.example.test.ui.activity.MainActivity
 import com.example.test.ui.activity.ServersListProfile
+import com.example.test.ui.activity.SplashActivity
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.database.Profile
 import com.google.android.gms.ads.MobileAds
@@ -33,6 +36,8 @@ import java.util.*
 
 
 class App : Application(),Application.ActivityLifecycleCallbacks, LifecycleObserver {
+
+    private var activityCount = 0
     companion object {
         @SuppressLint("StaticFieldLeak")
         var context: Context? = null
@@ -56,7 +61,7 @@ class App : Application(),Application.ActivityLifecycleCallbacks, LifecycleObser
     }
 
 
-    fun fixWebViewDataDirectoryBug() {
+    private fun fixWebViewDataDirectoryBug() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             val processName = getProcessName()
             val packageName = this.packageName
@@ -78,13 +83,26 @@ class App : Application(),Application.ActivityLifecycleCallbacks, LifecycleObser
         if (!appOpenAdManager.isShowingAd) {
             currentActivity = activity
         }
+        if (AppVariable.isBackGround){
+            AppVariable.isBackGround = false
+            AppVariable.isBackGroundToSplash = true
+            val intent = Intent(activity,SplashActivity::class.java)
+            activity.startActivity(intent)
+        }
+        activityCount++
+
     }
 
     override fun onActivityResumed(activity: Activity) {}
 
     override fun onActivityPaused(activity: Activity) {}
 
-    override fun onActivityStopped(activity: Activity) {}
+    override fun onActivityStopped(activity: Activity) {
+        activityCount--
+        if(activityCount ==0){
+            AppVariable.isBackGround = true
+        }
+    }
 
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
 

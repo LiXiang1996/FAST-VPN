@@ -11,4 +11,6 @@ object AppVariable {
     var isFast: Boolean = true
     var temporaryProfile: Profile? = null
     var isShowBanedIpDialog = false
+    var isBackGround = false
+    var isBackGroundToSplash = false
 }

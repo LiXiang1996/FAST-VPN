@@ -16,7 +16,8 @@ class InterstitialAdManager {
     private var interstitialAd: InterstitialAd? = null
     private val testADid = "ca-app-pub-3940256099942544/1033173712"
     var countdownTimer: CountDownTimer? = null
-    private var adIsLoading: Boolean = false
+    var adIsLoading: Boolean = false
+    var adIsImpression: Boolean = false
     private var interADTAG = AppConstant.TAG + "showInterstitial"
 
     fun showInterstitial(
@@ -27,11 +28,14 @@ class InterstitialAdManager {
 
                 override fun onAdClicked() {
                     Timber.tag(interADTAG).e("Ad was onAdClicked.")
+                    adIsImpression = false
+                    onShowAdCompleteListener.onShowAdComplete()
                     super.onAdClicked()
                 }
 
                 override fun onAdImpression() {
-                    Timber.tag(interADTAG).e("Ad was dismissed.")
+                    Timber.tag(interADTAG).e("Ad was onAdImpression.")
+                    adIsImpression = true
                     super.onAdImpression()
                 }
 

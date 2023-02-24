@@ -51,7 +51,6 @@ class SplashActivity : BaseActivity() {
         }
         AppVariable.isShowBanedIpDialog =
             countryCode.toLowerCase() == "ir" || Locale.getDefault().country.toLowerCase() == "irn"
-//            countryCode.toLowerCase() == "us" || Locale.getDefault().country.toLowerCase() == "usa"
     }
 
 
@@ -62,15 +61,13 @@ class SplashActivity : BaseActivity() {
     override fun initData() {
         super.initData()
 
-        val ad:ADListBean? = GetJsonData.getJson(this)
-        if (ad!=null){
+        val ad: ADListBean? = GetJsonData.getJson(this)
+        if (ad != null) {
             Timber.tag(AppConstant.TAG).e("${ad.click} show  size ${ad.robvn_n_home.size}")
-        }else{
+        } else {
             Timber.tag(AppConstant.TAG).e("AD DATA NULL")
         }
 
-
-        // TODO: 此处loading最少展示一秒，一秒后开始去加载广告数据，如果有缓存就加载，没有就去拉 ，拿到数据去展示广告（广告请求两次），失败就走，成功展示，总计<10秒
         countDownTimer = object : CountDownTimer(3000L, 300) {
             override fun onTick(p0: Long) {
                 progress.progress = ((3000 - p0) / 30).toInt() + 1
@@ -83,8 +80,8 @@ class SplashActivity : BaseActivity() {
 
         countDownADTimer = object : CountDownTimer(10000L, 1000) {
             override fun onTick(p0: Long) {
-                Timber.tag(AppConstant.TAG).e(p0.toString())
             }
+
             override fun onFinish() {
                 if (canJump) {
                     val intent = Intent(this@SplashActivity, MainActivity::class.java)
@@ -93,9 +90,14 @@ class SplashActivity : BaseActivity() {
                 finish()
             }
         }
-        lifecycleScope.launch {
+
+        MainScope().launch {
             countDownADTimer.start()
-            delay(1000)
+            Timber.tag(AppConstant.TAG+"Splash").e("isBackGround: ${AppVariable.isBackGround}")
+            if (AppVariable.isBackGroundToSplash){
+                delay(3000);AppVariable.isBackGroundToSplash = false
+            }
+            else delay(1000)
             showAD()
         }
     }
@@ -106,7 +108,7 @@ class SplashActivity : BaseActivity() {
         super.onDestroy()
     }
 
-    fun showAD(){
+    private fun showAD() {
         val application = application as? App
         if (application == null) {
             if (canJump) {

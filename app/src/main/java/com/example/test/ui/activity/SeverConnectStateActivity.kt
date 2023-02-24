@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.RemoteException
 import android.view.KeyEvent
 import android.widget.Chronometer
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -12,6 +13,7 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import com.bumptech.glide.Glide
 import com.example.test.R
+import com.example.test.ad.utils.NativeAdManager
 import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
 import com.example.test.base.BaseActivity
@@ -41,7 +43,9 @@ class SeverConnectStateActivity : BaseActivity() {
     lateinit var connectText: AppCompatTextView
     private lateinit var connectTime: Chronometer
     lateinit var titleView: TitleView
-    override var layoutId: Int =R.layout.activity_server_connect_state_layout
+    override var layoutId: Int = R.layout.activity_server_connect_state_layout
+    private lateinit var nativeAdManager: NativeAdManager
+    private lateinit var nativeAdContainer: FrameLayout
     override fun initView() {
         super.initView()
 
@@ -52,6 +56,8 @@ class SeverConnectStateActivity : BaseActivity() {
         countryName = findViewById(R.id.server_connect_country_text)
         connectText = findViewById(R.id.server_connect_state_text)
         connectTime = findViewById(R.id.server_connect_time_text)
+        nativeAdContainer = findViewById(R.id.server_connect_state_native_ad_frame)
+
         connectTime.text = "00:00:00"
         StatusBarUtil.setTranslucentStatus(this)
 
@@ -59,6 +65,8 @@ class SeverConnectStateActivity : BaseActivity() {
         countryName.text =
             if (country == AppConstant.DEFAULT || country.isBlank()) getString(R.string.super_fast_server) else country
         Glide.with(this).load(CountryUtils.getCountrySource(country)).circleCrop().into(countryImg)
+        nativeAdManager = NativeAdManager()
+        showNativeAD()
     }
     override fun initListener() {
         titleView.leftImg.setOnClickListener {
@@ -104,4 +112,9 @@ class SeverConnectStateActivity : BaseActivity() {
         }
         return super.onKeyDown(keyCode, event)
     }
+
+
+
+    private fun showNativeAD() {
+        nativeAdManager.refreshAd(this, nativeAdContainer) }
 }
