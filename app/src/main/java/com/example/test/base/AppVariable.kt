@@ -3,9 +3,6 @@ package com.example.test.base
 import com.example.test.ad.data.ADListBean
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.database.Profile
-import com.google.android.gms.ads.appopen.AppOpenAd
-import com.google.android.gms.ads.interstitial.InterstitialAd
-import com.google.android.gms.ads.nativead.NativeAd
 
 object AppVariable {
     var host: String = "" //执行操作的host
@@ -21,4 +18,9 @@ object AppVariable {
     var interADList: MutableList<ADListBean.ADBean>? = null
     var nativeHomeADList: MutableList<ADListBean.ADBean>? = null
     var nativeResultADList: MutableList<ADListBean.ADBean>? = null
+    var cacheSplashADData:ADListBean.ADBean?=null
+    var cacheDataList: MutableList<HashMap<String, Any>>?= mutableListOf(HashMap<String, Any>().apply {
+        this["test type"] = "type"
+        this["test value"] = "value"
+    })
 }

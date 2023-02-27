@@ -20,7 +20,6 @@ import com.google.android.gms.ads.nativead.NativeAdView
 import timber.log.Timber
 import java.text.FieldPosition
 
-const val TAG = AppConstant.TAG + " NativeAD"
 
 object NativeAdView1 {
     var adMedia: MediaView? = null
@@ -40,12 +39,11 @@ object NativeAdView1 {
 }
 
 class NativeAdManager {
+    var currentNativeAd: NativeAd? = null
+    val TAG = AppConstant.TAG + " NativeAD"
+    var isLoadingAD = false
 
-    companion object {
-        var currentNativeAd: NativeAd? = null
-    }
-
-    private fun populateNativeAdView(nativeAd: NativeAd, adView: View) {
+     fun populateNativeAdView(nativeAd: NativeAd, adView: View) {
         val nativeAdView: NativeAdView = adView.rootView as NativeAdView
         nativeAdView.mediaView = NativeAdView1.adMedia
         nativeAdView.bodyView = NativeAdView1.adBody
@@ -85,69 +83,83 @@ class NativeAdManager {
             // 创建一个新的视频生命周期回调对象，并将其传递给视频控制器。这
             //       当视频中发生事件时，视频控制器将调用此对象上的方法
             //       生命周期。
-            vc.videoLifecycleCallbacks =
-                object : VideoController.VideoLifecycleCallbacks() {
-                    override fun onVideoEnd() {
-                        super.onVideoEnd()
-                    }
+            vc.videoLifecycleCallbacks = object : VideoController.VideoLifecycleCallbacks() {
+                override fun onVideoEnd() {
+                    super.onVideoEnd()
                 }
+            }
         }
     }
 
-    fun refreshAd(activity: Activity, frameLayout: FrameLayout,position: Int = 0,nativeListAD: MutableList<ADListBean.ADBean>) {
-        Timber.tag(TAG).e("加载NativeAD $position")
-        val builder = AdLoader.Builder(activity, nativeListAD[position].robvn_id)
-        builder.forNativeAd { nativeAd ->
-            if (activity.isDestroyed || activity.isFinishing || activity.isChangingConfigurations) {
-                nativeAd.destroy()
-                return@forNativeAd
-            }
-            currentNativeAd?.destroy()
-            currentNativeAd = nativeAd
-            val adView = NativeAdView1.getView(activity)
-            populateNativeAdView(nativeAd, adView)
-            frameLayout.removeAllViews()
-            frameLayout.addView(adView.rootView)
+    fun refreshAd(
+        activity: Activity,
+        frameLayout: FrameLayout?,
+        type: String,
+        position: Int = 0,
+        nativeListAD: MutableList<ADListBean.ADBean>,
+        result:(NativeAd)->Unit
+    ) {
+//        if (isLoadingAD) return
+        Timber.tag(TAG).e("加载NativeAD $position 类型 $type")
+        if (position < nativeListAD.size) {
+            isLoadingAD = true
+            val builder = AdLoader.Builder(activity, nativeListAD[position].robvn_id)
+            val videoOptions = VideoOptions.Builder().setStartMuted(true).build()
+            val adOptions = NativeAdOptions.Builder().setVideoOptions(videoOptions).build()
+
+            builder.forNativeAd { nativeAd ->
+                if (activity.isDestroyed || activity.isFinishing || activity.isChangingConfigurations) {
+                    nativeAd.destroy()
+                    return@forNativeAd
+                }
+                currentNativeAd?.destroy()
+                currentNativeAd = nativeAd
+                result.invoke(nativeAd)
+            }.withNativeAdOptions(adOptions)
+           .withAdListener(object : AdListener() {
+                override fun onAdClicked() {
+                    Timber.tag(TAG).e("ad clicked")
+                    super.onAdClicked()
+                }
+
+                override fun onAdClosed() {
+                    Timber.tag(TAG).e("ad closed")
+                    super.onAdClosed()
+                }
+
+                override fun onAdLoaded() {
+                    isLoadingAD = false
+                    Timber.tag(TAG).e("ad onLoaded 未展示 加入缓存 type $type")
+                    val data = HashMap<String, Any>().apply {
+                        put("type", type)
+                        put("value", currentNativeAd!!)
+                    }
+                    AppVariable.cacheDataList?.add(data)
+                    super.onAdLoaded()
+                }
+
+                override fun onAdOpened() {
+                    Timber.tag(TAG).e("ad opened")
+                    super.onAdOpened()
+                }
+
+                override fun onAdImpression() {
+                    Timber.tag(TAG).e("ad onAdImpression,移除缓存")
+                    val a = AppVariable.cacheDataList?.find { it["type"].toString() == type }
+                    a?.remove(type)
+                    super.onAdImpression()
+                }
+
+                override fun onAdFailedToLoad(loadAdError: LoadAdError) {
+                    isLoadingAD = false
+                    Timber.tag(TAG)
+                        .e("domain: ${loadAdError.domain}, code: ${loadAdError.code}, message: ${loadAdError.message}")
+                    refreshAd(activity, frameLayout, type, position + 1, nativeListAD){
+                        result.invoke(it)
+                    }
+                }
+            }).build().loadAd(AdRequest.Builder().build())
         }
-
-        val videoOptions =
-            VideoOptions.Builder().setStartMuted(true).build()
-        val adOptions = NativeAdOptions.Builder().setVideoOptions(videoOptions).build()
-        builder.withNativeAdOptions(adOptions)
-
-        val adLoader = builder.withAdListener(object : AdListener() {
-            override fun onAdClicked() {
-                Timber.tag(TAG).e("ad clicked")
-                super.onAdClicked()
-            }
-
-            override fun onAdClosed() {
-                Timber.tag(TAG).e("ad closed")
-                super.onAdClosed()
-            }
-
-            override fun onAdLoaded() {
-                Timber.tag(TAG).e("ad onLoaded")
-                super.onAdLoaded()
-            }
-
-            override fun onAdOpened() {
-                Timber.tag(TAG).e("ad opened")
-                super.onAdOpened()
-            }
-
-            override fun onAdImpression() {
-                Timber.tag(TAG).e("ad onAdImpression")
-                super.onAdImpression()
-            }
-
-            override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                Timber.tag(TAG).e("domain: ${loadAdError.domain}, code: ${loadAdError.code}, message: ${loadAdError.message}")
-                refreshAd(activity,frameLayout, position+1, nativeListAD)
-            }
-        }
-        ).build()
-        adLoader.loadAd(AdRequest.Builder().build())
     }
 
 }

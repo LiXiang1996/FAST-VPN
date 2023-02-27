@@ -8,13 +8,9 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.webkit.WebView
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.example.test.ad.data.ADListBean
-import com.example.test.ad.utils.AppOpenAdManager
-import com.example.test.ad.utils.OnShowAdCompleteListener
 import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
 import com.example.test.base.data.RemoteProfile
@@ -39,15 +35,16 @@ import java.util.*
 class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObserver {
 
     private var activityCount = 0
-
     companion object {
         @SuppressLint("StaticFieldLeak")
         var context: Context? = null
             private set
+        var remoteADListData: ADListBean? = null
     }
 
-    private lateinit var appOpenAdManager: AppOpenAdManager
-    private var currentActivity: Activity? = null
+//    private lateinit var appOpenAdManager: AppOpenAdManager
+//    private lateinit var interstitialAaManager: InterstitialAdManager
+//    private var currentActivity: Activity? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -58,7 +55,8 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
         context = applicationContext
         Core.init(this, MainActivity::class)
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
-        appOpenAdManager = AppOpenAdManager()
+//        appOpenAdManager = AppOpenAdManager()
+//        interstitialAaManager = InterstitialAdManager()
         RequestConfiguration.Builder().setTestDeviceIds(listOf("1632B27F26C7337301F620C5BE220833"))
 //        getRemoteConfig()
     }
@@ -79,9 +77,9 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
 
     override fun onActivityStarted(activity: Activity) {
-        if (!appOpenAdManager.isShowingAd) {
-            currentActivity = activity
-        }
+//        if (!appOpenAdManager.isShowingAd) {
+//            currentActivity = activity
+//        }
         if (AppVariable.isBackGround) {
             AppVariable.isBackGround = false
             if (activity !is SplashActivity) {//不在启屏页做重复跳转
@@ -100,7 +98,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
 
     override fun onActivityStopped(activity: Activity) {
         activityCount--
-        if (activityCount == 0 ) {
+        if (activityCount == 0) {
             AppVariable.isBackGround = true
         }
     }
@@ -109,19 +107,25 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
 
     override fun onActivityDestroyed(activity: Activity) {}
 
-    /**
-     * Shows an app open ad.
-     */
-    fun showAdIfAvailable(activity: Activity, openADId:List<ADListBean.ADBean>,onShowAdCompleteListener: OnShowAdCompleteListener) {
-        appOpenAdManager.showAdIfAvailable(activity, openADId,onShowAdCompleteListener)
-    }
-    fun loadAD(activity: Activity, openADId:List<ADListBean.ADBean>,result:()->Unit) {
-        appOpenAdManager.loadAd(activity, openADId){
-            result.invoke()
-        }
-    }
 
-    private fun getDataList(list: String) {
+//    fun showAdIfAvailable(
+//        activity: Activity,
+//        openADId: ADListBean.ADBean,
+//        onShowAdCompleteListener: OnShowAdCompleteListener
+//    ) {
+//        appOpenAdManager.showAdIfAvailable(activity, openADId, onShowAdCompleteListener)
+//    }
+
+//    fun loadAD(activity: Activity, openADId: ADListBean.ADBean, result: (Boolean,Boolean) -> Unit) {
+//        appOpenAdManager.loadAd(activity, openADId) {isAdLoad,isOpenAD->
+//            if (isAdLoad)result.invoke(true,true)
+//            else if (!isOpenAD){
+//
+//            }
+//        }
+//    }
+
+    private fun getServerDataList(list: String) {
         try {
             val gson = Gson()
             val resultBean: MutableList<RemoteProfile> =
@@ -145,22 +149,41 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
         }
     }
 
+    private fun getADList(list: String) {
+        try {
+            val gson = Gson()
+            val resultBean: ADListBean = gson.fromJson(list, ADListBean::class.java)
+            remoteADListData = resultBean
+        } catch (e: Exception) {
+            Timber.tag(AppConstant.TAG).e(e)
+        }
+    }
+
 
     private fun getRemoteConfig() {
         val remoteConfig: FirebaseRemoteConfig = Firebase.remoteConfig
-        var list: String? = ""
-        remoteConfig.fetchAndActivate()
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    list = remoteConfig.getString("axxxxxx")
-                    list?.let { getDataList(it) }
-                }
+        var listServer: String? = ""
+        var listAD: String? = ""
+        remoteConfig.fetchAndActivate().addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                listServer = remoteConfig.getString("robvn_ser")
+                listAD = remoteConfig.getString("robvn_ad")
+                listServer?.let { getServerDataList(it) }
+                listAD?.let { getADList(it) }
             }
-        if (list?.isEmpty() == true && list?.isBlank() == true) {
-            list = remoteConfig.getString("axxxxxx")
-            if (list?.isEmpty() == true || list?.isBlank() == true) ServersListProfile.getServersList()
+        }
+        if (listServer?.isEmpty() == true && listServer?.isBlank() == true) {
+            listServer = remoteConfig.getString("robvn_ser")
+            if (listServer?.isEmpty() == true || listServer?.isBlank() == true) ServersListProfile.getServersList()
             else {
-                list?.let { getDataList(it) }
+                listServer?.let { getServerDataList(it) }
+            }
+        }
+
+        if (listAD?.isEmpty() == true && listAD?.isBlank() == true) {
+            listAD = remoteConfig.getString("robvn_ad")
+            if (listServer?.isNotEmpty() == true && listServer?.isNotBlank() == true && listAD != null) {
+                getADList(listAD!!)
             }
         }
     }

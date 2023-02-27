@@ -25,6 +25,8 @@ import androidx.lifecycle.lifecycleScope
 import com.airbnb.lottie.LottieAnimationView
 import com.bumptech.glide.Glide
 import com.example.test.R
+import com.example.test.ad.data.ADType
+import com.example.test.ad.data.GetADData
 import com.example.test.ad.utils.*
 import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
@@ -100,7 +102,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         super.onResume()
         isToConnect = AppVariable.state == BaseService.State.Stopped
         setData()
-        showNativeAD()
+        showNativeAD(activity as BaseActivity)
     }
 
     private fun initView(view: View) {
@@ -157,7 +159,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                 }
             }
             if (NetworkUtil.get().isNetworkAvailable || NetworkUtil.isNetSystemUsable(activity)) {
-                activity?.let { it1 -> loadInterAd(it1) }
+                activity?.let { it1 -> loadInterAd(it1,ADType.INTER_CONNECT.value) }
             } else Toast.makeText(activity, getString(R.string.network_error), Toast.LENGTH_LONG)
                 .show()
         }
@@ -330,20 +332,20 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                             }
                         }
                     launch {
-                        loadInterAd(activity as Activity)
+                        loadInterAd(activity as Activity,ADType.INTER_SERVER.value)
                     }
                 }
             }
         }
 
-    private fun loadInterAd(activity: Activity) {
+    private fun loadInterAd(activity: Activity,type:String) {
         (activity as MainActivity).frameLayout.visibility = View.VISIBLE
         connectingAndStoppingAnimation()
         MainScope().launch {
             delay(1000)//延迟一秒后再执行下面代码
         }
         countDownTimer = null
-        showInterAD(activity)
+        showInterAD(activity,type)
         countDownTimer = object : CountDownTimer(9000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
             }
@@ -356,27 +358,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         countDownTimer?.start()
     }
 
-    private fun showInterAD(activity: BaseActivity) {
-        AppVariable.interADList?.let { data ->
-            if (InterstitialAdManager.interstitialAd == null) {
-                interstitialAdManager.loadAd(activity, data, 0) {
-                    if (it) interstitialAdManager.showInterstitial(activity, data, object :
-                        OnShowAdCompleteListener {
-                        override fun onShowAdComplete() {
-                            toggle()
-                        }
-                    })
-                }
-            } else interstitialAdManager.showInterstitial(activity, data, object :
-                OnShowAdCompleteListener {
-                override fun onShowAdComplete() {
-                    toggle()
-                }
-            })
 
-        }
-
-    }
 
 
     private fun result() {
@@ -418,15 +400,23 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         super.onDestroy()
     }
 
-    private fun showNativeAD() {
-        activity?.let {
-            AppVariable.nativeHomeADList?.let { it1 ->
-                nativeAdManager.refreshAd(
-                    it,
-                    nativeAdContainer,
-                    0,it1
-                )
-            }
+    private fun showNativeAD(activity: BaseActivity) {
+        AppVariable.nativeHomeADList?.let {
+            GetADData.getFindData(activity,context,ADType.NATIVE_HOME.value,nativeAdManager,
+                it,nativeAdContainer,object :OnShowAdCompleteListener{
+                    override fun onShowAdComplete() {
+                    }
+                })
+        }
+
+    }
+    private fun showInterAD(activity: BaseActivity,type: String) {
+        AppVariable.interADList?.let { data ->
+            GetADData.getFindData(activity,context,type,interstitialAdManager,data,null,object :OnShowAdCompleteListener{
+                override fun onShowAdComplete() {
+                    toggle()
+                }
+            })
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.example.test.ui.activity
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.os.RemoteException
@@ -13,7 +14,10 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import com.bumptech.glide.Glide
 import com.example.test.R
+import com.example.test.ad.data.ADType
+import com.example.test.ad.data.GetADData
 import com.example.test.ad.utils.NativeAdManager
+import com.example.test.ad.utils.OnShowAdCompleteListener
 import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
 import com.example.test.base.BaseActivity
@@ -119,9 +123,12 @@ class SeverConnectStateActivity : BaseActivity() {
 
     private fun showNativeAD() {
         AppVariable.nativeResultADList?.let {
-            nativeAdManager.refreshAd(this, nativeAdContainer,0,
-                it
-            )
+                GetADData.getFindData(this, this, ADType.OPEN.value, nativeAdManager,
+                    it, nativeAdContainer, object : OnShowAdCompleteListener {
+                        override fun onShowAdComplete() {
+                        }
+                    })
         }
+
     }
 }
