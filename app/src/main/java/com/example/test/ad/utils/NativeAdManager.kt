@@ -5,11 +5,11 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
-import android.widget.Toast
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import com.example.test.R
 import com.example.test.ad.data.ADListBean
+import com.example.test.ad.data.CheckADStatus
 import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
 import com.google.android.gms.ads.*
@@ -18,7 +18,8 @@ import com.google.android.gms.ads.nativead.NativeAd
 import com.google.android.gms.ads.nativead.NativeAdOptions
 import com.google.android.gms.ads.nativead.NativeAdView
 import timber.log.Timber
-import java.text.FieldPosition
+import java.util.*
+import kotlin.collections.HashMap
 
 
 object NativeAdView1 {
@@ -43,7 +44,7 @@ class NativeAdManager {
     val TAG = AppConstant.TAG + " NativeAD"
     var isLoadingAD = false
 
-     fun populateNativeAdView(nativeAd: NativeAd, adView: View) {
+    fun populateNativeAdView(nativeAd: NativeAd, adView: View) {
         val nativeAdView: NativeAdView = adView.rootView as NativeAdView
         nativeAdView.mediaView = NativeAdView1.adMedia
         nativeAdView.bodyView = NativeAdView1.adBody
@@ -97,9 +98,8 @@ class NativeAdManager {
         type: String,
         position: Int = 0,
         nativeListAD: MutableList<ADListBean.ADBean>,
-        result:(NativeAd)->Unit
+        result: (NativeAd) -> Unit
     ) {
-//        if (isLoadingAD) return
         Timber.tag(TAG).e("加载NativeAD $position 类型 $type")
         if (position < nativeListAD.size) {
             isLoadingAD = true
@@ -115,10 +115,12 @@ class NativeAdManager {
                 currentNativeAd?.destroy()
                 currentNativeAd = nativeAd
                 result.invoke(nativeAd)
-            }.withNativeAdOptions(adOptions)
-           .withAdListener(object : AdListener() {
+            }.withNativeAdOptions(adOptions).withAdListener(object : AdListener() {
                 override fun onAdClicked() {
                     Timber.tag(TAG).e("ad clicked")
+                    CheckADStatus().setShowAndClickCount(
+                        activity, isShow = false, isClick = true
+                    )
                     super.onAdClicked()
                 }
 
@@ -133,6 +135,7 @@ class NativeAdManager {
                     val data = HashMap<String, Any>().apply {
                         put("type", type)
                         put("value", currentNativeAd!!)
+                        put(AppConstant.LOAD_TIME,Date().time)
                     }
                     AppVariable.cacheDataList?.add(data)
                     super.onAdLoaded()
@@ -147,6 +150,9 @@ class NativeAdManager {
                     Timber.tag(TAG).e("ad onAdImpression,移除缓存")
                     val a = AppVariable.cacheDataList?.find { it["type"].toString() == type }
                     a?.remove(type)
+                    CheckADStatus().setShowAndClickCount(
+                        activity, isShow = true, isClick = false
+                    )
                     super.onAdImpression()
                 }
 
@@ -154,8 +160,10 @@ class NativeAdManager {
                     isLoadingAD = false
                     Timber.tag(TAG)
                         .e("domain: ${loadAdError.domain}, code: ${loadAdError.code}, message: ${loadAdError.message}")
-                    refreshAd(activity, frameLayout, type, position + 1, nativeListAD){
-                        result.invoke(it)
+                    if (position+1 < nativeListAD.size) {
+                        refreshAd(activity, frameLayout, type, position + 1, nativeListAD) {
+                            result.invoke(it)
+                        }
                     }
                 }
             }).build().loadAd(AdRequest.Builder().build())
@@ -163,3 +171,13 @@ class NativeAdManager {
     }
 
 }
+//
+//var NativeAd.getLoadTime: Long?
+//    get() = field ?:0L
+//    set(value) {
+//        field =value
+//    }
+//
+//fun NativeAd.setTime(time:Long){
+//    getLoadTime = time
+//}

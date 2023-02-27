@@ -17,6 +17,7 @@ class AppConstant {
          const val STOP_OR_START = "stop_or_start"
          const val SHOW_DIALOG = "show_dialog"
          const val TAG = "lixiang"
+         const val LOAD_TIME = "loadtime"
 
 
 

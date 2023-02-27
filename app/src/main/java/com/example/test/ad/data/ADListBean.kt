@@ -1,5 +1,6 @@
 package com.example.test.ad.data
 
+import android.app.Activity
 import android.content.Context
 import android.widget.FrameLayout
 import com.example.test.App
@@ -7,6 +8,8 @@ import com.example.test.ad.utils.*
 import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
 import com.example.test.base.BaseActivity
+import com.example.test.base.utils.SharedPreferencesUtils
+import com.google.android.gms.ads.appopen.AppOpenAd
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.nativead.NativeAd
 import com.google.gson.Gson
@@ -14,7 +17,8 @@ import org.json.JSONObject
 import timber.log.Timber
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import java.util.Timer
+import java.util.*
+import kotlin.collections.HashMap
 
 
 //广告相关数据类
@@ -53,7 +57,8 @@ object GetADData {
         adListBean: MutableList<ADListBean.ADBean>,
         container: FrameLayout?,//native的承载对象
         onShowAdCompleteListener: OnShowAdCompleteListener
-    ): HashMap<String, Any>? {
+    ) {
+        if (!CheckADStatus().canShowAD(activity)) return
         val data = AppVariable.cacheDataList?.find { it["type"].toString() == type }
         if (data == null) {
             when (type) {
@@ -64,6 +69,10 @@ object GetADData {
                                 manager.showInterstitial(
                                     activity, adListBean, type, onShowAdCompleteListener
                                 )
+                            }
+                            // TODO:  
+                            if (!it1&&!it2){
+                                onShowAdCompleteListener.onShowAdComplete()
                             }
                         }
                     }
@@ -87,49 +96,96 @@ object GetADData {
         } else {
             when (type) {
                 ADType.INTER_SERVER.value, ADType.INTER_CONNECT.value -> {
-                    if (manager is InterstitialAdManager && data["value"] is InterstitialAd) manager.showInterstitialWithData(
-                        activity,
-                        adListBean,
-                        data["value"] as InterstitialAd,
-                        type,
-                        onShowAdCompleteListener
-                    )
+                    if (manager is InterstitialAdManager && data["value"] is InterstitialAd && data["loadTime"] is Long) {
+                        if (CheckADStatus().wasLoadTimeLessThanNHoursAgo(
+                                1,
+                                (data["loadTime"] as Long)
+                            )
+                        ) {
+                            manager.showInterstitialWithData(
+                                activity,
+                                adListBean,
+                                data["value"] as InterstitialAd,
+                                type,
+                                onShowAdCompleteListener
+                            )
+                        } else {
+                            val data =
+                                AppVariable.cacheDataList?.find { it["type"].toString() == type }
+                            AppVariable.cacheDataList?.remove(data)
+                            manager.loadAd(context, adListBean, 0, type) { it1, it2 ->
+                                if (it1) {
+                                    manager.showInterstitial(
+                                        activity, adListBean, type, onShowAdCompleteListener
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
 
                 ADType.NATIVE_HOME.value, ADType.NATIVE_RESULT.value -> {
-                    if (manager is NativeAdManager && data["value"] is NativeAd) {
+                    if (manager is NativeAdManager && data["value"] is NativeAd && data["loadTime"] is Long) {
                         Timber.tag(AppConstant.TAG).e("展示缓存 type$type")
-                        val adView = NativeAdView1.getView(activity)
-                        manager.populateNativeAdView(data["value"] as NativeAd, adView)
-                        container?.removeAllViews()
-                        container?.addView(adView.rootView)
-//                        container?.let {
-//                            manager.refreshAd(
-//                                activity, it, type, 0, adListBean
-//                            )
-//                        }
+                        //判断过期
+                        if (CheckADStatus().wasLoadTimeLessThanNHoursAgo(
+                                1,
+                                (data["loadTime"] as Long)
+                            )
+                        ) {
+                            Timber.tag(AppConstant.TAG + type)
+                                .e("未过期 ${(data["loadTime"] as Long)}")
+                            val adView = NativeAdView1.getView(activity)
+                            manager.populateNativeAdView(data["value"] as NativeAd, adView)
+                            container?.removeAllViews()
+                            container?.addView(adView.rootView)
+                        } else {
+                            //过期 删除缓存
+                            val data =
+                                AppVariable.cacheDataList?.find { it["type"].toString() == type }
+                            AppVariable.cacheDataList?.remove(data)
+                            manager.refreshAd(
+                                activity, container, type, 0, adListBean
+                            ) { it1 ->
+                                val adView = NativeAdView1.getView(activity)
+                                manager.populateNativeAdView(it1, adView)
+                                container?.removeAllViews()
+                                container?.addView(adView.rootView)
+                            }
+                        }
                     }
                 }
                 ADType.OPEN.value -> {
-                    if (AppVariable.cacheSplashADData?.robvn_l == ADType.OPEN.value) {
-                        if (manager is AppOpenAdManager) manager.showAdIfAvailable(
-                            activity,
-                            type,
-                            AppVariable.cacheSplashADData!!,
-                            onShowAdCompleteListener
-                        )
-                    } else if (AppVariable.cacheSplashADData?.robvn_l == ADType.INTER.value) {
-                        if (manager is InterstitialAdManager) manager.showInterstitial(
-                            activity,
-                            mutableListOf(AppVariable.cacheSplashADData!!),
-                            ADType.INTER_OPEN.value,
-                            onShowAdCompleteListener
-                        )
+                    if (data["loadTime"] is Long) {
+                        if (CheckADStatus().wasLoadTimeLessThanNHoursAgo(
+                                1,
+                                (data["loadTime"] as Long)
+                            )
+                        ) {
+                            if (AppVariable.cacheSplashADData?.robvn_l == ADType.OPEN.value && data["value"] is AppOpenAd) {
+                                if (manager is AppOpenAdManager) manager.showAdIfAvailableWithData(
+                                    activity,
+                                    type,
+                                    AppVariable.cacheSplashADData!!,
+                                    data["value"] as AppOpenAd,
+                                    onShowAdCompleteListener
+                                )
+                            } else if (AppVariable.cacheSplashADData?.robvn_l == ADType.INTER.value && data["value"] is InterstitialAd) {
+                                if (manager is InterstitialAdManager) manager.showInterstitialWithData(
+                                    activity,
+                                    mutableListOf(AppVariable.cacheSplashADData!!),
+                                    data["value"] as InterstitialAd,
+                                    ADType.INTER_OPEN.value,
+                                    onShowAdCompleteListener
+                                )
+                            }
+                        }
+                    } else {
+                        getOpenData(activity, manager, onShowAdCompleteListener)
                     }
                 }
             }
         }
-        return data
     }
 
     private fun getOpenData(
@@ -237,4 +293,47 @@ object GetJsonData {
         }
     }
 
+}
+
+class CheckADStatus {
+    fun setShowAndClickCount(activity: Activity, isShow: Boolean, isClick: Boolean) {
+        val dayShow: Int = SharedPreferencesUtils.getParam(activity, AppVariable.dateShow, 0) as Int
+        val dayClick: Int =
+            SharedPreferencesUtils.getParam(activity, AppVariable.dateClick, 0) as Int
+        if (isShow && dayShow < (GetJsonData.getData(activity)?.robvn_sm ?: 40)) {
+            SharedPreferencesUtils.setParam(activity, AppVariable.dateShow, dayShow + 1)
+            Timber.tag(AppConstant.TAG).e("展示次数${dayShow + 1}")
+        }
+        if (isClick && dayClick < (GetJsonData.getData(activity)?.robvn_cm ?: 10)) {
+            SharedPreferencesUtils.setParam(activity, AppVariable.dateClick, dayClick + 1)
+            Timber.tag(AppConstant.TAG).e("点击次数${dayClick + 1}")
+        }
+    }
+
+    private fun getShowCountIsOk(activity: Activity): Boolean {
+        return (SharedPreferencesUtils.getParam(
+            activity,
+            AppVariable.dateShow,
+            0
+        ) as Int) < (GetJsonData.getData(activity)?.robvn_sm ?: 40)
+    }
+
+    private fun getClickCountIsOk(activity: Activity): Boolean {
+        return (SharedPreferencesUtils.getParam(
+            activity,
+            AppVariable.dateClick,
+            0
+        ) as Int) < (GetJsonData.getData(activity)?.robvn_cm ?: 10)
+    }
+
+    fun canShowAD(activity: Activity): Boolean {
+        return CheckADStatus().getShowCountIsOk(activity) && CheckADStatus().getClickCountIsOk(activity)
+    }
+
+    fun wasLoadTimeLessThanNHoursAgo(numHours: Long, loadTime: Long): Boolean {
+        val dateDifference: Long = Date().time - loadTime
+        Timber.tag(AppConstant.TAG).e("datadiff $dateDifference")
+        val numMilliSecondsPerHour: Long = 3600000
+        return dateDifference < numMilliSecondsPerHour * numHours
+    }
 }

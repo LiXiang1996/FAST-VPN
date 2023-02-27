@@ -187,7 +187,7 @@ class ServersListProfile {
                 robvn_city = "Chengdu",
                 robvn_ip = "34.213.182.172",
                 robvn_country = "CN",
-                robvn_port = 810
+                robvn_port = 800
             )
         )
 

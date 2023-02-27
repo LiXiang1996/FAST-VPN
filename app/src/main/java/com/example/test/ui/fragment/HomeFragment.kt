@@ -26,6 +26,7 @@ import com.airbnb.lottie.LottieAnimationView
 import com.bumptech.glide.Glide
 import com.example.test.R
 import com.example.test.ad.data.ADType
+import com.example.test.ad.data.CheckADStatus
 import com.example.test.ad.data.GetADData
 import com.example.test.ad.utils.*
 import com.example.test.base.AppConstant
@@ -52,10 +53,6 @@ import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.*
 
-
-// TODO: Home页面 4.5 插屏策略（1）
-//- connecting/disconnecting动画至少展示1s
-//- 最长等待广告请求时间为10s，超过10s未返回广告直接进入结果页，之后返回的广告缓存下来
 
 class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
 
@@ -159,7 +156,16 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                 }
             }
             if (NetworkUtil.get().isNetworkAvailable || NetworkUtil.isNetSystemUsable(activity)) {
-                activity?.let { it1 -> loadInterAd(it1,ADType.INTER_CONNECT.value) }
+                if (activity is MainActivity) {
+                    if (CheckADStatus().canShowAD(activity as MainActivity))
+                        activity?.let { it1 -> loadInterAd(it1,ADType.INTER_CONNECT.value) }
+                    else {
+                        MainScope().launch {
+                            delay(3000)
+                            toggle()
+                        }
+                    }
+                }
             } else Toast.makeText(activity, getString(R.string.network_error), Toast.LENGTH_LONG)
                 .show()
         }
@@ -332,7 +338,14 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                             }
                         }
                     launch {
-                        loadInterAd(activity as Activity,ADType.INTER_SERVER.value)
+                        if (activity is MainActivity) {
+                            if (CheckADStatus().canShowAD(activity as MainActivity))
+                                loadInterAd(activity as Activity, ADType.INTER_SERVER.value)
+                            else {
+                                delay(3000)
+                                toggle()
+                            }
+                        }
                     }
                 }
             }
@@ -385,19 +398,9 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
             .into(countryIcon)
     }
 
-
-    override fun onPause() {
-        interstitialAdManager.countdownTimer?.cancel()
-        super.onPause()
-    }
-
     override fun onStop() {
         countDownTimer?.cancel()
         super.onStop()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
     }
 
     private fun showNativeAD(activity: BaseActivity) {

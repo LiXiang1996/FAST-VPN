@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Context
 import com.example.test.ad.data.ADListBean
 import com.example.test.ad.data.ADType
+import com.example.test.ad.data.CheckADStatus
 import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
 import com.google.android.gms.ads.AdError
@@ -12,8 +13,8 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.appopen.AppOpenAd
-import com.google.android.gms.ads.interstitial.InterstitialAd
 import timber.log.Timber
+import java.text.SimpleDateFormat
 import java.util.*
 
 /**
@@ -36,7 +37,6 @@ class AppOpenAdManager {
     var isShowingAd = false
     private var TAG = AppConstant.TAG + "OpenAD"
 
-    /**跟踪开机广告的加载时间，以确保不会展示过期的广告. */
     private var loadTime: Long = 0
 
     /**
@@ -57,17 +57,17 @@ class AppOpenAdManager {
         }
         isLoadingAd = true
         val request = AdRequest.Builder().build()
-        AppOpenAd.load(
-            context,
+        AppOpenAd.load(context,
             openData.robvn_id,
             request,
             object : AppOpenAd.AppOpenAdLoadCallback() {
                 override fun onAdLoaded(ad: AppOpenAd) {
+                    val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                    val a = format.format(Date())
                     appOpenAd = ad
                     isLoadingAd = false
                     loadTime = Date().time
-                    Timber.tag(TAG)
-                        .e(" on AdLoaded. 缓存 type:$type,LoadTime $loadTime")
+                    Timber.tag(TAG).e(" on AdLoaded. 缓存 type:$type,LoadTime $loadTime date${a}")
                     result.invoke(true, true)
                     AppVariable.cacheSplashADData = openData
 
@@ -79,24 +79,21 @@ class AppOpenAdManager {
                     val data = HashMap<String, Any>().apply {
                         put("type", type)
                         put("value", appOpenAd!!)
+                        put(AppConstant.LOAD_TIME,Date().time)
                     }
                     AppVariable.cacheDataList?.add(data)
-                    if (type == ADType.INTER_OPEN.value) AppVariable.cacheSplashADData = openData
-
                 }
 
                 @SuppressLint("BinaryOperationInTimber")
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                     isLoadingAd = false
                     result.invoke(false, false)
-                    Timber.tag(TAG)
-                        .e(
+                    Timber.tag(TAG).e(
                             "onAdFailedToLoad: %s",
                             loadAdError.message + "code " + loadAdError.code + "   id${openData.robvn_id}"
                         )
                 }
-            }
-        )
+            })
     }
 
 
@@ -113,66 +110,6 @@ class AppOpenAdManager {
         return appOpenAd != null && wasLoadTimeLessThanNHoursAgo(1)
     }
 
-
-    fun showAdIfAvailable(
-        activity: Activity,
-        type: String,
-        openADID: ADListBean.ADBean,
-        onShowAdCompleteListener: OnShowAdCompleteListener
-    ) {
-        if (isShowingAd) {
-            Timber.tag(TAG).e("The app open ad is already showing.")
-            return
-        }
-        if (!isAdAvailable()) {
-            Timber.tag(TAG).e("ad对象为空或者广告一小时前展示过")
-            loadAd(activity, type, openADID) { _, _ -> }
-            return
-        }
-        if (appOpenAd == null) {
-            Timber.tag(TAG).e("ad对象为空或者广告一小时前展示过")
-            return
-        }
-        Timber.tag(TAG).e("Will show ad.")
-        appOpenAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
-            override fun onAdClicked() {
-                onShowAdCompleteListener.onShowAdComplete()
-                super.onAdClicked()
-            }
-
-            override fun onAdImpression() {
-                Timber.tag(TAG).e(" AD onAdImpression.移除缓存")
-                val a = AppVariable.cacheDataList?.find { it["type"].toString() == type }
-                a?.remove(type)
-                super.onAdImpression()
-            }
-
-            override fun onAdDismissedFullScreenContent() {
-                appOpenAd = null
-                isShowingAd = false
-                onShowAdCompleteListener.onShowAdComplete()
-                Timber.tag(TAG).e("onAdDismissedFullScreenContent.")
-            }
-
-            @SuppressLint("BinaryOperationInTimber")
-            override fun onAdFailedToShowFullScreenContent(adError: AdError) {
-                appOpenAd = null
-                isShowingAd = false
-                Timber.tag(TAG).e(
-                    "onAdFailedToShowFullScreenContent: %s",
-                    adError.message + "code" + adError.code
-                )
-                onShowAdCompleteListener.onShowAdComplete()
-                loadAd(activity, type, openADID) { _, _ -> }
-            }
-
-            override fun onAdShowedFullScreenContent() {
-                Timber.tag(TAG).e("onAdShowedFullScreenContent.")
-            }
-        }
-        isShowingAd = true
-        appOpenAd?.show(activity)
-    }
 
     fun showAdIfAvailableWithData(
         activity: Activity,
@@ -196,6 +133,10 @@ class AppOpenAdManager {
         appOpenAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
             override fun onAdClicked() {
                 onShowAdCompleteListener.onShowAdComplete()
+                CheckADStatus().setShowAndClickCount(activity,
+                    isShow = false,
+                    isClick = true
+                )
                 super.onAdClicked()
             }
 
@@ -203,6 +144,11 @@ class AppOpenAdManager {
                 Timber.tag(TAG).e(" AD onAdImpression.移除缓存")
                 val a = AppVariable.cacheDataList?.find { it["type"].toString() == type }
                 a?.remove(type)
+                CheckADStatus().setShowAndClickCount(activity,
+                    isShow = true,
+                    isClick = false
+                )
+                AppVariable.cacheSplashADData = null
                 super.onAdImpression()
             }
 
@@ -218,8 +164,7 @@ class AppOpenAdManager {
                 appOpenAd = null
                 isShowingAd = false
                 Timber.tag(TAG).e(
-                    "onAdFailedToShowFullScreenContent: %s",
-                    adError.message + "code" + adError.code
+                    "onAdFailedToShowFullScreenContent: %s", adError.message + "code" + adError.code
                 )
                 onShowAdCompleteListener.onShowAdComplete()
                 loadAd(activity, type, openADID) { _, _ -> }
@@ -242,3 +187,75 @@ class AppOpenAdManager {
 interface OnShowAdCompleteListener {
     fun onShowAdComplete()
 }
+
+
+
+
+//    fun showAdIfAvailable(
+//        activity: Activity,
+//        type: String,
+//        openADID: ADListBean.ADBean,
+//        onShowAdCompleteListener: OnShowAdCompleteListener
+//    ) {
+//        if (isShowingAd) {
+//            Timber.tag(TAG).e("The app open ad is already showing.")
+//            return
+//        }
+//        if (!isAdAvailable()) {
+//            Timber.tag(TAG).e("ad对象为空或者广告一小时前展示过")
+//            loadAd(activity, type, openADID) { _, _ -> }
+//            return
+//        }
+//        if (appOpenAd == null) {
+//            Timber.tag(TAG).e("ad对象为空或者广告一小时前展示过")
+//            return
+//        }
+//        Timber.tag(TAG).e("Will show ad.")
+//        appOpenAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
+//            override fun onAdClicked() {
+//                onShowAdCompleteListener.onShowAdComplete()
+//                CheckADStatus().setShowAndClickCount(activity,
+//                    isShow = false,
+//                    isClick = true
+//                )
+//                super.onAdClicked()
+//            }
+//
+//            override fun onAdImpression() {
+//                Timber.tag(TAG).e(" AD onAdImpression.移除缓存")
+//                CheckADStatus().setShowAndClickCount(activity,
+//                    isShow = true,
+//                    isClick = false
+//                )
+//                AppVariable.cacheSplashADData = null
+//                val a = AppVariable.cacheDataList?.find { it["type"].toString() == type }
+//                a?.remove(type)
+//                super.onAdImpression()
+//            }
+//
+//            override fun onAdDismissedFullScreenContent() {
+//                appOpenAd = null
+//                isShowingAd = false
+//                onShowAdCompleteListener.onShowAdComplete()
+//                Timber.tag(TAG).e("onAdDismissedFullScreenContent.")
+//            }
+//
+//            @SuppressLint("BinaryOperationInTimber")
+//            override fun onAdFailedToShowFullScreenContent(adError: AdError) {
+//                appOpenAd = null
+//                isShowingAd = false
+//                Timber.tag(TAG).e(
+//                    "onAdFailedToShowFullScreenContent: %s", adError.message + "code" + adError.code
+//                )
+//                onShowAdCompleteListener.onShowAdComplete()
+//                loadAd(activity, type, openADID) { _, _ -> }
+//            }
+//
+//            override fun onAdShowedFullScreenContent() {
+//                Timber.tag(TAG).e("onAdShowedFullScreenContent.")
+//            }
+//        }
+//        isShowingAd = true
+//        appOpenAd?.show(activity)
+//    }
+

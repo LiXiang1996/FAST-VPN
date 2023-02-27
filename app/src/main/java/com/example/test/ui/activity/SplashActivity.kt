@@ -6,10 +6,7 @@ import android.os.CountDownTimer
 import android.widget.ProgressBar
 import com.example.test.App
 import com.example.test.R
-import com.example.test.ad.data.ADListBean
-import com.example.test.ad.data.ADType
-import com.example.test.ad.data.GetADData
-import com.example.test.ad.data.GetJsonData
+import com.example.test.ad.data.*
 import com.example.test.ad.utils.AppOpenAdManager
 import com.example.test.ad.utils.InterstitialAdManager
 import com.example.test.ad.utils.NativeAdManager
@@ -63,35 +60,49 @@ class SplashActivity : BaseActivity() {
     }
 
     override fun initData() {
-        loadADData()
-        //progress
-        countDownTimer = object : CountDownTimer(3000L, 300) {
-            override fun onTick(p0: Long) {
-                progress.progress = ((3000 - p0) / 30).toInt() + 1
+        if (CheckADStatus().canShowAD(this)) {
+            loadADData()
+            //progress
+            countDownTimer = object : CountDownTimer(3000L, 300) {
+                override fun onTick(p0: Long) {
+                    progress.progress = ((3000 - p0) / 30).toInt() + 1
+                }
+
+                override fun onFinish() {
+                }
+            }
+            countDownTimer.start()
+
+            //ad Timer
+            countDownADTimer = object : CountDownTimer(10000L, 1000) {
+                override fun onTick(p0: Long) {
+                }
+
+                override fun onFinish() {
+                    nextTo()
+                }
             }
 
-            override fun onFinish() {
+            MainScope().launch {
+                countDownADTimer.start()
+                Timber.tag(AppConstant.TAG + "Splash")
+                    .e("isBackGround: ${AppVariable.isBackGround}")
+                if (AppVariable.isBackGroundToSplash) {
+                    delay(3000)
+                } else delay(1000)
+                showAD()
             }
-        }
-        countDownTimer.start()
+        }else{
+            countDownTimer = object : CountDownTimer(3000L, 300) {
+                override fun onTick(p0: Long) {
+                    progress.progress = ((3000 - p0) / 30).toInt() + 1
+                }
 
-        //ad Timer
-        countDownADTimer = object : CountDownTimer(10000L, 1000) {
-            override fun onTick(p0: Long) {
+                override fun onFinish() {
+                    nextTo()
+                }
             }
-
-            override fun onFinish() {
-                nextTo()
-            }
-        }
-
-        MainScope().launch {
-            countDownADTimer.start()
-            Timber.tag(AppConstant.TAG + "Splash").e("isBackGround: ${AppVariable.isBackGround}")
-            if (AppVariable.isBackGroundToSplash) {
-                delay(3000)
-            } else delay(1000)
-            showAD()
+            countDownTimer.start()
         }
         super.initData()
     }
@@ -137,13 +148,13 @@ class SplashActivity : BaseActivity() {
         }
         //native结果页
         AppVariable.nativeHomeADList?.let {
-            nativeAdManager.refreshAd(this, null, ADType.NATIVE_RESULT.value, 0, it){
+            nativeAdManager.refreshAd(this, null, ADType.NATIVE_RESULT.value, 0, it) {
 
             }
         }
         //native首页
         AppVariable.nativeResultADList?.let {
-            nativeAdManager.refreshAd(this, null, ADType.NATIVE_HOME.value, 0, it){
+            nativeAdManager.refreshAd(this, null, ADType.NATIVE_HOME.value, 0, it) {
 
             }
         }

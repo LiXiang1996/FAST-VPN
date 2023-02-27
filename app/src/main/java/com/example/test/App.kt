@@ -55,9 +55,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
         context = applicationContext
         Core.init(this, MainActivity::class)
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
-//        appOpenAdManager = AppOpenAdManager()
-//        interstitialAaManager = InterstitialAdManager()
-        RequestConfiguration.Builder().setTestDeviceIds(listOf("1632B27F26C7337301F620C5BE220833"))
+        RequestConfiguration.Builder().setTestDeviceIds(listOf("001233B6A65D1EF088BA61537BB77C43","1632B27F26C7337301F620C5BE220833"))
 //        getRemoteConfig()
     }
 

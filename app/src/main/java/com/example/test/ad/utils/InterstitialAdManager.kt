@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.CountDownTimer
 import com.example.test.ad.data.ADListBean
 import com.example.test.ad.data.ADType
+import com.example.test.ad.data.CheckADStatus
 import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
 import com.example.test.base.BaseActivity
@@ -19,16 +20,16 @@ import kotlin.collections.HashMap
 
 class InterstitialAdManager {
     var interstitialAd: InterstitialAd? = null
-    var countdownTimer: CountDownTimer? = null
     var adIsLoading: Boolean = false
     var adIsImpression: Boolean = false
     private var interADTAG = AppConstant.TAG + "showInterstitial"
-    private var loadTime: Long = 0
+    var loadTime: Long = 0
 
 
     fun showInterstitial(
         context: BaseActivity,
-        interListAD: MutableList<ADListBean.ADBean>, type: String,
+        interListAD: MutableList<ADListBean.ADBean>,
+        type: String,
         onShowAdCompleteListener: OnShowAdCompleteListener
     ) {
         adIsImpression = false
@@ -36,6 +37,9 @@ class InterstitialAdManager {
             interstitialAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
                 override fun onAdClicked() {
                     Timber.tag(interADTAG).e("Ad was onAdClicked.")
+                    CheckADStatus().setShowAndClickCount(
+                        context, isShow = false, isClick = true
+                    )
                     super.onAdClicked()
                 }
 
@@ -44,6 +48,10 @@ class InterstitialAdManager {
                     adIsImpression = true
                     val a = AppVariable.cacheDataList?.find { it["type"].toString() == type }
                     a?.remove(type)
+                    if (type == ADType.INTER_OPEN.value) AppVariable.cacheSplashADData = null
+                    CheckADStatus().setShowAndClickCount(
+                        context, isShow = true, isClick = false
+                    )
                     super.onAdImpression()
                 }
 
@@ -83,6 +91,9 @@ class InterstitialAdManager {
         interstitialAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
             override fun onAdClicked() {
                 Timber.tag(interADTAG).e("Ad was onAdClicked.")
+                CheckADStatus().setShowAndClickCount(
+                    context, isShow = false, isClick = true
+                )
                 super.onAdClicked()
             }
 
@@ -91,12 +102,18 @@ class InterstitialAdManager {
                 adIsImpression = true
                 val a = AppVariable.cacheDataList?.find { it["type"].toString() == type }
                 a?.remove(type)
+                CheckADStatus().setShowAndClickCount(
+                    context, isShow = true, isClick = false
+                )
+                if (type == ADType.INTER_OPEN.value) AppVariable.cacheSplashADData = null
+
                 super.onAdImpression()
             }
 
             override fun onAdDismissedFullScreenContent() {
                 Timber.tag(interADTAG).e("全屏内容消失")
                 interstitialAd = null
+                adIsImpression = false
                 onShowAdCompleteListener.onShowAdComplete()
             }
 
@@ -124,75 +141,70 @@ class InterstitialAdManager {
                 Timber.tag(interADTAG).e("广告全屏展示.")
             }
         }
-        val a = AppVariable.cacheDataList?.find { it["type"].toString() == type }
-        a?.remove(type)
         interstitialAd?.show(context)
     }
 
     fun loadAd(
         context: Context,
         interListAd: MutableList<ADListBean.ADBean>,
-        position: Int = 0, type: String,
+        position: Int = 0,
+        type: String,
         result: (Boolean, Boolean) -> Unit
     ) {
-        Timber.tag(interADTAG).e("AppOpen 是否正在loading广告 $adIsLoading  ")
+        if (position < interListAd.size) {
+            if (adIsLoading || interstitialAd != null) {
+                Timber.tag(interADTAG)
+                    .e(" 广告是否在loading $adIsLoading  是否ad已存在 ${interstitialAd != null}")
+                return
+            }
+            adIsLoading = true
+            val adRequest = AdRequest.Builder().build()
+            InterstitialAd.load(context,
+                interListAd[position].robvn_id,
+                adRequest,
+                object : InterstitialAdLoadCallback() {
+                    override fun onAdFailedToLoad(adError: LoadAdError) {
+                        interstitialAd = null
+                        adIsLoading = false
+                        val error =
+                            "position$position domain: ${adError.domain}, code: ${adError.code}, " + "message: ${adError.message} "
+                        Timber.tag(interADTAG).e("onAdFailedToLoad----$error")
+                        if (position + 1 < interListAd.size) loadAd(
+                            context, interListAd, position + 1, type
+                        ) { it, _ ->
+                            if (it) result.invoke(true, true)
+                        }
+                        if (type == ADType.INTER_OPEN.value) result.invoke(false, false)
+                        //todo 加载失败是否跳走
+                    }
 
-        if (adIsLoading || isAdAvailable()) {
-            Timber.tag(interADTAG)
-                .e(" 是否有正在loading的广告 $adIsLoading   isAdAvailable ${isAdAvailable()}")
-            return
+                    override fun onAdLoaded(ad: InterstitialAd) {
+                        Timber.tag(interADTAG).e("Ad was loaded。 position $position 缓存 type $type")
+                        interstitialAd = ad
+                        loadTime = Date().time
+                        val cacheData =
+                            AppVariable.cacheDataList?.find { it["type"].toString() == type }
+                        if (cacheData != null) {
+                            AppVariable.cacheDataList?.remove(cacheData)
+                        }
+                        val data = HashMap<String, Any>().apply {
+                            put("type", type)
+                            put("value", interstitialAd!!)
+                            put(AppConstant.LOAD_TIME, Date().time)
+                        }
+                        AppVariable.cacheDataList?.add(data)
+                        if (type == ADType.INTER_OPEN.value) AppVariable.cacheSplashADData =
+                            interListAd[position]
+                        adIsLoading = false
+                        result.invoke(true, true)
+                    }
+                })
         }
-        adIsLoading = true
-        val adRequest = AdRequest.Builder().build()
-        InterstitialAd.load(
-            context,
-            interListAd[position].robvn_id,
-            adRequest,
-            object : InterstitialAdLoadCallback() {
-                override fun onAdFailedToLoad(adError: LoadAdError) {
-                    interstitialAd = null
-                    adIsLoading = false
-                    val error =
-                        "position$position domain: ${adError.domain}, code: ${adError.code}, " + "message: ${adError.message} "
-                    Timber.tag(interADTAG).e("onAdFailedToLoad----$error")
-                    if (position < interListAd.size) loadAd(
-                        context,
-                        interListAd,
-                        position + 1,
-                        type
-                    ) { it, _ ->
-                        if (it) result.invoke(true, true)
-                    }
-                    if (type == ADType.INTER_OPEN.value) result.invoke(false, false)
-                }
-
-                override fun onAdLoaded(ad: InterstitialAd) {
-                    Timber.tag(interADTAG)
-                        .e("Ad was loaded。 position $position 缓存 type $type")
-                    interstitialAd = ad
-
-                    val cacheData =
-                        AppVariable.cacheDataList?.find { it["type"].toString() == type }
-                    if (cacheData != null) {
-                        AppVariable.cacheDataList?.remove(cacheData)
-                    }
-                    val data = HashMap<String, Any>().apply {
-                        put("type", type)
-                        put("value", interstitialAd!!)
-                    }
-                    AppVariable.cacheDataList?.add(data)
-                    if (type == ADType.INTER_OPEN.value) AppVariable.cacheSplashADData =
-                        interListAd[position]
-                    adIsLoading = false
-                    result.invoke(true, true)
-                }
-            })
     }
 
 
     private fun startInterstitialAD(
-        context: Context,
-        interListAD: MutableList<ADListBean.ADBean>, type: String
+        context: Context, interListAD: MutableList<ADListBean.ADBean>, type: String
     ) {
         if (!adIsLoading && interstitialAd == null) {
             adIsLoading = true
