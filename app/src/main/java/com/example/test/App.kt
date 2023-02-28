@@ -35,6 +35,7 @@ import java.util.*
 class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObserver {
 
     private var activityCount = 0
+
     companion object {
         @SuppressLint("StaticFieldLeak")
         var context: Context? = null
@@ -42,9 +43,6 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
         var remoteADListData: ADListBean? = null
     }
 
-//    private lateinit var appOpenAdManager: AppOpenAdManager
-//    private lateinit var interstitialAaManager: InterstitialAdManager
-//    private var currentActivity: Activity? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -55,7 +53,11 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
         context = applicationContext
         Core.init(this, MainActivity::class)
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
-        RequestConfiguration.Builder().setTestDeviceIds(listOf("001233B6A65D1EF088BA61537BB77C43","1632B27F26C7337301F620C5BE220833"))
+        RequestConfiguration.Builder().setTestDeviceIds(
+            listOf(
+                "001233B6A65D1EF088BA61537BB77C43", "1632B27F26C7337301F620C5BE220833"
+            )
+        )
 //        getRemoteConfig()
     }
 
@@ -75,9 +77,6 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
 
     override fun onActivityStarted(activity: Activity) {
-//        if (!appOpenAdManager.isShowingAd) {
-//            currentActivity = activity
-//        }
         if (AppVariable.isBackGround) {
             AppVariable.isBackGround = false
             if (activity !is SplashActivity) {//不在启屏页做重复跳转
@@ -87,7 +86,6 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
             }
         }
         activityCount++
-
     }
 
     override fun onActivityResumed(activity: Activity) {}

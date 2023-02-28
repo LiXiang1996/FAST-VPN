@@ -33,49 +33,44 @@ class InterstitialAdManager {
         onShowAdCompleteListener: OnShowAdCompleteListener
     ) {
         adIsImpression = false
-        if (interstitialAd != null) {
-            interstitialAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
-                override fun onAdClicked() {
-                    Timber.tag(interADTAG).e("Ad was onAdClicked.")
-                    CheckADStatus().setShowAndClickCount(
-                        context, isShow = false, isClick = true
-                    )
-                    super.onAdClicked()
-                }
-
-                override fun onAdImpression() {
-                    Timber.tag(interADTAG).e("Ad was onAdImpression.load成功后直接调用，移除缓存")
-                    adIsImpression = true
-                    val a = AppVariable.cacheDataList?.find { it["type"].toString() == type }
-                    a?.remove(type)
-                    if (type == ADType.INTER_OPEN.value) AppVariable.cacheSplashADData = null
-                    CheckADStatus().setShowAndClickCount(
-                        context, isShow = true, isClick = false
-                    )
-                    super.onAdImpression()
-                }
-
-                override fun onAdDismissedFullScreenContent() {
-                    Timber.tag(interADTAG).e("全屏内容消失")
-                    interstitialAd = null
-                    onShowAdCompleteListener.onShowAdComplete()
-                }
-
-                override fun onAdFailedToShowFullScreenContent(adError: AdError) {
-                    Timber.tag(interADTAG).e("Ad failed to show.再次去请求广告（loadAD）")
-                    interstitialAd = null
-                    loadAd(context, interListAD, 0, type) { _, _ -> }
-                }
-
-                override fun onAdShowedFullScreenContent() {
-                    Timber.tag(interADTAG).e("广告全屏展示.")
-                }
+        interstitialAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
+            override fun onAdClicked() {
+                Timber.tag(interADTAG).e("Ad was onAdClicked.")
+                CheckADStatus().setShowAndClickCount(
+                    context, isShow = false, isClick = true
+                )
+                super.onAdClicked()
             }
-            interstitialAd?.show(context)
-        } else {
-            Timber.tag(interADTAG).e("Ad wasn't loaded.")
-            startInterstitialAD(context, interListAD, type)
+
+            override fun onAdImpression() {
+                Timber.tag(interADTAG).e("Ad was onAdImpression.load成功后直接调用，移除缓存")
+                adIsImpression = true
+                val a = AppVariable.cacheDataList?.find { it["type"].toString() == type }
+                a?.remove(type)
+                if (type == ADType.INTER_OPEN.value) AppVariable.cacheSplashADData = null
+                CheckADStatus().setShowAndClickCount(
+                    context, isShow = true, isClick = false
+                )
+                super.onAdImpression()
+            }
+
+            override fun onAdDismissedFullScreenContent() {
+                Timber.tag(interADTAG).e("全屏内容消失")
+                interstitialAd = null
+                onShowAdCompleteListener.onShowAdComplete()
+            }
+
+            override fun onAdFailedToShowFullScreenContent(adError: AdError) {
+                Timber.tag(interADTAG).e("Ad failed to show.再次去请求广告（loadAD）")
+                interstitialAd = null
+                loadAd(context, interListAD, 0, type) { _, _ -> }
+            }
+
+            override fun onAdShowedFullScreenContent() {
+                Timber.tag(interADTAG).e("广告全屏展示.")
+            }
         }
+        interstitialAd?.show(context)
     }
 
     fun showInterstitialWithData(
@@ -169,13 +164,15 @@ class InterstitialAdManager {
                         val error =
                             "position$position domain: ${adError.domain}, code: ${adError.code}, " + "message: ${adError.message} "
                         Timber.tag(interADTAG).e("onAdFailedToLoad----$error")
+                        //如果列表长度足够，则继续去reload，成功就返回true，直到遍历完还是失败，则返回false false
                         if (position + 1 < interListAd.size) loadAd(
                             context, interListAd, position + 1, type
                         ) { it, _ ->
                             if (it) result.invoke(true, true)
+                        } else {
+                            result(false, false)
                         }
                         if (type == ADType.INTER_OPEN.value) result.invoke(false, false)
-                        //todo 加载失败是否跳走
                     }
 
                     override fun onAdLoaded(ad: InterstitialAd) {
@@ -199,16 +196,6 @@ class InterstitialAdManager {
                         result.invoke(true, true)
                     }
                 })
-        }
-    }
-
-
-    private fun startInterstitialAD(
-        context: Context, interListAD: MutableList<ADListBean.ADBean>, type: String
-    ) {
-        if (!adIsLoading && interstitialAd == null) {
-            adIsLoading = true
-            loadAd(context, interListAD, position = 0, type) { _, _ -> }
         }
     }
 
