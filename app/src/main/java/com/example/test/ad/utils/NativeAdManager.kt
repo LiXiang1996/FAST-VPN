@@ -42,7 +42,7 @@ object NativeAdView1 {
 
 class NativeAdManager {
     var currentNativeAd: NativeAd? = null
-    val TAG = AppConstant.TAG + " NativeAD"
+    val nativeTAG = AppConstant.TAG + " NativeAD"
     var isLoadingAD = false
 
     fun populateNativeAdView(nativeAd: NativeAd, adView: View) {
@@ -113,7 +113,6 @@ class NativeAdManager {
                     nativeAd.destroy()
                     return@forNativeAd
                 }
-                currentNativeAd?.destroy()
                 currentNativeAd = nativeAd
                 result.invoke(nativeAd)
             }.withNativeAdOptions(adOptions).withAdListener(object : AdListener() {
@@ -126,7 +125,7 @@ class NativeAdManager {
                 }
 
                 override fun onAdClosed() {
-                    Timber.tag(TAG).e("关闭广告")
+                    Timber.tag(nativeTAG).e("关闭广告")
                     super.onAdClosed()
                 }
 
@@ -143,7 +142,7 @@ class NativeAdManager {
                 }
 
                 override fun onAdOpened() {
-                    Timber.tag(TAG).e("ad opened")
+                    Timber.tag(nativeTAG).e("ad opened")
                     super.onAdOpened()
                 }
 

@@ -35,6 +35,7 @@ import java.util.*
 class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObserver {
 
     private var activityCount = 0
+    private var currentActivity: Activity? = null
 
     companion object {
         @SuppressLint("StaticFieldLeak")
@@ -48,7 +49,14 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
         super.onCreate()
         fixWebViewDataDirectoryBug()
         Firebase.initialize(this)
-        MobileAds.setRequestConfiguration(RequestConfiguration.Builder().setTestDeviceIds(listOf("001233B6A65D1EF088BA61537BB77C43","1632B27F26C7337301F620C5BE220833")).build())
+        MobileAds.setRequestConfiguration(
+            RequestConfiguration.Builder().setTestDeviceIds(
+                listOf(
+                    "001233B6A65D1EF088BA61537BB77C43",
+                    "1632B27F26C7337301F620C5BE220833"
+                )
+            ).build()
+        )
         MobileAds.initialize(this) {}
         registerActivityLifecycleCallbacks(this)
         context = applicationContext
@@ -84,11 +92,16 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
         activityCount++
     }
 
-    override fun onActivityResumed(activity: Activity) {}
+    override fun onActivityResumed(activity: Activity) {
+        currentActivity = activity
+    }
 
-    override fun onActivityPaused(activity: Activity) {}
+    override fun onActivityPaused(activity: Activity) {
+        currentActivity = activity
+    }
 
     override fun onActivityStopped(activity: Activity) {
+        currentActivity = activity
         activityCount--
         if (activityCount == 0) {
             AppVariable.isBackGround = true
@@ -123,6 +136,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
             Timber.tag(AppConstant.TAG).e(e)
         }
     }
+
     private fun getServerSmartDataList(list: String) {
         try {
             val gson = Gson()
@@ -131,10 +145,11 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
             if ((resultBean.size) > 0) {
                 val profileList = mutableListOf<Profile>()
                 resultBean.forEach { profileList.add(ToProfile.remoteProfileToProfile(it)) }
-                Timber.tag(AppConstant.TAG).e("smartProfileList $profileList  size:${profileList.size}")
+                Timber.tag(AppConstant.TAG)
+                    .e("smartProfileList $profileList  size:${profileList.size}")
                 if ((profileList.size) > 0) {
-                    profileList.forEach {it1->
-                        val findData = ServersListProfile.getServersList().find {it2->
+                    profileList.forEach { it1 ->
+                        val findData = ServersListProfile.getServersList().find { it2 ->
                             it2.city == it1.city
                         }
                         if (findData != null) {
@@ -191,8 +206,9 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
         if (listServerSmart?.isEmpty() == true && listServerSmart?.isBlank() == true) {
             listServerSmart = remoteConfig.getString("robvn_smart")
             if (listServerSmart?.isNotEmpty() == true || listServerSmart?.isNotBlank() == true)
-                listServerSmart?.let { getServerSmartDataList(it)
-            }
+                listServerSmart?.let {
+                    getServerSmartDataList(it)
+                }
         }
 
         if (listAD?.isEmpty() == true && listAD?.isBlank() == true) {

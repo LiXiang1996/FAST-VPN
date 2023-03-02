@@ -8,6 +8,7 @@ import com.example.test.ad.data.ADType
 import com.example.test.ad.data.CheckADStatus
 import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
+import com.example.test.base.BaseActivity
 import com.example.test.base.utils.TimberUtils
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
@@ -88,6 +89,7 @@ class AppOpenAdManager {
                 @SuppressLint("BinaryOperationInTimber")
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                     isLoadingAd = false
+                    if (context is BaseActivity){ if (!context.canJump) return }
                     result.invoke(false, false)
                     TimberUtils().printADLoadLog(type, AppConstant.LOAD_FAIL, openData, loadAdError)
                 }

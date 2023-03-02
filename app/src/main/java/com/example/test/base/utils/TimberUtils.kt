@@ -51,7 +51,7 @@ class TimberUtils {
     fun printAdFailedToShowFullScreenContent(
         type: String
     ) {
-        Timber.tag(ADTAG).e("Type: $type  全屏内容展示失败")
+        Timber.tag(ADTAG).e("Type: $type  展示失败")
     }
 
 }

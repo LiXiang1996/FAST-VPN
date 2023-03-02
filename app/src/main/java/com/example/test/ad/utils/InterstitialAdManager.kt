@@ -29,6 +29,7 @@ class InterstitialAdManager {
         type: String,
         onShowAdCompleteListener: OnShowAdCompleteListener
     ) {
+        if (context.isFinishing||context.isDestroyed) return
         adIsImpression = false
         interstitialAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
             override fun onAdClicked() {
@@ -58,7 +59,7 @@ class InterstitialAdManager {
             }
 
             override fun onAdFailedToShowFullScreenContent(adError: AdError) {
-                TimberUtils().printAdFailedToShowFullScreenContent(type)
+//                TimberUtils().printAdFailedToShowFullScreenContent(type)
                 interstitialAd = null
                 loadAd(context, interListAD, 0, type) { it1, _ ->
                     if (it1) {
@@ -91,6 +92,7 @@ class InterstitialAdManager {
         type: String,
         onShowAdCompleteListener: OnShowAdCompleteListener
     ) {
+        if (context.isFinishing||context.isDestroyed||!context.canJump) return
         adIsImpression = false
         interstitialAd = interstitialAdCache
         interstitialAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
@@ -177,6 +179,7 @@ class InterstitialAdManager {
                             adError
                         )
                         //如果列表长度足够，则继续去reload，成功就返回true，直到遍历完还是失败，则返回false false
+                        if (context is BaseActivity){ if (!context.canJump) return }
                         if (position + 1 < interListAd.size) loadAd(
                             context, interListAd, position + 1, type
                         ) { it, _ ->

@@ -96,10 +96,10 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
 
 
     override fun onResume() {
-        super.onResume()
         isToConnect = AppVariable.state == BaseService.State.Stopped
         setData()
         showNativeAD(activity as BaseActivity)
+        super.onResume()
     }
 
     private fun initView(view: View) {
@@ -368,7 +368,10 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
 
             override fun onFinish() {
                 //这儿用是否展示广告来判断倒计时结束时是否跳转
-                if (!interstitialAdManager.adIsImpression) toggle()
+                if (!interstitialAdManager.adIsImpression){
+                    interstitialAdManager.interstitialAd = null
+                    toggle()
+                }
             }
         }
         countDownTimer?.start()
@@ -426,6 +429,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                 null,
                 object : OnShowAdCompleteListener {
                     override fun onShowAdComplete() {
+                        countDownTimer?.cancel()
                         toggle()
                     }
                 })

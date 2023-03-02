@@ -52,7 +52,6 @@ class SeverConnectStateActivity : BaseActivity() {
     private lateinit var nativeAdContainer: FrameLayout
     override fun initView() {
         super.initView()
-
         container = findViewById(R.id.server_connect_container)
         titleView = findViewById(R.id.sever_state_title_view)
         countryImg = findViewById(R.id.server_connect_country_img)
@@ -74,6 +73,7 @@ class SeverConnectStateActivity : BaseActivity() {
         showNativeAD()
         super.onResume()
     }
+
     override fun initListener() {
         titleView.leftImg.setOnClickListener {
             finish()
@@ -120,14 +120,13 @@ class SeverConnectStateActivity : BaseActivity() {
     }
 
 
-
     private fun showNativeAD() {
         AppVariable.nativeResultADList?.let {
-                GetADData.getFindData(this, this, ADType.NATIVE_RESULT.value, nativeAdManager,
-                    it, nativeAdContainer, object : OnShowAdCompleteListener {
-                        override fun onShowAdComplete() {
-                        }
-                    })
+            GetADData.getFindData(this, this, ADType.NATIVE_RESULT.value, nativeAdManager,
+                it, nativeAdContainer, object : OnShowAdCompleteListener {
+                    override fun onShowAdComplete() {
+                    }
+                })
         }
     }
 }

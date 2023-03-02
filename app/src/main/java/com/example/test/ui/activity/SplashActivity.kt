@@ -30,7 +30,8 @@ class SplashActivity : BaseActivity() {
     lateinit var countDownTimer: CountDownTimer
     var countDownADTimer: CountDownTimer? = null
     override var layoutId: Int = R.layout.activity_splash
-    private lateinit var interstitialAaManager: InterstitialAdManager
+    private lateinit var interstitialAaManager1: InterstitialAdManager
+    private lateinit var interstitialAaManager2: InterstitialAdManager
     private lateinit var nativeAdManager: NativeAdManager
     private lateinit var appOpenAdManager: AppOpenAdManager
 
@@ -48,7 +49,8 @@ class SplashActivity : BaseActivity() {
         }
         AppVariable.isShowBanedIpDialog =
             countryCode.lowercase() == "ir" || Locale.getDefault().country.lowercase() == "irn"
-        interstitialAaManager = InterstitialAdManager()
+        interstitialAaManager1 = InterstitialAdManager()
+        interstitialAaManager2 = InterstitialAdManager()
         appOpenAdManager = AppOpenAdManager()
         nativeAdManager = NativeAdManager()
 
@@ -61,7 +63,6 @@ class SplashActivity : BaseActivity() {
 
     override fun initData() {
         if (CheckADStatus().canShowAD(this)) {
-            loadADData()
             //progress
             countDownTimer = object : CountDownTimer(3000L, 300) {
                 override fun onTick(p0: Long) {
@@ -89,7 +90,10 @@ class SplashActivity : BaseActivity() {
                     .e("是否从后台切回前台: ${AppVariable.isBackGround}")
                 if (AppVariable.isBackGroundToSplash) {
                     delay(3000)
-                } else delay(1000)
+                } else{
+                    loadADData()
+                    delay(1000)
+                }
                 showAD()
             }
         } else {
@@ -127,37 +131,40 @@ class SplashActivity : BaseActivity() {
 
         //2、按需求开始load所谓位置的广告
         //开屏页
-
-        //服务器列表页面跳转首页
-        AppVariable.interADList?.let {
-            interstitialAaManager.loadAd(
-                applicationContext,
-                it,
-                0,
-                type = ADType.INTER_SERVER.value
-            ) { _, _ -> }
-        }
         //连接页面
         AppVariable.interADList?.let {
-            interstitialAaManager.loadAd(
+            interstitialAaManager1.loadAd(
                 applicationContext,
                 it,
                 0,
                 type = ADType.INTER_CONNECT.value
             ) { _, _ -> }
         }
-        //native结果页
-        AppVariable.nativeHomeADList?.let {
-            nativeAdManager.refreshAd(this, null, ADType.NATIVE_RESULT.value, 0, it) {
 
-            }
+        //服务器列表页面跳转首页
+        AppVariable.interADList?.let {
+            interstitialAaManager2.loadAd(
+                applicationContext,
+                it,
+                0,
+                type = ADType.INTER_SERVER.value
+            ) { _, _ -> }
         }
+
         //native首页
         AppVariable.nativeResultADList?.let {
             nativeAdManager.refreshAd(this, null, ADType.NATIVE_HOME.value, 0, it) {
 
             }
         }
+
+        //native结果页
+        AppVariable.nativeHomeADList?.let {
+            nativeAdManager.refreshAd(this, null, ADType.NATIVE_RESULT.value, 0, it) {
+
+            }
+        }
+
     }
 
     override fun onStop() {

@@ -18,7 +18,6 @@ import timber.log.Timber
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.util.*
-import kotlin.collections.HashMap
 
 
 //广告相关数据类
@@ -84,7 +83,7 @@ object GetADData {
                             val adView = NativeAdView1.getView(activity)
                             manager.populateNativeAdView(it1, adView)
                             container?.removeAllViews()
-                            container?.addView(adView.rootView)
+                            container?.addView(adView)
                         }
 
                 }
@@ -109,7 +108,8 @@ object GetADData {
                                 onShowAdCompleteListener
                             )
                         } else {
-                            val data = AppVariable.cacheDataList?.find { it["type"].toString() == type }
+                            val data =
+                                AppVariable.cacheDataList?.find { it["type"].toString() == type }
                             AppVariable.cacheDataList?.remove(data)
                             manager.loadAd(context, adListBean, 0, type) { it1, it2 ->
                                 if (it1) {
@@ -117,6 +117,7 @@ object GetADData {
                                         activity, adListBean, type, onShowAdCompleteListener
                                     )
                                 }
+                                if (!it1 && !it2) onShowAdCompleteListener.onShowAdComplete()
                             }
                         }
                     }
@@ -136,7 +137,7 @@ object GetADData {
                             val adView = NativeAdView1.getView(activity)
                             manager.populateNativeAdView(data["value"] as NativeAd, adView)
                             container?.removeAllViews()
-                            container?.addView(adView.rootView)
+                            container?.addView(adView)
                         } else {
                             //过期 删除缓存
                             val data =
@@ -148,7 +149,7 @@ object GetADData {
                                 val adView = NativeAdView1.getView(activity)
                                 manager.populateNativeAdView(it1, adView)
                                 container?.removeAllViews()
-                                container?.addView(adView.rootView)
+                                container?.addView(adView)
                             }
                         }
                     }
@@ -225,25 +226,26 @@ object GetADData {
                         )
                     }
                 }
-            } else if (type == ADType.INTER.value) {//这儿是判断大类别，用INTER
+            } else if (type == ADType.INTER.value) {//这儿是判断广告类别，用INTER
+                val managerInter = InterstitialAdManager()
                 Timber.tag(AppConstant.TAG + "Open").e("开屏类型为inter")
-                if (manager is InterstitialAdManager) AppVariable.openADList?.get(position)?.let {
-                    manager.loadAd(
+                AppVariable.openADList?.get(position)?.let {
+                    managerInter.loadAd(
                         activity,
                         mutableListOf(it),
                         0,
                         ADType.INTER_OPEN.value
                     ) { it1, it2 ->
                         if (it1) {
-                            manager.interstitialAd?.let { it3 ->
-                                manager.showInterstitialWithData(
+                            managerInter.interstitialAd?.let { it3 ->
+                                managerInter.showInterstitialWithData(
                                     activity, mutableListOf(AppVariable.openADList!!.get(position)),
                                     it3, type, onShowAdCompleteListener
                                 )
                             }
                         } else if (!it2) {
                             getOpenData(
-                                activity, manager, onShowAdCompleteListener, position + 1
+                                activity, managerInter, onShowAdCompleteListener, position + 1
                             )
                         }
                     }
