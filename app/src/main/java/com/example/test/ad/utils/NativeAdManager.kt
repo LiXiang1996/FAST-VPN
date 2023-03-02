@@ -12,6 +12,7 @@ import com.example.test.ad.data.ADListBean
 import com.example.test.ad.data.CheckADStatus
 import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
+import com.example.test.base.utils.TimberUtils
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.nativead.MediaView
 import com.google.android.gms.ads.nativead.NativeAd
@@ -100,7 +101,7 @@ class NativeAdManager {
         nativeListAD: MutableList<ADListBean.ADBean>,
         result: (NativeAd) -> Unit
     ) {
-        Timber.tag(TAG).e("加载NativeAD $position 类型 $type")
+        TimberUtils().printADLoadLog(type, AppConstant.LOADING, nativeListAD[position])
         if (position < nativeListAD.size) {
             isLoadingAD = true
             val builder = AdLoader.Builder(activity, nativeListAD[position].robvn_id)
@@ -117,25 +118,25 @@ class NativeAdManager {
                 result.invoke(nativeAd)
             }.withNativeAdOptions(adOptions).withAdListener(object : AdListener() {
                 override fun onAdClicked() {
-                    Timber.tag(TAG).e("ad clicked")
-                    CheckADStatus().setShowAndClickCount(
+                    TimberUtils().printADClick(type)
+                    CheckADStatus ().setShowAndClickCount(
                         activity, isShow = false, isClick = true
                     )
                     super.onAdClicked()
                 }
 
                 override fun onAdClosed() {
-                    Timber.tag(TAG).e("ad closed")
+                    Timber.tag(TAG).e("关闭广告")
                     super.onAdClosed()
                 }
 
                 override fun onAdLoaded() {
                     isLoadingAD = false
-                    Timber.tag(TAG).e("ad onLoaded 未展示 加入缓存 type $type")
+                    TimberUtils().printADLoadLog(type, AppConstant.LOAD_SUC, nativeListAD[position])
                     val data = HashMap<String, Any>().apply {
                         put("type", type)
                         put("value", currentNativeAd!!)
-                        put(AppConstant.LOAD_TIME,Date().time)
+                        put(AppConstant.LOAD_TIME, Date().time)
                     }
                     AppVariable.cacheDataList?.add(data)
                     super.onAdLoaded()
@@ -147,7 +148,7 @@ class NativeAdManager {
                 }
 
                 override fun onAdImpression() {
-                    Timber.tag(TAG).e("ad onAdImpression,移除缓存")
+                    TimberUtils().printADImpression(type)
                     val a = AppVariable.cacheDataList?.find { it["type"].toString() == type }
                     a?.remove(type)
                     CheckADStatus().setShowAndClickCount(
@@ -158,9 +159,12 @@ class NativeAdManager {
 
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                     isLoadingAD = false
-                    Timber.tag(TAG)
-                        .e("domain: ${loadAdError.domain}, code: ${loadAdError.code}, message: ${loadAdError.message}")
-                    if (position+1 < nativeListAD.size) {
+                    TimberUtils().printADLoadLog(
+                        type,
+                        AppConstant.LOAD_FAIL,
+                        nativeListAD[position],loadAdError
+                    )
+                    if (position + 1 < nativeListAD.size) {
                         refreshAd(activity, frameLayout, type, position + 1, nativeListAD) {
                             result.invoke(it)
                         }
@@ -171,13 +175,3 @@ class NativeAdManager {
     }
 
 }
-//
-//var NativeAd.getLoadTime: Long?
-//    get() = field ?:0L
-//    set(value) {
-//        field =value
-//    }
-//
-//fun NativeAd.setTime(time:Long){
-//    getLoadTime = time
-//}

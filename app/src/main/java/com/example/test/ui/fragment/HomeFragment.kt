@@ -159,7 +159,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
             if (NetworkUtil.get().isNetworkAvailable || NetworkUtil.isNetSystemUsable(activity)) {
                 if (activity is MainActivity) {
                     if (CheckADStatus().canShowAD(activity as MainActivity))
-                        activity?.let { it1 -> loadInterAd(it1,ADType.INTER_CONNECT.value) }
+                        activity?.let { it1 -> loadInterAd(it1, ADType.INTER_CONNECT.value) }
                     else {
                         (activity as MainActivity).frameLayout.visibility = View.VISIBLE//不可点击
                         MainScope().launch {
@@ -354,14 +354,14 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
             }
         }
 
-    private fun loadInterAd(activity: Activity,type:String) {
+    private fun loadInterAd(activity: Activity, type: String) {
         (activity as MainActivity).frameLayout.visibility = View.VISIBLE
         connectingAndStoppingAnimation()
         MainScope().launch {
             delay(1000)//延迟一秒后再执行下面代码
         }
         countDownTimer = null
-        showInterAD(activity,type)
+        showInterAD(activity, type)
         countDownTimer = object : CountDownTimer(9000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
             }
@@ -373,8 +373,6 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         }
         countDownTimer?.start()
     }
-
-
 
 
     private fun result() {
@@ -408,21 +406,29 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
 
     private fun showNativeAD(activity: BaseActivity) {
         AppVariable.nativeHomeADList?.let {
-            GetADData.getFindData(activity,context,ADType.NATIVE_HOME.value,nativeAdManager,
-                it,nativeAdContainer,object :OnShowAdCompleteListener{
+            GetADData.getFindData(activity, context, ADType.NATIVE_HOME.value, nativeAdManager,
+                it, nativeAdContainer, object : OnShowAdCompleteListener {
                     override fun onShowAdComplete() {
                     }
                 })
         }
 
     }
-    private fun showInterAD(activity: BaseActivity,type: String) {
+
+    private fun showInterAD(activity: BaseActivity, type: String) {
         AppVariable.interADList?.let { data ->
-            GetADData.getFindData(activity,context,type,interstitialAdManager,data,null,object :OnShowAdCompleteListener{
-                override fun onShowAdComplete() {
-                    toggle()
-                }
-            })
+            GetADData.getFindData(
+                activity,
+                context,
+                type,
+                interstitialAdManager,
+                data,
+                null,
+                object : OnShowAdCompleteListener {
+                    override fun onShowAdComplete() {
+                        toggle()
+                    }
+                })
         }
     }
 }

@@ -179,13 +179,14 @@ class RecyclerViewAdapter(context: Context?) : Adapter<RecyclerViewAdapter.MyVie
 class ServersListProfile {
     companion object {
         private val fastProfile = Profile(name = "Fast Super Server")
+        private var smartListProfile = mutableListOf<Profile>()
 
         private val defaultProfile1 = ToProfile.remoteProfileToProfile(
             RemoteProfile(
                 robvn_pwd = "tvX1v#NSFP_LG_bJ",
                 robvn_account = "chacha20-ietf-poly1305",
                 robvn_city = "Dallas",
-                robvn_ip = "34.213.182.172",
+                robvn_ip = "52.11.255.98",
                 robvn_country = "United States",
                 robvn_port = 812
             )
@@ -198,6 +199,13 @@ class ServersListProfile {
             mutableList.add(fastProfile)
             mutableList.addAll(defaultList)
             return mutableList
+        }
+
+         fun  setSmartListProfile(listProfile:MutableList<Profile>){
+            this.smartListProfile = listProfile
+        }
+        fun getSmartServersList():MutableList<Profile>{
+            return smartListProfile
         }
 
 

@@ -8,6 +8,7 @@ import com.example.test.ad.data.ADType
 import com.example.test.ad.data.CheckADStatus
 import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
+import com.example.test.base.utils.TimberUtils
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
@@ -35,7 +36,7 @@ class AppOpenAdManager {
 
     private var isLoadingAd = false
     var isShowingAd = false
-    private var TAG = AppConstant.TAG + "OpenAD"
+    private var TAG = AppConstant.TAG + "Open"
 
     private var loadTime: Long = 0
 
@@ -49,12 +50,12 @@ class AppOpenAdManager {
         openData: ADListBean.ADBean,
         result: (Boolean, Boolean) -> Unit
     ) {
-        Timber.tag(TAG).e("AppOpen 是否正在loading广告 $isLoadingAd  ")
         if (isLoadingAd) {
-            Timber.tag(TAG)
-                .e("AppOpen 是否有正在loading的广告 $isLoadingAd appOpenAd是否为空${appOpenAd == null} ")
+//            Timber.tag(TAG)
+//                .e("AppOpen 是否有正在loading的广告 $isLoadingAd appOpenAd是否为空${appOpenAd == null} ")
             return
         }
+        TimberUtils().printADLoadLog(type,AppConstant.LOADING,openData)
         isLoadingAd = true
         val request = AdRequest.Builder().build()
         AppOpenAd.load(context,
@@ -67,7 +68,7 @@ class AppOpenAdManager {
                     appOpenAd = ad
                     isLoadingAd = false
                     loadTime = Date().time
-                    Timber.tag(TAG).e(" on AdLoaded. 缓存 type:$type,LoadTime $loadTime date${a}")
+                    TimberUtils().printADLoadLog(type, AppConstant.LOAD_SUC, openData)
                     result.invoke(true, true)
                     AppVariable.cacheSplashADData = openData
 
@@ -88,10 +89,7 @@ class AppOpenAdManager {
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                     isLoadingAd = false
                     result.invoke(false, false)
-                    Timber.tag(TAG).e(
-                        "onAdFailedToLoad: %s",
-                        loadAdError.message + "code " + loadAdError.code + "   id${openData.robvn_id}"
-                    )
+                    TimberUtils().printADLoadLog(type, AppConstant.LOAD_FAIL, openData, loadAdError)
                 }
             })
     }
@@ -102,15 +100,13 @@ class AppOpenAdManager {
         type: String,
         openADID: ADListBean.ADBean,
         appOpenAdCache: AppOpenAd,
-        onShowAdCompleteListener: OnShowAdCompleteListener,result: (Boolean, Boolean) -> Unit
+        onShowAdCompleteListener: OnShowAdCompleteListener, result: (Boolean, Boolean) -> Unit
     ) {
-        Timber.tag(TAG).e("有缓存")
         appOpenAd = appOpenAdCache
         if (isShowingAd) {
-            Timber.tag(TAG).e("The app open ad is already showing.")
+//            Timber.tag(TAG).e("The app open ad is already showing.")
             return
         }
-        Timber.tag(TAG).e("Will show ad.")
         appOpenAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
             override fun onAdClicked() {
                 onShowAdCompleteListener.onShowAdComplete()
@@ -121,7 +117,7 @@ class AppOpenAdManager {
             }
 
             override fun onAdImpression() {
-                Timber.tag(TAG).e(" AD onAdImpression.移除缓存")
+                TimberUtils().printADImpression(type)
                 val a = AppVariable.cacheDataList?.find { it["type"].toString() == type }
                 a?.remove(type)
                 CheckADStatus().setShowAndClickCount(
@@ -135,22 +131,20 @@ class AppOpenAdManager {
                 appOpenAd = null
                 isShowingAd = false
                 onShowAdCompleteListener.onShowAdComplete()
-                Timber.tag(TAG).e("onAdDismissedFullScreenContent.")
+                TimberUtils().printAdDismissedFullScreenContent(type)
             }
 
             @SuppressLint("BinaryOperationInTimber")
             override fun onAdFailedToShowFullScreenContent(adError: AdError) {
                 appOpenAd = null
                 isShowingAd = false
-                Timber.tag(TAG).e(
-                    "onAdFailedToShowFullScreenContent: %s", adError.message + "code" + adError.code
-                )
-                result.invoke(false,false)
+                TimberUtils().printAdFailedToShowFullScreenContent(type)
+                result.invoke(false, false)
                 onShowAdCompleteListener.onShowAdComplete()
             }
 
             override fun onAdShowedFullScreenContent() {
-                Timber.tag(TAG).e("onAdShowedFullScreenContent.")
+//                TimberUtils().printAdShowedFullScreenContent(type)
             }
         }
         isShowingAd = true

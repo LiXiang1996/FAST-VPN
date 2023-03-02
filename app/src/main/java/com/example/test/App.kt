@@ -106,10 +106,10 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
             val resultBean: MutableList<RemoteProfile> =
                 gson.fromJson(list, object : TypeToken<List<RemoteProfile?>?>() {}.type)
             if ((resultBean.size) > 0) {
-                Timber.tag(AppConstant.TAG).e("remoteConfig $list  size:${resultBean.size}")
+//                Timber.tag(AppConstant.TAG).e("remoteConfig $list  size:${resultBean.size}")
                 val profileList = mutableListOf<Profile>()
                 resultBean.forEach { profileList.add(ToProfile.remoteProfileToProfile(it)) }
-                Timber.tag(AppConstant.TAG).e("profileList $profileList  size:${profileList.size}")
+//                Timber.tag(AppConstant.TAG).e("profileList $profileList  size:${profileList.size}")
                 if ((profileList.size) > 0) {
                     ServersListProfile.defaultList.clear()
                     profileList.forEach {
@@ -129,17 +129,25 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
             val resultBean: MutableList<RemoteProfile> =
                 gson.fromJson(list, object : TypeToken<List<RemoteProfile?>?>() {}.type)
             if ((resultBean.size) > 0) {
-                Timber.tag(AppConstant.TAG).e("remoteConfig $list  size:${resultBean.size}")
                 val profileList = mutableListOf<Profile>()
                 resultBean.forEach { profileList.add(ToProfile.remoteProfileToProfile(it)) }
-                Timber.tag(AppConstant.TAG).e("profileList $profileList  size:${profileList.size}")
+                Timber.tag(AppConstant.TAG).e("smartProfileList $profileList  size:${profileList.size}")
                 if ((profileList.size) > 0) {
-                    ServersListProfile.defaultList.clear()
-                    profileList.forEach {
-                        ServersListProfile.defaultList.add(it)
+                    profileList.forEach {it1->
+                        val findData = ServersListProfile.getServersList().find {it2->
+                            it2.city == it1.city
+                        }
+                        if (findData != null) {
+                            it1.name = findData.name//国家名
+                            it1.host = findData.host//ip
+                            it1.remotePort = findData.remotePort//端口
+                            it1.password = findData.password//密码
+                            it1.method = findData.method
+                        }
                     }
+                    ServersListProfile.setSmartListProfile(profileList)
                     Timber.tag(AppConstant.TAG)
-                        .e("servers${ServersListProfile.getServersList().size}")
+                        .e("smart servers${profileList.size}")
                 }
             }
         } catch (e: Exception) {

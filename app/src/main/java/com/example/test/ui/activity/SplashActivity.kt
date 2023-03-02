@@ -85,8 +85,8 @@ class SplashActivity : BaseActivity() {
 
             MainScope().launch {
                 countDownADTimer?.start()
-                Timber.tag(AppConstant.TAG + "Splash")
-                    .e("isBackGround: ${AppVariable.isBackGround}")
+                Timber.tag(AppConstant.TAG)
+                    .e("是否从后台切回前台: ${AppVariable.isBackGround}")
                 if (AppVariable.isBackGroundToSplash) {
                     delay(3000)
                 } else delay(1000)
@@ -111,8 +111,8 @@ class SplashActivity : BaseActivity() {
         //1、获取所有ad数据
         val ad: ADListBean? = GetJsonData.getData(this)
         if (ad != null) {
-            Timber.tag(AppConstant.TAG)
-                .e("click" + "${ad.robvn_cm} show ${ad.robvn_sm} robvn_o_open size ${ad.robvn_o_open.size}")
+//            Timber.tag(AppConstant.TAG)
+//                .e("click" + "${ad.robvn_cm} show ${ad.robvn_sm} robvn_o_open size ${ad.robvn_o_open.size}")
             AppVariable.openADList =
                 ad.robvn_o_open.sortedByDescending { it.robvn_p } as MutableList<ADListBean.ADBean>
             AppVariable.interADList =
@@ -134,7 +134,7 @@ class SplashActivity : BaseActivity() {
                 applicationContext,
                 it,
                 0,
-                type = "interserver"
+                type = ADType.INTER_SERVER.value
             ) { _, _ -> }
         }
         //连接页面
@@ -143,7 +143,7 @@ class SplashActivity : BaseActivity() {
                 applicationContext,
                 it,
                 0,
-                type = "interconnect"
+                type = ADType.INTER_CONNECT.value
             ) { _, _ -> }
         }
         //native结果页

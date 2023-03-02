@@ -70,8 +70,7 @@ object GetADData {
                                     activity, adListBean, type, onShowAdCompleteListener
                                 )
                             }
-                            // TODO:  
-                            if (!it1&&!it2){
+                            if (!it1 && !it2) {
                                 onShowAdCompleteListener.onShowAdComplete()
                             }
                         }
@@ -110,8 +109,7 @@ object GetADData {
                                 onShowAdCompleteListener
                             )
                         } else {
-                            val data =
-                                AppVariable.cacheDataList?.find { it["type"].toString() == type }
+                            val data = AppVariable.cacheDataList?.find { it["type"].toString() == type }
                             AppVariable.cacheDataList?.remove(data)
                             manager.loadAd(context, adListBean, 0, type) { it1, it2 ->
                                 if (it1) {
@@ -133,7 +131,7 @@ object GetADData {
                                 (data[AppConstant.LOAD_TIME] as Long)
                             )
                         ) {
-                            Timber.tag(AppConstant.TAG + type)
+                            Timber.tag(AppConstant.TAG + " " + type)
                                 .e("未过期 ${(data[AppConstant.LOAD_TIME] as Long)}")
                             val adView = NativeAdView1.getView(activity)
                             manager.populateNativeAdView(data["value"] as NativeAd, adView)
@@ -169,9 +167,9 @@ object GetADData {
                                     AppVariable.cacheSplashADData!!,
                                     data["value"] as AppOpenAd,
                                     onShowAdCompleteListener
-                                ){it1,it2->
+                                ) { it1, it2 ->
                                     getOpenData(
-                                        activity, manager, onShowAdCompleteListener,  0
+                                        activity, manager, onShowAdCompleteListener, 0
                                     )
                                 }
                             } else if (AppVariable.cacheSplashADData?.robvn_l == ADType.INTER.value && data["value"] is InterstitialAd) {
@@ -201,7 +199,7 @@ object GetADData {
         if (position < (AppVariable.openADList?.size ?: 0)) {
             val type: String? = AppVariable.openADList?.get(position)?.robvn_l
             if (type == ADType.OPEN.value) {
-                Timber.tag(AppConstant.TAG + "OpenAD").e("开屏类型为open")
+                Timber.tag(AppConstant.TAG + "Open").e("开屏类型为open")
                 if (manager is AppOpenAdManager) AppVariable.openADList?.get(position)?.let {
                     manager.loadAd(activity, type, it) { it1, it2 ->
                         if (it1) {
@@ -210,10 +208,13 @@ object GetADData {
                                     activity, type,
                                     AppVariable.openADList?.get(position)!!,
                                     it3, onShowAdCompleteListener
-                                ){it1,it2->
-                                    if (!it1&&it2){
+                                ) { it1, it2 ->
+                                    if (!it1 && it2) {
                                         getOpenData(
-                                            activity, manager, onShowAdCompleteListener, position + 1
+                                            activity,
+                                            manager,
+                                            onShowAdCompleteListener,
+                                            position + 1
                                         )
                                     }
                                 }
@@ -225,7 +226,7 @@ object GetADData {
                     }
                 }
             } else if (type == ADType.INTER.value) {//这儿是判断大类别，用INTER
-                Timber.tag(AppConstant.TAG + "OpenAD").e("开屏类型为inter")
+                Timber.tag(AppConstant.TAG + "Open").e("开屏类型为inter")
                 if (manager is InterstitialAdManager) AppVariable.openADList?.get(position)?.let {
                     manager.loadAd(
                         activity,
@@ -312,11 +313,11 @@ class CheckADStatus {
             SharedPreferencesUtils.getParam(activity, AppVariable.dateClick, 0) as Int
         if (isShow && dayShow < (GetJsonData.getData(activity)?.robvn_sm ?: 40)) {
             SharedPreferencesUtils.setParam(activity, AppVariable.dateShow, dayShow + 1)
-            Timber.tag(AppConstant.TAG).e("展示次数${dayShow + 1}")
+//            Timber.tag(AppConstant.TAG).e("展示次数${dayShow + 1}")
         }
         if (isClick && dayClick < (GetJsonData.getData(activity)?.robvn_cm ?: 10)) {
             SharedPreferencesUtils.setParam(activity, AppVariable.dateClick, dayClick + 1)
-            Timber.tag(AppConstant.TAG).e("点击次数${dayClick + 1}")
+//            Timber.tag(AppConstant.TAG).e("点击次数${dayClick + 1}")
         }
     }
 
@@ -337,13 +338,19 @@ class CheckADStatus {
     }
 
     fun canShowAD(activity: Activity): Boolean {
-        Timber.tag(AppConstant.TAG).e("广告可否再展示 ${CheckADStatus().getShowCountIsOk(activity) && CheckADStatus().getClickCountIsOk(activity)}")
-        return CheckADStatus().getShowCountIsOk(activity) && CheckADStatus().getClickCountIsOk(activity)
+        if (!CheckADStatus().getShowCountIsOk(activity) || !CheckADStatus().getClickCountIsOk(
+                activity
+            )
+        ) {
+            Timber.tag(AppConstant.TAG + " AD").e("广告加载已达上限")
+        }
+        return CheckADStatus().getShowCountIsOk(activity) && CheckADStatus().getClickCountIsOk(
+            activity
+        )
     }
 
     fun wasLoadTimeLessThanNHoursAgo(numHours: Long, loadTime: Long): Boolean {
         val dateDifference: Long = Date().time - loadTime
-        Timber.tag(AppConstant.TAG).e("datadiff $dateDifference")
         val numMilliSecondsPerHour: Long = 3600000
         return dateDifference < numMilliSecondsPerHour * numHours
     }

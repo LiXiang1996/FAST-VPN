@@ -1,28 +1,25 @@
 package com.example.test.ad.utils
 
 import android.content.Context
-import android.os.CountDownTimer
 import com.example.test.ad.data.ADListBean
 import com.example.test.ad.data.ADType
 import com.example.test.ad.data.CheckADStatus
 import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
 import com.example.test.base.BaseActivity
+import com.example.test.base.utils.TimberUtils
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
-import timber.log.Timber
 import java.util.*
-import kotlin.collections.HashMap
 
 class InterstitialAdManager {
     var interstitialAd: InterstitialAd? = null
     var adIsLoading: Boolean = false
     var adIsImpression: Boolean = false
-    private var interADTAG = AppConstant.TAG + "showInterstitial"
     var loadTime: Long = 0
 
 
@@ -35,7 +32,7 @@ class InterstitialAdManager {
         adIsImpression = false
         interstitialAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
             override fun onAdClicked() {
-                Timber.tag(interADTAG).e("Ad was onAdClicked.")
+                TimberUtils().printADClick(type)
                 CheckADStatus().setShowAndClickCount(
                     context, isShow = false, isClick = true
                 )
@@ -43,7 +40,7 @@ class InterstitialAdManager {
             }
 
             override fun onAdImpression() {
-                Timber.tag(interADTAG).e("Ad was onAdImpression.load成功后直接调用，移除缓存")
+                TimberUtils().printADImpression(type)
                 adIsImpression = true
                 val a = AppVariable.cacheDataList?.find { it["type"].toString() == type }
                 a?.remove(type)
@@ -55,65 +52,13 @@ class InterstitialAdManager {
             }
 
             override fun onAdDismissedFullScreenContent() {
-                Timber.tag(interADTAG).e("全屏内容消失")
+                TimberUtils().printAdDismissedFullScreenContent(type)
                 interstitialAd = null
                 onShowAdCompleteListener.onShowAdComplete()
             }
 
             override fun onAdFailedToShowFullScreenContent(adError: AdError) {
-                Timber.tag(interADTAG).e("Ad failed to show.再次去请求广告（loadAD）")
-                interstitialAd = null
-                loadAd(context, interListAD, 0, type) { _, _ -> }
-            }
-
-            override fun onAdShowedFullScreenContent() {
-                Timber.tag(interADTAG).e("广告全屏展示.")
-            }
-        }
-        interstitialAd?.show(context)
-    }
-
-    fun showInterstitialWithData(
-        context: BaseActivity,
-        interListAD: MutableList<ADListBean.ADBean>,
-        interstitialAdCache: InterstitialAd,
-        type: String,
-        onShowAdCompleteListener: OnShowAdCompleteListener
-    ) {
-        Timber.tag(interADTAG).e("有缓存")
-        adIsImpression = false
-        interstitialAd = interstitialAdCache
-        interstitialAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
-            override fun onAdClicked() {
-                Timber.tag(interADTAG).e("Ad was onAdClicked.")
-                CheckADStatus().setShowAndClickCount(
-                    context, isShow = false, isClick = true
-                )
-                super.onAdClicked()
-            }
-
-            override fun onAdImpression() {
-                Timber.tag(interADTAG).e("Ad was onAdImpression.移除缓存")
-                adIsImpression = true
-                val a = AppVariable.cacheDataList?.find { it["type"].toString() == type }
-                a?.remove(type)
-                CheckADStatus().setShowAndClickCount(
-                    context, isShow = true, isClick = false
-                )
-                if (type == ADType.INTER_OPEN.value) AppVariable.cacheSplashADData = null
-
-                super.onAdImpression()
-            }
-
-            override fun onAdDismissedFullScreenContent() {
-                Timber.tag(interADTAG).e("全屏内容消失")
-                interstitialAd = null
-                adIsImpression = false
-                onShowAdCompleteListener.onShowAdComplete()
-            }
-
-            override fun onAdFailedToShowFullScreenContent(adError: AdError) {
-                Timber.tag(interADTAG).e("Ad failed to show.再次去请求广告（loadAD）")
+                TimberUtils().printAdFailedToShowFullScreenContent(type)
                 interstitialAd = null
                 loadAd(context, interListAD, 0, type) { it1, _ ->
                     if (it1) {
@@ -133,7 +78,72 @@ class InterstitialAdManager {
             }
 
             override fun onAdShowedFullScreenContent() {
-                Timber.tag(interADTAG).e("广告全屏展示.")
+//                TimberUtils().printAdShowedFullScreenContent(type)
+            }
+        }
+        interstitialAd?.show(context)
+    }
+
+    fun showInterstitialWithData(
+        context: BaseActivity,
+        interListAD: MutableList<ADListBean.ADBean>,
+        interstitialAdCache: InterstitialAd,
+        type: String,
+        onShowAdCompleteListener: OnShowAdCompleteListener
+    ) {
+        adIsImpression = false
+        interstitialAd = interstitialAdCache
+        interstitialAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
+            override fun onAdClicked() {
+                TimberUtils().printADClick(type)
+                CheckADStatus().setShowAndClickCount(
+                    context, isShow = false, isClick = true
+                )
+                super.onAdClicked()
+            }
+
+            override fun onAdImpression() {
+                TimberUtils().printADImpression(type)
+                adIsImpression = true
+                val a = AppVariable.cacheDataList?.find { it["type"].toString() == type }
+                a?.remove(type)
+                CheckADStatus().setShowAndClickCount(
+                    context, isShow = true, isClick = false
+                )
+                if (type == ADType.INTER_OPEN.value) AppVariable.cacheSplashADData = null
+
+                super.onAdImpression()
+            }
+
+            override fun onAdDismissedFullScreenContent() {
+                TimberUtils().printAdDismissedFullScreenContent(type)
+                interstitialAd = null
+                adIsImpression = false
+                onShowAdCompleteListener.onShowAdComplete()
+            }
+
+            override fun onAdFailedToShowFullScreenContent(adError: AdError) {
+                TimberUtils().printAdFailedToShowFullScreenContent(type)
+                interstitialAd = null
+                loadAd(context, interListAD, 0, type) { it1, _ ->
+                    if (it1) {
+                        val cacheData =
+                            AppVariable.cacheDataList?.find { it["type"].toString() == type }
+                        cacheData?.let {
+                            if (it["value"] is InterstitialAd) showInterstitialWithData(
+                                context,
+                                interListAD,
+                                it["value"] as InterstitialAd,
+                                type,
+                                onShowAdCompleteListener
+                            )
+                        }
+                    }
+                }
+            }
+
+            override fun onAdShowedFullScreenContent() {
+//                TimberUtils().printAdShowedFullScreenContent(type)
             }
         }
         interstitialAd?.show(context)
@@ -147,9 +157,8 @@ class InterstitialAdManager {
         result: (Boolean, Boolean) -> Unit
     ) {
         if (position < interListAd.size) {
+            TimberUtils().printADLoadLog(type, AppConstant.LOADING, interListAd[position])
             if (adIsLoading || interstitialAd != null) {
-                Timber.tag(interADTAG)
-                    .e(" 广告是否在loading $adIsLoading  是否ad已存在 ${interstitialAd != null}")
                 return
             }
             adIsLoading = true
@@ -161,9 +170,12 @@ class InterstitialAdManager {
                     override fun onAdFailedToLoad(adError: LoadAdError) {
                         interstitialAd = null
                         adIsLoading = false
-                        val error =
-                            "position$position domain: ${adError.domain}, code: ${adError.code}, " + "message: ${adError.message} "
-                        Timber.tag(interADTAG).e("onAdFailedToLoad----$error")
+                        TimberUtils().printADLoadLog(
+                            type,
+                            AppConstant.LOAD_FAIL,
+                            interListAd[position],
+                            adError
+                        )
                         //如果列表长度足够，则继续去reload，成功就返回true，直到遍历完还是失败，则返回false false
                         if (position + 1 < interListAd.size) loadAd(
                             context, interListAd, position + 1, type
@@ -176,7 +188,11 @@ class InterstitialAdManager {
                     }
 
                     override fun onAdLoaded(ad: InterstitialAd) {
-                        Timber.tag(interADTAG).e("Ad was loaded。 position $position 缓存 type $type")
+                        TimberUtils().printADLoadLog(
+                            type,
+                            AppConstant.LOAD_SUC,
+                            interListAd[position]
+                        )
                         interstitialAd = ad
                         loadTime = Date().time
                         val cacheData =
@@ -206,7 +222,7 @@ class InterstitialAdManager {
     /** 检查广告是否在 n 小时前加载. */
     private fun wasLoadTimeLessThanNHoursAgo(numHours: Long): Boolean {
         val dateDifference: Long = Date().time - loadTime
-        Timber.tag(interADTAG).e("datadiff $dateDifference")
+//        Timber.tag(interADTAG).e("datadiff $dateDifference")
         val numMilliSecondsPerHour: Long = 3600000
         return dateDifference < numMilliSecondsPerHour * numHours
     }
