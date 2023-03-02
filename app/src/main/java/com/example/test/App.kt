@@ -48,16 +48,12 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
         super.onCreate()
         fixWebViewDataDirectoryBug()
         Firebase.initialize(this)
+        MobileAds.setRequestConfiguration(RequestConfiguration.Builder().setTestDeviceIds(listOf("001233B6A65D1EF088BA61537BB77C43","1632B27F26C7337301F620C5BE220833")).build())
         MobileAds.initialize(this) {}
         registerActivityLifecycleCallbacks(this)
         context = applicationContext
         Core.init(this, MainActivity::class)
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
-        RequestConfiguration.Builder().setTestDeviceIds(
-            listOf(
-                "001233B6A65D1EF088BA61537BB77C43", "1632B27F26C7337301F620C5BE220833"
-            )
-        )
 //        getRemoteConfig()
     }
 
@@ -104,24 +100,30 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
     override fun onActivityDestroyed(activity: Activity) {}
 
 
-//    fun showAdIfAvailable(
-//        activity: Activity,
-//        openADId: ADListBean.ADBean,
-//        onShowAdCompleteListener: OnShowAdCompleteListener
-//    ) {
-//        appOpenAdManager.showAdIfAvailable(activity, openADId, onShowAdCompleteListener)
-//    }
-
-//    fun loadAD(activity: Activity, openADId: ADListBean.ADBean, result: (Boolean,Boolean) -> Unit) {
-//        appOpenAdManager.loadAd(activity, openADId) {isAdLoad,isOpenAD->
-//            if (isAdLoad)result.invoke(true,true)
-//            else if (!isOpenAD){
-//
-//            }
-//        }
-//    }
-
     private fun getServerDataList(list: String) {
+        try {
+            val gson = Gson()
+            val resultBean: MutableList<RemoteProfile> =
+                gson.fromJson(list, object : TypeToken<List<RemoteProfile?>?>() {}.type)
+            if ((resultBean.size) > 0) {
+                Timber.tag(AppConstant.TAG).e("remoteConfig $list  size:${resultBean.size}")
+                val profileList = mutableListOf<Profile>()
+                resultBean.forEach { profileList.add(ToProfile.remoteProfileToProfile(it)) }
+                Timber.tag(AppConstant.TAG).e("profileList $profileList  size:${profileList.size}")
+                if ((profileList.size) > 0) {
+                    ServersListProfile.defaultList.clear()
+                    profileList.forEach {
+                        ServersListProfile.defaultList.add(it)
+                    }
+                    Timber.tag(AppConstant.TAG)
+                        .e("servers${ServersListProfile.getServersList().size}")
+                }
+            }
+        } catch (e: Exception) {
+            Timber.tag(AppConstant.TAG).e(e)
+        }
+    }
+    private fun getServerSmartDataList(list: String) {
         try {
             val gson = Gson()
             val resultBean: MutableList<RemoteProfile> =
@@ -160,11 +162,14 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
         val remoteConfig: FirebaseRemoteConfig = Firebase.remoteConfig
         var listServer: String? = ""
         var listAD: String? = ""
+        var listServerSmart: String? = ""
         remoteConfig.fetchAndActivate().addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 listServer = remoteConfig.getString("robvn_ser")
+                listServerSmart = remoteConfig.getString("robvn_smart")
                 listAD = remoteConfig.getString("robvn_ad")
                 listServer?.let { getServerDataList(it) }
+                listServerSmart?.let { getServerSmartDataList(it) }
                 listAD?.let { getADList(it) }
             }
         }
@@ -173,6 +178,12 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
             if (listServer?.isEmpty() == true || listServer?.isBlank() == true) ServersListProfile.getServersList()
             else {
                 listServer?.let { getServerDataList(it) }
+            }
+        }
+        if (listServerSmart?.isEmpty() == true && listServerSmart?.isBlank() == true) {
+            listServerSmart = remoteConfig.getString("robvn_smart")
+            if (listServerSmart?.isNotEmpty() == true || listServerSmart?.isNotBlank() == true)
+                listServerSmart?.let { getServerSmartDataList(it)
             }
         }
 

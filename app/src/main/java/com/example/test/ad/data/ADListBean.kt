@@ -96,10 +96,10 @@ object GetADData {
         } else {
             when (type) {
                 ADType.INTER_SERVER.value, ADType.INTER_CONNECT.value -> {
-                    if (manager is InterstitialAdManager && data["value"] is InterstitialAd && data["loadTime"] is Long) {
+                    if (manager is InterstitialAdManager && data["value"] is InterstitialAd && data[AppConstant.LOAD_TIME] is Long) {
                         if (CheckADStatus().wasLoadTimeLessThanNHoursAgo(
                                 1,
-                                (data["loadTime"] as Long)
+                                (data[AppConstant.LOAD_TIME] as Long)
                             )
                         ) {
                             manager.showInterstitialWithData(
@@ -125,16 +125,16 @@ object GetADData {
                 }
 
                 ADType.NATIVE_HOME.value, ADType.NATIVE_RESULT.value -> {
-                    if (manager is NativeAdManager && data["value"] is NativeAd && data["loadTime"] is Long) {
+                    if (manager is NativeAdManager && data["value"] is NativeAd && data[AppConstant.LOAD_TIME] is Long) {
                         Timber.tag(AppConstant.TAG).e("展示缓存 type$type")
                         //判断过期
                         if (CheckADStatus().wasLoadTimeLessThanNHoursAgo(
                                 1,
-                                (data["loadTime"] as Long)
+                                (data[AppConstant.LOAD_TIME] as Long)
                             )
                         ) {
                             Timber.tag(AppConstant.TAG + type)
-                                .e("未过期 ${(data["loadTime"] as Long)}")
+                                .e("未过期 ${(data[AppConstant.LOAD_TIME] as Long)}")
                             val adView = NativeAdView1.getView(activity)
                             manager.populateNativeAdView(data["value"] as NativeAd, adView)
                             container?.removeAllViews()
@@ -156,10 +156,10 @@ object GetADData {
                     }
                 }
                 ADType.OPEN.value -> {
-                    if (data["loadTime"] is Long) {
+                    if (data[AppConstant.LOAD_TIME] is Long) {
                         if (CheckADStatus().wasLoadTimeLessThanNHoursAgo(
                                 1,
-                                (data["loadTime"] as Long)
+                                (data[AppConstant.LOAD_TIME] as Long)
                             )
                         ) {
                             if (AppVariable.cacheSplashADData?.robvn_l == ADType.OPEN.value && data["value"] is AppOpenAd) {
@@ -169,7 +169,11 @@ object GetADData {
                                     AppVariable.cacheSplashADData!!,
                                     data["value"] as AppOpenAd,
                                     onShowAdCompleteListener
-                                )
+                                ){it1,it2->
+                                    getOpenData(
+                                        activity, manager, onShowAdCompleteListener,  0
+                                    )
+                                }
                             } else if (AppVariable.cacheSplashADData?.robvn_l == ADType.INTER.value && data["value"] is InterstitialAd) {
                                 if (manager is InterstitialAdManager) manager.showInterstitialWithData(
                                     activity,
@@ -206,7 +210,13 @@ object GetADData {
                                     activity, type,
                                     AppVariable.openADList?.get(position)!!,
                                     it3, onShowAdCompleteListener
-                                )
+                                ){it1,it2->
+                                    if (!it1&&it2){
+                                        getOpenData(
+                                            activity, manager, onShowAdCompleteListener, position + 1
+                                        )
+                                    }
+                                }
                             }
                         }
                         if (!it1 && !it2) getOpenData(
@@ -327,6 +337,7 @@ class CheckADStatus {
     }
 
     fun canShowAD(activity: Activity): Boolean {
+        Timber.tag(AppConstant.TAG).e("广告可否再展示 ${CheckADStatus().getShowCountIsOk(activity) && CheckADStatus().getClickCountIsOk(activity)}")
         return CheckADStatus().getShowCountIsOk(activity) && CheckADStatus().getClickCountIsOk(activity)
     }
 

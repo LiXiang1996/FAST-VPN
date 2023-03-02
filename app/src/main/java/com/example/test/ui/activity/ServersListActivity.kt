@@ -184,10 +184,10 @@ class ServersListProfile {
             RemoteProfile(
                 robvn_pwd = "tvX1v#NSFP_LG_bJ",
                 robvn_account = "chacha20-ietf-poly1305",
-                robvn_city = "Chengdu",
+                robvn_city = "Dallas",
                 robvn_ip = "34.213.182.172",
-                robvn_country = "CN",
-                robvn_port = 800
+                robvn_country = "United States",
+                robvn_port = 812
             )
         )
 

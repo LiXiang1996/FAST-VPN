@@ -123,7 +123,7 @@ class SeverConnectStateActivity : BaseActivity() {
 
     private fun showNativeAD() {
         AppVariable.nativeResultADList?.let {
-                GetADData.getFindData(this, this, ADType.OPEN.value, nativeAdManager,
+                GetADData.getFindData(this, this, ADType.NATIVE_RESULT.value, nativeAdManager,
                     it, nativeAdContainer, object : OnShowAdCompleteListener {
                         override fun onShowAdComplete() {
                         }

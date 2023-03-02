@@ -145,6 +145,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
     private fun initListener() {
         connectClickBtn.setOnClickListener {
             if (isShowGuideDialog) {
+                //引导页消失操作
                 isShowGuideDialog = false
                 connectClickGuideLottie.visibility = View.GONE
                 connectClickGuideLottie.cancelAnimation()
@@ -160,6 +161,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                     if (CheckADStatus().canShowAD(activity as MainActivity))
                         activity?.let { it1 -> loadInterAd(it1,ADType.INTER_CONNECT.value) }
                     else {
+                        (activity as MainActivity).frameLayout.visibility = View.VISIBLE//不可点击
                         MainScope().launch {
                             delay(3000)
                             toggle()
@@ -282,6 +284,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         connectStateImg.animation = animationRotate
         connectStateImg.animation.start()
         animationRotate?.start()
+
     }
 
     private fun connectedAndStoppedAnimation() {

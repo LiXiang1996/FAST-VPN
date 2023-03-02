@@ -102,7 +102,7 @@ class AppOpenAdManager {
         type: String,
         openADID: ADListBean.ADBean,
         appOpenAdCache: AppOpenAd,
-        onShowAdCompleteListener: OnShowAdCompleteListener
+        onShowAdCompleteListener: OnShowAdCompleteListener,result: (Boolean, Boolean) -> Unit
     ) {
         Timber.tag(TAG).e("有缓存")
         appOpenAd = appOpenAdCache
@@ -145,8 +145,8 @@ class AppOpenAdManager {
                 Timber.tag(TAG).e(
                     "onAdFailedToShowFullScreenContent: %s", adError.message + "code" + adError.code
                 )
+                result.invoke(false,false)
                 onShowAdCompleteListener.onShowAdComplete()
-//                loadAd(activity, type, openADID) { _, _ -> }
             }
 
             override fun onAdShowedFullScreenContent() {

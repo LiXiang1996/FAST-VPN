@@ -28,7 +28,7 @@ class SplashActivity : BaseActivity() {
 
     lateinit var progress: ProgressBar
     lateinit var countDownTimer: CountDownTimer
-    lateinit var countDownADTimer: CountDownTimer
+    var countDownADTimer: CountDownTimer? = null
     override var layoutId: Int = R.layout.activity_splash
     private lateinit var interstitialAaManager: InterstitialAdManager
     private lateinit var nativeAdManager: NativeAdManager
@@ -84,7 +84,7 @@ class SplashActivity : BaseActivity() {
             }
 
             MainScope().launch {
-                countDownADTimer.start()
+                countDownADTimer?.start()
                 Timber.tag(AppConstant.TAG + "Splash")
                     .e("isBackGround: ${AppVariable.isBackGround}")
                 if (AppVariable.isBackGroundToSplash) {
@@ -92,7 +92,7 @@ class SplashActivity : BaseActivity() {
                 } else delay(1000)
                 showAD()
             }
-        }else{
+        } else {
             countDownTimer = object : CountDownTimer(3000L, 300) {
                 override fun onTick(p0: Long) {
                     progress.progress = ((3000 - p0) / 30).toInt() + 1
@@ -161,13 +161,13 @@ class SplashActivity : BaseActivity() {
     }
 
     override fun onStop() {
-        countDownADTimer.cancel()
+        countDownADTimer?.cancel()
         super.onStop()
     }
 
     override fun onDestroy() {
-        countDownTimer.cancel()
-        countDownADTimer.cancel()
+        countDownTimer?.cancel()
+        countDownADTimer?.cancel()
         super.onDestroy()
     }
 
@@ -176,7 +176,7 @@ class SplashActivity : BaseActivity() {
             GetADData.getFindData(this, this, ADType.OPEN.value, appOpenAdManager,
                 it, null, object : OnShowAdCompleteListener {
                     override fun onShowAdComplete() {
-                        countDownADTimer.cancel()
+                        countDownADTimer?.cancel()
                         val intent = Intent(this@SplashActivity, MainActivity::class.java)
                         this@SplashActivity.startActivity(intent)
                         finish()
