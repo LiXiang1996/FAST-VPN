@@ -78,6 +78,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
 
     private lateinit var interstitialAdManager: InterstitialAdManager
     private lateinit var nativeAdManager: NativeAdManager
+    private lateinit var nativeAdManagerR: NativeAdManager
      lateinit var nativeAdContainer: NativeFrameLayout
 
 
@@ -145,6 +146,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         }
         interstitialAdManager = InterstitialAdManager()
         nativeAdManager = NativeAdManager()
+        nativeAdManagerR = NativeAdManager()
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -422,7 +424,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
     }
 
     override fun onStop() {
-        countDownTimer?.cancel()
+//        countDownTimer?.cancel()
         super.onStop()
     }
 
@@ -457,8 +459,8 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
 
         if (AppVariable.cacheDataList?.find { it["type"].toString() == ADType.NATIVE_RESULT.value } == null) {
             //没有缓存去请求native结果页
-            AppVariable.nativeHomeADList?.let {
-                nativeAdManager.refreshAd(activity, null, ADType.NATIVE_RESULT.value, 0, it) {
+            AppVariable.nativeResultADList?.let {
+                nativeAdManagerR.refreshAd(activity, null, ADType.NATIVE_RESULT.value, 0, it) {
                 }
             }
         }

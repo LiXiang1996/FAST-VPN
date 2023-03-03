@@ -118,8 +118,9 @@ class AppOpenAdManager {
 
             override fun onAdImpression() {
                 TimberUtils().printADImpression(type)
-                val a = AppVariable.cacheDataList?.find { it["type"].toString() == type }
-                a?.remove(type)
+                AppVariable.cacheDataList?.forEach {
+                    if (it["type"].toString() ==type)  AppVariable.cacheDataList?.remove(it)
+                }
                 CheckADStatus().setShowAndClickCount(
                     activity, isShow = true, isClick = false
                 )
@@ -128,6 +129,7 @@ class AppOpenAdManager {
             }
 
             override fun onAdDismissedFullScreenContent() {
+                AppVariable.cacheSplashADData = null
                 appOpenAd = null
                 isShowingAd = false
                 onShowAdCompleteListener.onShowAdComplete()
@@ -137,6 +139,7 @@ class AppOpenAdManager {
             @SuppressLint("BinaryOperationInTimber")
             override fun onAdFailedToShowFullScreenContent(adError: AdError) {
                 appOpenAd = null
+                AppVariable.cacheSplashADData = null
                 isShowingAd = false
                 TimberUtils().printAdFailedToShowFullScreenContent(type,adError)
                 result.invoke(false, false)
@@ -144,6 +147,7 @@ class AppOpenAdManager {
             }
 
             override fun onAdShowedFullScreenContent() {
+                AppVariable.cacheSplashADData = null
 //                TimberUtils().printAdShowedFullScreenContent(type)
             }
         }

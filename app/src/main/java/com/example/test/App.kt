@@ -85,7 +85,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
     override fun onActivityStarted(activity: Activity) {
         if (AppVariable.isBackGround) {
             AppVariable.isBackGround = false
-            Timber.tag(AppConstant.TAG).e("${(System.currentTimeMillis() - AppVariable.exitAppTime) / 1000}")
+//            Timber.tag(AppConstant.TAG).e("${(System.currentTimeMillis() - AppVariable.exitAppTime) / 1000}")
             if ((System.currentTimeMillis() - AppVariable.exitAppTime) / 1000 > 3) {
                 if (activity !is SplashActivity) {//不在启屏页做重复跳转
                     AppVariable.isBackGroundToSplash = true

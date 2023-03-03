@@ -148,14 +148,14 @@ class SplashActivity : BaseActivity() {
         }
         if (AppVariable.cacheDataList?.find { it["type"].toString() == ADType.NATIVE_HOME.value } == null) {
             //native首页
-            AppVariable.nativeResultADList?.let {
+            AppVariable.nativeHomeADList?.let {
                 nativeAdManagerHome.refreshAd(this, null, ADType.NATIVE_HOME.value, 0, it) {
                 }
             }
         }
         if (AppVariable.cacheDataList?.find { it["type"].toString() == ADType.NATIVE_RESULT.value } == null) {
             //native结果页
-            AppVariable.nativeHomeADList?.let {
+            AppVariable.nativeResultADList?.let {
                 nativeAdManagerResult.refreshAd(this, null, ADType.NATIVE_RESULT.value, 0, it) {
                 }
             }
@@ -197,6 +197,8 @@ class SplashActivity : BaseActivity() {
             } else {
                 GetADData.getOpenData(this, manager, onShowAdCompleteListener)
             }
+        }else{
+            showAD()
         }
     }
 
@@ -232,13 +234,13 @@ class SplashActivity : BaseActivity() {
 
 
         //native首页
-        AppVariable.nativeResultADList?.let {
+        AppVariable.nativeHomeADList?.let {
             nativeAdManagerHome.refreshAd(this, null, ADType.NATIVE_HOME.value, 0, it) {
             }
         }
 
         //native结果页
-        AppVariable.nativeHomeADList?.let {
+        AppVariable.nativeResultADList?.let {
             nativeAdManagerResult.refreshAd(this, null, ADType.NATIVE_RESULT.value, 0, it) {
             }
         }

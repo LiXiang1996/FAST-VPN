@@ -43,16 +43,18 @@ class InterstitialAdManager {
             override fun onAdImpression() {
                 TimberUtils().printADImpression(type)
                 adIsImpression = true
-                val a = AppVariable.cacheDataList?.find { it["type"].toString() == type }
-                a?.remove(type)
-                if (type == ADType.INTER_OPEN.value) AppVariable.cacheSplashADData = null
-                else loadAd(context, interListAD, 0, type) { it1, it2 -> }//不是开屏页面，展示成功做缓存
-
+                AppVariable.cacheDataList?.forEach {
+                    if (it["type"].toString() ==type)  AppVariable.cacheDataList?.remove(it)
+                }
                 CheckADStatus().setShowAndClickCount(
                     context, isShow = true, isClick = false
                 )
+                if (type == ADType.INTER_OPEN.value) AppVariable.cacheSplashADData = null
+                else loadAd(context, interListAD, 0, type) { it1, it2 -> }//展示成功做缓存
+
                 super.onAdImpression()
             }
+
 
             override fun onAdDismissedFullScreenContent() {
                 TimberUtils().printAdDismissedFullScreenContent(type)
@@ -62,23 +64,24 @@ class InterstitialAdManager {
 
             override fun onAdFailedToShowFullScreenContent(adError: AdError) {
                 TimberUtils().printAdFailedToShowFullScreenContent(type, adError)
-                val a = AppVariable.cacheDataList?.find { it["type"].toString() == type }
-                a?.remove(type)
+                AppVariable.cacheDataList?.forEach {
+                    if (it["type"].toString() ==type)  AppVariable.cacheDataList?.remove(it)
+                }
                 interstitialAd = null
                 loadAd(context, interListAD, 0, type) { it1, _ ->
-                    if (it1) {
-                        val cacheData =
-                            AppVariable.cacheDataList?.find { it["type"].toString() == type }
-                        cacheData?.let {
-                            if (it["value"] is InterstitialAd) showInterstitialWithData(
-                                context,
-                                interListAD,
-                                it["value"] as InterstitialAd,
-                                type,
-                                onShowAdCompleteListener
-                            )
-                        }
-                    }
+//                    if (it1) {
+//                        val cacheData =
+//                            AppVariable.cacheDataList?.find { it["type"].toString() == type }
+//                        cacheData?.let {
+//                            if (it["value"] is InterstitialAd) showInterstitialWithData(
+//                                context,
+//                                interListAD,
+//                                it["value"] as InterstitialAd,
+//                                type,
+//                                onShowAdCompleteListener
+//                            )
+//                        }
+//                    }
                 }
             }
 
@@ -108,8 +111,9 @@ class InterstitialAdManager {
             override fun onAdImpression() {
                 TimberUtils().printADImpression(type)
                 adIsImpression = true
-                val a = AppVariable.cacheDataList?.find { it["type"].toString() == type }
-                a?.remove(type)
+                AppVariable.cacheDataList?.forEach {
+                    if (it["type"].toString() ==type)  AppVariable.cacheDataList?.remove(it)
+                }
                 CheckADStatus().setShowAndClickCount(
                     context, isShow = true, isClick = false
                 )
@@ -128,23 +132,24 @@ class InterstitialAdManager {
 
             override fun onAdFailedToShowFullScreenContent(adError: AdError) {
                 TimberUtils().printAdFailedToShowFullScreenContent(type, adError)
-                val a = AppVariable.cacheDataList?.find { it["type"].toString() == type }
-                a?.remove(type)
+                AppVariable.cacheDataList?.forEach {
+                    if (it["type"].toString() ==type)  AppVariable.cacheDataList?.remove(it)
+                }
                 interstitialAd = null
                 loadAd(context, interListAD, 0, type) { it1, _ ->
-                    if (it1) {
-                        val cacheData =
-                            AppVariable.cacheDataList?.find { it["type"].toString() == type }
-                        cacheData?.let {
-                            if (it["value"] is InterstitialAd) showInterstitialWithData(
-                                context,
-                                interListAD,
-                                it["value"] as InterstitialAd,
-                                type,
-                                onShowAdCompleteListener
-                            )
-                        }
-                    }
+//                    if (it1) {
+//                        val cacheData =
+//                            AppVariable.cacheDataList?.find { it["type"].toString() == type }
+//                        cacheData?.let {
+//                            if (it["value"] is InterstitialAd) showInterstitialWithData(
+//                                context,
+//                                interListAD,
+//                                it["value"] as InterstitialAd,
+//                                type,
+//                                onShowAdCompleteListener
+//                            )
+//                        }
+//                    }
                 }
             }
 
@@ -190,7 +195,7 @@ class InterstitialAdManager {
                             loadAd(
                                 context, interListAd, position + 1, type
                             ) { it, _ ->
-                                if (it) result.invoke(true, true)
+//                                if (it) result.invoke(true, true)
                             }
                         } else {
                             result(false, false)
@@ -217,8 +222,7 @@ class InterstitialAdManager {
                             put(AppConstant.LOAD_TIME, Date().time)
                         }
                         AppVariable.cacheDataList?.add(data)
-                        if (type == ADType.INTER_OPEN.value) AppVariable.cacheSplashADData =
-                            interListAd[position]
+                        if (type == ADType.INTER_OPEN.value) AppVariable.cacheSplashADData = interListAd[position]
                         adIsLoading = false
                         result.invoke(true, true)
                     }

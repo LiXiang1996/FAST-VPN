@@ -8,14 +8,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:paddingBottom="12.5dp"
-        android:background="#FFFFFF"
-        android:orientation="vertical">
+        android:background="#FFFFFF">
         <com.google.android.gms.ads.nativead.MediaView
             android:id="@+id/native_ad_media"
             android:layout_width="match_parent"
-            android:layout_height="214dp"
-            android:layout_gravity="center_horizontal"
+            android:layout_height="210dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -24,6 +21,7 @@
             android:layout_width="41dp"
             android:layout_height="41dp"
             android:layout_marginStart="11.5dp"
+            android:layout_marginBottom="12.5dp"
             android:layout_marginTop="9.1dp"
             tools:src="@mipmap/home_robot_disconnect"
             app:layout_constraintStart_toStartOf="parent"
@@ -47,7 +45,7 @@
             tools:text="High School Escape 2 aniefkawejfnaefnajw" />
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:layout_marginStart="9.1dp"
+            android:layout_marginBottom="12.5dp"
             android:id="@+id/ad_title2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -57,7 +55,7 @@
             android:layout_marginEnd="10dp"
             android:textSize="14sp"
             app:layout_constraintEnd_toStartOf="@id/ad_call_to_action"
-            app:layout_constraintBottom_toBottomOf="@id/native_ad_header"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="@id/ad_title1"
             app:layout_constraintTop_toBottomOf="@id/ad_title1"
             tools:text="Press the spacebar and nfasjnafienfaefaefoaenfia" />
@@ -72,7 +70,8 @@
             android:textSize="12sp"
             tools:text="install"
             android:textColor="@color/white"
-            app:layout_constraintBottom_toBottomOf="@id/native_ad_header"
+            android:layout_marginBottom="12.5dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toEndOf="@id/ad_title1"

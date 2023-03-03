@@ -65,9 +65,12 @@ object GetADData {
                 ADType.INTER_SERVER.value, ADType.INTER_CONNECT.value -> {
                     if (manager is InterstitialAdManager) {
                         manager.loadAd(context, adListBean, 0, type) { it1, it2 ->
-                            if (it1) {
+                            if (it1 && activity.canJump) {
                                 manager.showInterstitial(
-                                    activity, adListBean, type, onShowAdCompleteListener
+                                    activity,
+                                    adListBean,
+                                    type,
+                                    onShowAdCompleteListener
                                 )
                             }
                             if (!it1 && !it2) {
@@ -100,7 +103,7 @@ object GetADData {
                         if (CheckADStatus().wasLoadTimeLessThanNHoursAgo(
                                 1,
                                 (data[AppConstant.LOAD_TIME] as Long)
-                            )
+                            ) && activity.canJump
                         ) {
                             manager.showInterstitialWithData(
                                 activity,
@@ -114,7 +117,7 @@ object GetADData {
                                 AppVariable.cacheDataList?.find { it["type"].toString() == type }
                             AppVariable.cacheDataList?.remove(data)
                             manager.loadAd(context, adListBean, 0, type) { it1, it2 ->
-                                if (it1) {
+                                if (it1 && activity.canJump) {
                                     manager.showInterstitial(
                                         activity, adListBean, type, onShowAdCompleteListener
                                     )
@@ -139,6 +142,18 @@ object GetADData {
                             adView.bringToFront()
                             container?.removeAllViews()
                             container?.addView(adView)
+
+                            if (!AppVariable.isNativeImpression) {
+                                AppVariable.isNativeImpression = false
+                                TimberUtils().printADImpression(type)
+                                AppVariable.cacheDataList?.forEach {
+                                    if (it["type"].toString() ==type)  AppVariable.cacheDataList?.remove(it)
+                                }
+                                CheckADStatus().setShowAndClickCount(
+                                    activity, isShow = true, isClick = false
+                                )
+                                manager.refreshAd(activity, container, type, 0, adListBean) {}
+                            } else AppVariable.isNativeImpression = false
 
                         } else {
                             //过期 删除缓存
@@ -194,7 +209,7 @@ object GetADData {
         }
     }
 
-     fun getOpenData(
+    fun getOpenData(
         activity: BaseActivity,
         manager: Any,
         onShowAdCompleteListener: OnShowAdCompleteListener,

@@ -29,6 +29,6 @@ object AppVariable {
     })
     var dateShow :String = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())+"show"
     var dateClick :String = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())+"click"
-    var canShowAD = false
+    var isNativeImpression = false
 
 }

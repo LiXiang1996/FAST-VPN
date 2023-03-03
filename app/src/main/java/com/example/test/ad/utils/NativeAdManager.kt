@@ -44,7 +44,6 @@ class NativeAdManager {
     var currentNativeAd: NativeAd? = null
     val nativeTAG = AppConstant.TAG + " NativeAD"
     var isLoadingAD = false
-    var isShowAD = false
 
     fun populateNativeAdView(nativeAd: NativeAd, adView: View) {
         val nativeAdView: NativeAdView = adView.rootView as NativeAdView
@@ -105,7 +104,7 @@ class NativeAdManager {
         result: (NativeAd) -> Unit
     ) {
         TimberUtils().printADLoadLog(type, AppConstant.LOADING, nativeListAD[position])
-        if (isLoadingAD) return
+        if (isLoadingAD||activity.isFinishing||activity.isDestroyed) return
         if (position < nativeListAD.size) {
             isLoadingAD = true
             val builder = AdLoader.Builder(activity, nativeListAD[position].robvn_id)
@@ -115,70 +114,81 @@ class NativeAdManager {
                 .setVideoOptions(videoOptions).build()
 
             builder.forNativeAd { nativeAd ->
-                currentNativeAd = nativeAd
                 if (activity.isDestroyed || activity.isFinishing || activity.isChangingConfigurations) {
                     nativeAd.destroy()
                     return@forNativeAd
                 }
+                currentNativeAd?.destroy()
+                currentNativeAd = nativeAd
                 result.invoke(nativeAd)
-            }.withNativeAdOptions(adOptions).withAdListener(object : AdListener() {
-                override fun onAdClicked() {
-                    TimberUtils().printADClick(type)
-                    CheckADStatus ().setShowAndClickCount(
-                        activity, isShow = false, isClick = true
-                    )
-                    super.onAdClicked()
-                }
-
-                override fun onAdClosed() {
-                    isShowAD = false
-                    Timber.tag(nativeTAG).e("关闭广告")
-                    super.onAdClosed()
-                }
-
-                override fun onAdLoaded() {
-                    isLoadingAD = false
-                    TimberUtils().printADLoadLog(type, AppConstant.LOAD_SUC, nativeListAD[position])
-                    val data = HashMap<String, Any>().apply {
-                        put("type", type)
-                        put("value", currentNativeAd!!)
-                        put(AppConstant.LOAD_TIME, Date().time)
+            }
+                .withNativeAdOptions(adOptions)
+                .withAdListener(object : AdListener() {
+                    override fun onAdClicked() {
+                        TimberUtils().printADClick(type)
+                        CheckADStatus().setShowAndClickCount(
+                            activity, isShow = false, isClick = true
+                        )
+                        super.onAdClicked()
                     }
-                    AppVariable.cacheDataList?.add(data)
-                    super.onAdLoaded()
-                }
 
-                override fun onAdOpened() {
-                    Timber.tag(nativeTAG).e("ad opened")
-                    super.onAdOpened()
-                }
+                    override fun onAdClosed() {
+                        Timber.tag(nativeTAG).e("关闭广告")
+                        super.onAdClosed()
+                    }
 
-                override fun onAdImpression() {
-                    isShowAD = true
-                    TimberUtils().printADImpression(type)
-                    val a = AppVariable.cacheDataList?.find { it["type"].toString() == type }
-                    a?.remove(type)
-                    CheckADStatus().setShowAndClickCount(
-                        activity, isShow = true, isClick = false
-                    )
-                    refreshAd(activity,frameLayout,type, position, nativeListAD){}
-                    super.onAdImpression()
-                }
+                    override fun onAdLoaded() {
+                        isLoadingAD = false
+                        TimberUtils().printADLoadLog(
+                            type,
+                            AppConstant.LOAD_SUC,
+                            nativeListAD[position]
+                        )
 
-                override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                    isLoadingAD = false
-                    TimberUtils().printADLoadLog(
-                        type,
-                        AppConstant.LOAD_FAIL,
-                        nativeListAD[position],loadAdError
-                    )
-                    if (position + 1 < nativeListAD.size) {
-                        refreshAd(activity, frameLayout, type, position + 1, nativeListAD) {
-                            result.invoke(it)
+                        AppVariable.cacheDataList?.forEach {
+                            if (it["type"].toString() ==type)  AppVariable.cacheDataList?.remove(it)
+                        }
+                        val data = HashMap<String, Any>().apply {
+                            put("type", type)
+                            put("value", currentNativeAd!!)
+                            put(AppConstant.LOAD_TIME, Date().time)
+                        }
+                        AppVariable.cacheDataList?.add(data)
+                        super.onAdLoaded()
+                    }
+
+                    override fun onAdOpened() {
+                        Timber.tag(nativeTAG).e("ad opened")
+                        super.onAdOpened()
+                    }
+
+                    override fun onAdImpression() {
+                        AppVariable.isNativeImpression = true
+                        TimberUtils().printADImpression(type)
+                        AppVariable.cacheDataList?.forEach {
+                            if (it["type"].toString() ==type)  AppVariable.cacheDataList?.remove(it)
+                        }
+                        CheckADStatus().setShowAndClickCount(
+                            activity, isShow = true, isClick = false
+                        )
+                        refreshAd(activity, frameLayout, type, position, nativeListAD) {}
+                        super.onAdImpression()
+                    }
+
+                    override fun onAdFailedToLoad(loadAdError: LoadAdError) {
+                        isLoadingAD = false
+                        TimberUtils().printADLoadLog(
+                            type,
+                            AppConstant.LOAD_FAIL,
+                            nativeListAD[position], loadAdError
+                        )
+                        if (position + 1 < nativeListAD.size) {
+                            refreshAd(activity, frameLayout, type, position + 1, nativeListAD) {
+                                result.invoke(it)
+                            }
                         }
                     }
-                }
-            }).build().loadAd(AdRequest.Builder().build())
+                }).build().loadAd(AdRequest.Builder().build())
         }
     }
 
