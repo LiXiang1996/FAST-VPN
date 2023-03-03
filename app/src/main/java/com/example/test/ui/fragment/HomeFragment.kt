@@ -9,6 +9,7 @@ import android.os.CountDownTimer
 import android.os.RemoteException
 import android.os.SystemClock
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
@@ -39,6 +40,7 @@ import com.example.test.ui.activity.MainActivity
 import com.example.test.ui.activity.ServersListActivity
 import com.example.test.ui.activity.ServersListProfile
 import com.example.test.ui.activity.SeverConnectStateActivity
+import com.example.test.ui.widget.NativeFrameLayout
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.ShadowsocksConnection
@@ -75,7 +77,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
 
     private lateinit var interstitialAdManager: InterstitialAdManager
     private lateinit var nativeAdManager: NativeAdManager
-    private lateinit var nativeAdContainer: FrameLayout
+     lateinit var nativeAdContainer: NativeFrameLayout
 
 
     override fun onCreateView(
@@ -99,6 +101,12 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         isToConnect = AppVariable.state == BaseService.State.Stopped
         setData()
         showNativeAD(activity as BaseActivity)
+        nativeAdContainer.setOnTouchListener(object :View.OnTouchListener{
+            override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+                return isShowGuideDialog
+            }
+
+        })
         super.onResume()
     }
 
@@ -133,6 +141,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         animationRotate?.repeatCount = Animation.INFINITE
         animationRotate?.duration = 3000
         animationRotate?.fillBefore = true
+        nativeAdContainer.setHomeFragment(this)
 
         if (isShowGuideDialog && AppVariable.state != BaseService.State.Connected) {
             (activity as MainActivity).showGuideView()
@@ -143,6 +152,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initListener() {
+
         connectClickBtn.setOnClickListener {
             if (isShowGuideDialog) {
                 //引导页消失操作
@@ -201,14 +211,25 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         }
     }
 
-    private val permission = registerForActivityResult(StartService()) {
+    private val permission = registerForActivityResult(StartService()) { it ->
         if (it) {
             Toast.makeText(
                 context,
                 getString(com.github.shadowsocks.core.R.string.vpn_permission_denied),
                 Toast.LENGTH_LONG
             ).show()
-            (activity as MainActivity)?.let { it.frameLayout.visibility = View.GONE }
+            (activity as MainActivity)?.let { it2 -> it2.frameLayout.visibility = View.GONE }
+            connectRobotImg.visibility = View.VISIBLE
+            lottieAnimationView.visibility = View.INVISIBLE
+            lottieAnimationView.clearAnimation()
+            animationRotate?.cancel()
+            connectClickBtn.setBackgroundResource(R.mipmap.main_btn_stop_bg)
+            connectStateImg.setImageDrawable(
+                ContextCompat.getDrawable(
+                    context, R.mipmap.home_toggle_btn_close
+                )
+            )
+            connectRobotImg.setImageDrawable(context.getDrawable(R.mipmap.home_robot_disconnect))
         } else {
             val data = ServersListProfile.getServerProfile(AppVariable.host).copy()
             val find = ProfileManager.getAllProfiles()?.find { it1 -> it1.host == AppVariable.host }
@@ -342,11 +363,10 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                         }
                     launch {
                         if (activity is MainActivity) {
-                            if (CheckADStatus().canShowAD(activity as MainActivity)){
+                            if (CheckADStatus().canShowAD(activity as MainActivity)) {
 //                                loadInterAd(activity as Activity, ADType.INTER_SERVER.value)
                                 loadInterAd(activity as Activity, ADType.INTER_CONNECT.value)
-                            }
-                            else {
+                            } else {
                                 delay(3000)
                                 toggle()
                             }
@@ -370,7 +390,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
 
             override fun onFinish() {
                 //这儿用是否展示广告来判断倒计时结束时是否跳转
-                if (!interstitialAdManager.adIsImpression){
+                if (!interstitialAdManager.adIsImpression) {
                     interstitialAdManager.interstitialAd = null
                     toggle()
                 }

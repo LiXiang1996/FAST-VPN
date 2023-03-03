@@ -107,7 +107,7 @@ class NativeAdManager {
             val builder = AdLoader.Builder(activity, nativeListAD[position].robvn_id)
             val videoOptions = VideoOptions.Builder().setStartMuted(true).build()
             val adOptions = NativeAdOptions.Builder()
-                .setReturnUrlsForImageAssets(false)//admob广告接入media view不显示图片
+                .setReturnUrlsForImageAssets(false)//修复admob广告接入media view不显示图片
                 .setVideoOptions(videoOptions).build()
 
             builder.forNativeAd { nativeAd ->
