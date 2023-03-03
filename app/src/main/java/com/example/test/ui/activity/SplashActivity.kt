@@ -3,6 +3,9 @@ package com.example.test.ui.activity
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.CountDownTimer
+import android.view.KeyEvent
+import android.view.View
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import com.example.test.R
 import com.example.test.ad.data.*
@@ -83,7 +86,10 @@ class SplashActivity : BaseActivity() {
                 }
 
                 override fun onFinish() {
-                    nextTo()
+                    if (!AppVariable.isBackGroundToSplash) {
+                        nextTo()
+                    }
+                    finish()
                 }
             }
 
@@ -91,18 +97,21 @@ class SplashActivity : BaseActivity() {
                 countDownADTimer?.start()
                 Timber.tag(AppConstant.TAG).e("是否从后台切回前台: ${AppVariable.isBackGroundToSplash}")
                 delay(1000)
-                if (AppVariable.isBackGroundToSplash) {
-                } else {
-                    loadADData()
+                if (!AppVariable.isBackGroundToSplash) loadADData()//冷启动请求广告数据
+                else {
+                    checkCache()
                 }
-                //检测本地缓存
+                //检测本地开屏缓存
                 if (AppVariable.cacheSplashADData != null && AppVariable.cacheSplashADData?.robvn_l != null) {
                     showDataAD(AppVariable.cacheSplashADData?.robvn_l.toString(),
                         object : OnShowAdCompleteListener {
                             override fun onShowAdComplete() {
                                 countDownADTimer?.cancel()
-                                val intent = Intent(this@SplashActivity, MainActivity::class.java)
-                                this@SplashActivity.startActivity(intent)
+                                if (!AppVariable.isBackGroundToSplash) {
+                                    val intent =
+                                        Intent(this@SplashActivity, MainActivity::class.java)
+                                    this@SplashActivity.startActivity(intent)
+                                }
                                 finish()
                             }
                         })
@@ -116,12 +125,41 @@ class SplashActivity : BaseActivity() {
                 }
 
                 override fun onFinish() {
-                    nextTo()
+                    if (!AppVariable.isBackGroundToSplash) {
+                        nextTo()
+                    } else finish()
                 }
             }
             countDownTimer.start()
         }
         super.initData()
+    }
+
+    private fun checkCache() {
+        if (AppVariable.cacheDataList?.find { it["type"].toString() == ADType.INTER_CONNECT.value } == null) {
+            AppVariable.interADList?.let {
+                interstitialAaManager1.loadAd(
+                    applicationContext,
+                    it,
+                    0,
+                    type = ADType.INTER_CONNECT.value
+                ) { _, _ -> }
+            }
+        }
+        if (AppVariable.cacheDataList?.find { it["type"].toString() == ADType.NATIVE_HOME.value } == null) {
+            //native首页
+            AppVariable.nativeResultADList?.let {
+                nativeAdManagerHome.refreshAd(this, null, ADType.NATIVE_HOME.value, 0, it) {
+                }
+            }
+        }
+        if (AppVariable.cacheDataList?.find { it["type"].toString() == ADType.NATIVE_RESULT.value } == null) {
+            //native结果页
+            AppVariable.nativeHomeADList?.let {
+                nativeAdManagerResult.refreshAd(this, null, ADType.NATIVE_RESULT.value, 0, it) {
+                }
+            }
+        }
     }
 
     private fun showDataAD(type: String, onShowAdCompleteListener: OnShowAdCompleteListener) {
@@ -224,8 +262,11 @@ class SplashActivity : BaseActivity() {
                 it, null, object : OnShowAdCompleteListener {
                     override fun onShowAdComplete() {
                         countDownADTimer?.cancel()
-                        val intent = Intent(this@SplashActivity, MainActivity::class.java)
-                        this@SplashActivity.startActivity(intent)
+                        if (!AppVariable.isBackGroundToSplash) {
+                            val intent =
+                                Intent(this@SplashActivity, MainActivity::class.java)
+                            this@SplashActivity.startActivity(intent)
+                        }
                         finish()
                     }
                 })
@@ -241,6 +282,14 @@ class SplashActivity : BaseActivity() {
             this@SplashActivity.startActivity(intent)
             finish()
         }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
     }
 
 

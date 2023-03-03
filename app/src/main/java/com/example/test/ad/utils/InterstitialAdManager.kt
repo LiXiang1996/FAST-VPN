@@ -61,7 +61,9 @@ class InterstitialAdManager {
             }
 
             override fun onAdFailedToShowFullScreenContent(adError: AdError) {
-                TimberUtils().printAdFailedToShowFullScreenContent(type)
+                TimberUtils().printAdFailedToShowFullScreenContent(type, adError)
+                val a = AppVariable.cacheDataList?.find { it["type"].toString() == type }
+                a?.remove(type)
                 interstitialAd = null
                 loadAd(context, interListAD, 0, type) { it1, _ ->
                     if (it1) {
@@ -80,9 +82,6 @@ class InterstitialAdManager {
                 }
             }
 
-            override fun onAdShowedFullScreenContent() {
-//                TimberUtils().printAdShowedFullScreenContent(type)
-            }
         }
         interstitialAd?.show(context)
     }
@@ -128,7 +127,9 @@ class InterstitialAdManager {
             }
 
             override fun onAdFailedToShowFullScreenContent(adError: AdError) {
-                TimberUtils().printAdFailedToShowFullScreenContent(type)
+                TimberUtils().printAdFailedToShowFullScreenContent(type, adError)
+                val a = AppVariable.cacheDataList?.find { it["type"].toString() == type }
+                a?.remove(type)
                 interstitialAd = null
                 loadAd(context, interListAD, 0, type) { it1, _ ->
                     if (it1) {
@@ -185,10 +186,12 @@ class InterstitialAdManager {
                         if (context is BaseActivity) {
                             if (!context.canJump) return
                         }
-                        if (position + 1 < interListAd.size) loadAd(
-                            context, interListAd, position + 1, type
-                        ) { it, _ ->
-                            if (it) result.invoke(true, true)
+                        if (position + 1 < interListAd.size) {
+                            loadAd(
+                                context, interListAd, position + 1, type
+                            ) { it, _ ->
+                                if (it) result.invoke(true, true)
+                            }
                         } else {
                             result(false, false)
                         }

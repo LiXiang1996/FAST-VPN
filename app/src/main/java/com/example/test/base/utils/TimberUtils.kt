@@ -2,6 +2,7 @@ package com.example.test.base.utils
 
 import com.example.test.ad.data.ADListBean
 import com.example.test.base.AppConstant
+import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.LoadAdError
 import timber.log.Timber
 
@@ -49,9 +50,9 @@ class TimberUtils {
     }
 
     fun printAdFailedToShowFullScreenContent(
-        type: String
+        type: String,adError: AdError
     ) {
-        Timber.tag(ADTAG).e("Type: $type  展示失败")
+        Timber.tag(ADTAG).e("Type: $type  展示失败   错误信息：${adError.message}")
     }
 
 }

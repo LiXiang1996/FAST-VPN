@@ -74,6 +74,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
     var isToConnect = false
     var countDownTimer: CountDownTimer? = null
     var isShowGuideDialog = false
+    var isUpdateNative = true
 
     private lateinit var interstitialAdManager: InterstitialAdManager
     private lateinit var nativeAdManager: NativeAdManager
@@ -100,13 +101,9 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
     override fun onResume() {
         isToConnect = AppVariable.state == BaseService.State.Stopped
         setData()
-        showNativeAD(activity as BaseActivity)
-        nativeAdContainer.setOnTouchListener(object :View.OnTouchListener{
-            override fun onTouch(v: View?, event: MotionEvent?): Boolean {
-                return isShowGuideDialog
-            }
-
-        })
+        if (isUpdateNative) {
+            showNativeAD(activity as BaseActivity)
+        }else isUpdateNative = !isUpdateNative
         super.onResume()
     }
 
@@ -451,10 +448,21 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                 null,
                 object : OnShowAdCompleteListener {
                     override fun onShowAdComplete() {
+                        isUpdateNative = false
                         countDownTimer?.cancel()
                         toggle()
                     }
                 })
         }
+
+        if (AppVariable.cacheDataList?.find { it["type"].toString() == ADType.NATIVE_RESULT.value } == null) {
+            //没有缓存去请求native结果页
+            AppVariable.nativeHomeADList?.let {
+                nativeAdManager.refreshAd(activity, null, ADType.NATIVE_RESULT.value, 0, it) {
+                }
+            }
+        }
     }
+
+
 }

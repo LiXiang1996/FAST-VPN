@@ -44,6 +44,7 @@ class NativeAdManager {
     var currentNativeAd: NativeAd? = null
     val nativeTAG = AppConstant.TAG + " NativeAD"
     var isLoadingAD = false
+    var isShowAD = false
 
     fun populateNativeAdView(nativeAd: NativeAd, adView: View) {
         val nativeAdView: NativeAdView = adView.rootView as NativeAdView
@@ -53,7 +54,9 @@ class NativeAdManager {
         nativeAdView.headlineView = NativeAdView1.headLine
         nativeAdView.callToActionView = NativeAdView1.actionView
         NativeAdView1.headLine?.text = nativeAd.headline
-        nativeAd.mediaContent?.let { NativeAdView1.adMedia?.setMediaContent(it) }
+        nativeAd.mediaContent?.let {
+            NativeAdView1.adMedia?.setMediaContent(it)
+        }
 
         if (nativeAd.body == null) {
             NativeAdView1.adBody?.visibility = View.INVISIBLE
@@ -102,6 +105,7 @@ class NativeAdManager {
         result: (NativeAd) -> Unit
     ) {
         TimberUtils().printADLoadLog(type, AppConstant.LOADING, nativeListAD[position])
+        if (isLoadingAD) return
         if (position < nativeListAD.size) {
             isLoadingAD = true
             val builder = AdLoader.Builder(activity, nativeListAD[position].robvn_id)
@@ -127,6 +131,7 @@ class NativeAdManager {
                 }
 
                 override fun onAdClosed() {
+                    isShowAD = false
                     Timber.tag(nativeTAG).e("关闭广告")
                     super.onAdClosed()
                 }
@@ -149,6 +154,7 @@ class NativeAdManager {
                 }
 
                 override fun onAdImpression() {
+                    isShowAD = true
                     TimberUtils().printADImpression(type)
                     val a = AppVariable.cacheDataList?.find { it["type"].toString() == type }
                     a?.remove(type)

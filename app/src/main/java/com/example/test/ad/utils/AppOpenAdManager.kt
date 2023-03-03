@@ -138,7 +138,7 @@ class AppOpenAdManager {
             override fun onAdFailedToShowFullScreenContent(adError: AdError) {
                 appOpenAd = null
                 isShowingAd = false
-                TimberUtils().printAdFailedToShowFullScreenContent(type)
+                TimberUtils().printAdFailedToShowFullScreenContent(type,adError)
                 result.invoke(false, false)
                 onShowAdCompleteListener.onShowAdComplete()
             }

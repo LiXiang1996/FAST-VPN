@@ -139,14 +139,6 @@ object GetADData {
                             adView.bringToFront()
                             container?.removeAllViews()
                             container?.addView(adView)
-                            // TODO:
-                            TimberUtils().printADImpression(type)
-                            val a = AppVariable.cacheDataList?.find { it["type"].toString() == type }
-                            a?.remove(type)
-                            CheckADStatus().setShowAndClickCount(
-                                activity, isShow = true, isClick = false
-                            )
-                            manager.refreshAd(activity,container,type, 0, adListBean){}
 
                         } else {
                             //过期 删除缓存
