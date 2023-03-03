@@ -16,6 +16,7 @@ object AppVariable {
     var temporaryProfile: Profile? = null
     var isShowBanedIpDialog = false
     var isBackGround = false
+    var exitAppTime = 0L
     var isBackGroundToSplash = false
     var openADList: MutableList<ADListBean.ADBean>? = null
     var interADList: MutableList<ADListBean.ADBean>? = null

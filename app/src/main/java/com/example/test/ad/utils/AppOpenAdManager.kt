@@ -52,11 +52,9 @@ class AppOpenAdManager {
         result: (Boolean, Boolean) -> Unit
     ) {
         if (isLoadingAd) {
-//            Timber.tag(TAG)
-//                .e("AppOpen 是否有正在loading的广告 $isLoadingAd appOpenAd是否为空${appOpenAd == null} ")
             return
         }
-        TimberUtils().printADLoadLog(type,AppConstant.LOADING,openData)
+        TimberUtils().printADLoadLog(type, AppConstant.LOADING, openData)
         isLoadingAd = true
         val request = AdRequest.Builder().build()
         AppOpenAd.load(context,
@@ -64,8 +62,6 @@ class AppOpenAdManager {
             request,
             object : AppOpenAd.AppOpenAdLoadCallback() {
                 override fun onAdLoaded(ad: AppOpenAd) {
-                    val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                    val a = format.format(Date())
                     appOpenAd = ad
                     isLoadingAd = false
                     loadTime = Date().time
@@ -89,7 +85,9 @@ class AppOpenAdManager {
                 @SuppressLint("BinaryOperationInTimber")
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                     isLoadingAd = false
-                    if (context is BaseActivity){ if (!context.canJump) return }
+                    if (context is BaseActivity) {
+                        if (!context.canJump) return
+                    }
                     result.invoke(false, false)
                     TimberUtils().printADLoadLog(type, AppConstant.LOAD_FAIL, openData, loadAdError)
                 }

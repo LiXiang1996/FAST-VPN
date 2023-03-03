@@ -9,6 +9,7 @@ import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
 import com.example.test.base.BaseActivity
 import com.example.test.base.utils.SharedPreferencesUtils
+import com.example.test.base.utils.TimberUtils
 import com.google.android.gms.ads.appopen.AppOpenAd
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.nativead.NativeAd
@@ -82,6 +83,7 @@ object GetADData {
                         ) { it1 ->
                             val adView = NativeAdView1.getView(activity)
                             manager.populateNativeAdView(it1, adView)
+                            adView.bringToFront()
                             container?.removeAllViews()
                             container?.addView(adView)
                         }
@@ -132,12 +134,20 @@ object GetADData {
                                 (data[AppConstant.LOAD_TIME] as Long)
                             )
                         ) {
-                            Timber.tag(AppConstant.TAG + " " + type)
-                                .e("未过期 ${(data[AppConstant.LOAD_TIME] as Long)}")
                             val adView = NativeAdView1.getView(activity)
                             manager.populateNativeAdView(data["value"] as NativeAd, adView)
+                            adView.bringToFront()
                             container?.removeAllViews()
                             container?.addView(adView)
+                            // TODO:
+                            TimberUtils().printADImpression(type)
+                            val a = AppVariable.cacheDataList?.find { it["type"].toString() == type }
+                            a?.remove(type)
+                            CheckADStatus().setShowAndClickCount(
+                                activity, isShow = true, isClick = false
+                            )
+                            manager.refreshAd(activity,container,type, 0, adListBean){}
+
                         } else {
                             //过期 删除缓存
                             val data =
@@ -148,6 +158,7 @@ object GetADData {
                             ) { it1 ->
                                 val adView = NativeAdView1.getView(activity)
                                 manager.populateNativeAdView(it1, adView)
+                                adView.bringToFront()
                                 container?.removeAllViews()
                                 container?.addView(adView)
                             }
@@ -191,7 +202,7 @@ object GetADData {
         }
     }
 
-    private fun getOpenData(
+     fun getOpenData(
         activity: BaseActivity,
         manager: Any,
         onShowAdCompleteListener: OnShowAdCompleteListener,

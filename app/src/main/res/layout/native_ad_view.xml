@@ -8,14 +8,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:paddingBottom="12.5dp"
         android:background="#FFFFFF"
         android:orientation="vertical">
         <com.google.android.gms.ads.nativead.MediaView
             android:id="@+id/native_ad_media"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="214dp"
             android:layout_gravity="center_horizontal"
-            android:maxHeight="215dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -24,7 +24,6 @@
             android:layout_width="41dp"
             android:layout_height="41dp"
             android:layout_marginStart="11.5dp"
-            android:layout_marginBottom="12.5dp"
             android:layout_marginTop="9.1dp"
             tools:src="@mipmap/home_robot_disconnect"
             app:layout_constraintStart_toStartOf="parent"

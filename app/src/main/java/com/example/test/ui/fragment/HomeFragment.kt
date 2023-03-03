@@ -342,8 +342,10 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                         }
                     launch {
                         if (activity is MainActivity) {
-                            if (CheckADStatus().canShowAD(activity as MainActivity))
-                                loadInterAd(activity as Activity, ADType.INTER_SERVER.value)
+                            if (CheckADStatus().canShowAD(activity as MainActivity)){
+//                                loadInterAd(activity as Activity, ADType.INTER_SERVER.value)
+                                loadInterAd(activity as Activity, ADType.INTER_CONNECT.value)
+                            }
                             else {
                                 delay(3000)
                                 toggle()

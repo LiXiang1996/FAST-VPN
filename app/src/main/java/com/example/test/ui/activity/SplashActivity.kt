@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.CountDownTimer
 import android.widget.ProgressBar
-import com.example.test.App
 import com.example.test.R
 import com.example.test.ad.data.*
 import com.example.test.ad.utils.AppOpenAdManager
@@ -16,6 +15,8 @@ import com.example.test.base.AppVariable
 import com.example.test.base.BaseActivity
 import com.example.test.base.bar.StatusBarUtil
 import com.example.test.base.utils.SharedPreferencesUtils
+import com.google.android.gms.ads.appopen.AppOpenAd
+import com.google.android.gms.ads.interstitial.InterstitialAd
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -31,8 +32,9 @@ class SplashActivity : BaseActivity() {
     var countDownADTimer: CountDownTimer? = null
     override var layoutId: Int = R.layout.activity_splash
     private lateinit var interstitialAaManager1: InterstitialAdManager
-    private lateinit var interstitialAaManager2: InterstitialAdManager
-    private lateinit var nativeAdManager: NativeAdManager
+    private lateinit var interstitialAaManagerOpen: InterstitialAdManager
+    private lateinit var nativeAdManagerHome: NativeAdManager
+    private lateinit var nativeAdManagerResult: NativeAdManager
     private lateinit var appOpenAdManager: AppOpenAdManager
 
 
@@ -50,9 +52,10 @@ class SplashActivity : BaseActivity() {
         AppVariable.isShowBanedIpDialog =
             countryCode.lowercase() == "ir" || Locale.getDefault().country.lowercase() == "irn"
         interstitialAaManager1 = InterstitialAdManager()
-        interstitialAaManager2 = InterstitialAdManager()
+        interstitialAaManagerOpen = InterstitialAdManager()
         appOpenAdManager = AppOpenAdManager()
-        nativeAdManager = NativeAdManager()
+        nativeAdManagerResult = NativeAdManager()
+        nativeAdManagerHome = NativeAdManager()
 
     }
 
@@ -86,15 +89,25 @@ class SplashActivity : BaseActivity() {
 
             MainScope().launch {
                 countDownADTimer?.start()
-                Timber.tag(AppConstant.TAG)
-                    .e("是否从后台切回前台: ${AppVariable.isBackGround}")
+                Timber.tag(AppConstant.TAG).e("是否从后台切回前台: ${AppVariable.isBackGroundToSplash}")
+                delay(1000)
                 if (AppVariable.isBackGroundToSplash) {
-                    delay(3000)
-                } else{
+                } else {
                     loadADData()
-                    delay(1000)
                 }
-                showAD()
+                //检测本地缓存
+                if (AppVariable.cacheSplashADData != null && AppVariable.cacheSplashADData?.robvn_l != null) {
+                    showDataAD(AppVariable.cacheSplashADData?.robvn_l.toString(),
+                        object : OnShowAdCompleteListener {
+                            override fun onShowAdComplete() {
+                                countDownADTimer?.cancel()
+                                val intent = Intent(this@SplashActivity, MainActivity::class.java)
+                                this@SplashActivity.startActivity(intent)
+                                finish()
+                            }
+                        })
+                } else
+                    showAD()
             }
         } else {
             countDownTimer = object : CountDownTimer(3000L, 300) {
@@ -109,6 +122,44 @@ class SplashActivity : BaseActivity() {
             countDownTimer.start()
         }
         super.initData()
+    }
+
+    private fun showDataAD(type: String, onShowAdCompleteListener: OnShowAdCompleteListener) {
+        val manager = if (type == ADType.OPEN.value) appOpenAdManager else interstitialAaManagerOpen
+        val data = AppVariable.cacheDataList?.find { it["type"].toString() == type }
+        if (data != null) {
+            if (data[AppConstant.LOAD_TIME] is Long) {
+                if (CheckADStatus().wasLoadTimeLessThanNHoursAgo(
+                        1,
+                        (data[AppConstant.LOAD_TIME] as Long)
+                    )
+                ) {
+                    if (AppVariable.cacheSplashADData?.robvn_l == ADType.OPEN.value && data["value"] is AppOpenAd) {
+                        if (manager is AppOpenAdManager) manager.showAdIfAvailableWithData(
+                            this,
+                            type,
+                            AppVariable.cacheSplashADData!!,
+                            data["value"] as AppOpenAd,
+                            onShowAdCompleteListener
+                        ) { it1, it2 ->
+                            GetADData.getOpenData(
+                                this, manager, onShowAdCompleteListener, 0
+                            )
+                        }
+                    } else if (AppVariable.cacheSplashADData?.robvn_l == ADType.INTER.value && data["value"] is InterstitialAd) {
+                        if (manager is InterstitialAdManager) manager.showInterstitialWithData(
+                            this,
+                            mutableListOf(AppVariable.cacheSplashADData!!),
+                            data["value"] as InterstitialAd,
+                            ADType.INTER_OPEN.value,
+                            onShowAdCompleteListener
+                        )
+                    }
+                }
+            } else {
+                GetADData.getOpenData(this, manager, onShowAdCompleteListener)
+            }
+        }
     }
 
     private fun loadADData() {
@@ -130,8 +181,8 @@ class SplashActivity : BaseActivity() {
         }
 
         //2、按需求开始load所谓位置的广告
-        //开屏页
-        //连接页面
+
+        //连接页面  服务器列表页面跳转首页 todo 3.2日  测试提出现在的需求 共用广告 只缓存一个
         AppVariable.interADList?.let {
             interstitialAaManager1.loadAd(
                 applicationContext,
@@ -141,27 +192,16 @@ class SplashActivity : BaseActivity() {
             ) { _, _ -> }
         }
 
-        //服务器列表页面跳转首页
-        AppVariable.interADList?.let {
-            interstitialAaManager2.loadAd(
-                applicationContext,
-                it,
-                0,
-                type = ADType.INTER_SERVER.value
-            ) { _, _ -> }
-        }
 
         //native首页
         AppVariable.nativeResultADList?.let {
-            nativeAdManager.refreshAd(this, null, ADType.NATIVE_HOME.value, 0, it) {
-
+            nativeAdManagerHome.refreshAd(this, null, ADType.NATIVE_HOME.value, 0, it) {
             }
         }
 
         //native结果页
         AppVariable.nativeHomeADList?.let {
-            nativeAdManager.refreshAd(this, null, ADType.NATIVE_RESULT.value, 0, it) {
-
+            nativeAdManagerResult.refreshAd(this, null, ADType.NATIVE_RESULT.value, 0, it) {
             }
         }
 
@@ -173,7 +213,7 @@ class SplashActivity : BaseActivity() {
     }
 
     override fun onDestroy() {
-        countDownTimer?.cancel()
+        countDownTimer.cancel()
         countDownADTimer?.cancel()
         super.onDestroy()
     }

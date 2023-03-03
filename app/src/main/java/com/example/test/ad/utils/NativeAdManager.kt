@@ -106,14 +106,16 @@ class NativeAdManager {
             isLoadingAD = true
             val builder = AdLoader.Builder(activity, nativeListAD[position].robvn_id)
             val videoOptions = VideoOptions.Builder().setStartMuted(true).build()
-            val adOptions = NativeAdOptions.Builder().setVideoOptions(videoOptions).build()
+            val adOptions = NativeAdOptions.Builder()
+                .setReturnUrlsForImageAssets(false)//admob广告接入media view不显示图片
+                .setVideoOptions(videoOptions).build()
 
             builder.forNativeAd { nativeAd ->
+                currentNativeAd = nativeAd
                 if (activity.isDestroyed || activity.isFinishing || activity.isChangingConfigurations) {
                     nativeAd.destroy()
                     return@forNativeAd
                 }
-                currentNativeAd = nativeAd
                 result.invoke(nativeAd)
             }.withNativeAdOptions(adOptions).withAdListener(object : AdListener() {
                 override fun onAdClicked() {
@@ -153,6 +155,7 @@ class NativeAdManager {
                     CheckADStatus().setShowAndClickCount(
                         activity, isShow = true, isClick = false
                     )
+                    refreshAd(activity,frameLayout,type, position, nativeListAD){}
                     super.onAdImpression()
                 }
 

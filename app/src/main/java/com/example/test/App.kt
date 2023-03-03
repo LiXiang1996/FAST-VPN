@@ -63,6 +63,8 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
         Core.init(this, MainActivity::class)
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
 //        getRemoteConfig()
+        var str = " {\"Dallas\",\"aaa\",\"bbb\",\"cccc\"}"
+        getServerSmartDataList2(str)
     }
 
 
@@ -83,10 +85,13 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
     override fun onActivityStarted(activity: Activity) {
         if (AppVariable.isBackGround) {
             AppVariable.isBackGround = false
-            if (activity !is SplashActivity) {//不在启屏页做重复跳转
-                AppVariable.isBackGroundToSplash = true
-                val intent = Intent(activity, SplashActivity::class.java)
-                activity.startActivity(intent)
+            Timber.tag(AppConstant.TAG).e("${(System.currentTimeMillis() - AppVariable.exitAppTime) / 1000}")
+            if ((System.currentTimeMillis() - AppVariable.exitAppTime) / 1000 > 3) {
+                if (activity !is SplashActivity) {//不在启屏页做重复跳转
+                    AppVariable.isBackGroundToSplash = true
+                    val intent = Intent(activity, SplashActivity::class.java)
+                    activity.startActivity(intent)
+                }
             }
         }
         activityCount++
@@ -105,6 +110,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
         activityCount--
         if (activityCount == 0) {
             AppVariable.isBackGround = true
+            AppVariable.exitAppTime = System.currentTimeMillis()
         }
     }
 
@@ -170,6 +176,22 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
         }
     }
 
+    private fun getServerSmartDataList2(str: String) {
+        val arr: List<String> = str.split(",")
+        val list = mutableListOf<String>()
+        arr.forEach {
+            val s = it
+                .replace("\"", "")
+                .replace("{", "")
+                .replace("}", "")
+                .replace(" ", "").trim()
+            list.add(s)
+            println("lixiang-----$s  ${list.size}")
+        }
+
+
+    }
+
     private fun getADList(list: String) {
         try {
             val gson = Gson()
@@ -192,7 +214,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
                 listServerSmart = remoteConfig.getString("robvn_smart")
                 listAD = remoteConfig.getString("robvn_ad")
                 listServer?.let { getServerDataList(it) }
-                listServerSmart?.let { getServerSmartDataList(it) }
+                listServerSmart?.let { getServerSmartDataList2(it) }
                 listAD?.let { getADList(it) }
             }
         }
@@ -207,7 +229,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
             listServerSmart = remoteConfig.getString("robvn_smart")
             if (listServerSmart?.isNotEmpty() == true || listServerSmart?.isNotBlank() == true)
                 listServerSmart?.let {
-                    getServerSmartDataList(it)
+                    getServerSmartDataList2(it)
                 }
         }
 
