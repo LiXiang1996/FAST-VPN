@@ -18,6 +18,9 @@ import com.google.android.gms.ads.nativead.MediaView
 import com.google.android.gms.ads.nativead.NativeAd
 import com.google.android.gms.ads.nativead.NativeAdOptions
 import com.google.android.gms.ads.nativead.NativeAdView
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.internal.synchronized
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.*
 import kotlin.collections.HashMap
@@ -57,6 +60,12 @@ class NativeAdManager {
             NativeAdView1.adMedia?.setMediaContent(it)
         }
 
+        if (nativeAdView.mediaView?.mediaContent==null){
+            Timber.tag(AppConstant.TAG).e("nativeAdView.mediaView?.mediaContent 为空")
+        }else{
+            Timber.tag(AppConstant.TAG).e("mediaContent ${nativeAdView.mediaView?.mediaContent}  body是否为空 ${nativeAd.body.isNullOrEmpty()}" +
+                    " nativeAd callToAction ${nativeAd.callToAction.toString()} nativeAd icon  ${nativeAd.icon}   ")
+        }
         if (nativeAd.body == null) {
             NativeAdView1.adBody?.visibility = View.INVISIBLE
         } else {
@@ -144,10 +153,6 @@ class NativeAdManager {
                             AppConstant.LOAD_SUC,
                             nativeListAD[position]
                         )
-
-                        AppVariable.cacheDataList?.forEach {
-                            if (it["type"].toString() ==type)  AppVariable.cacheDataList?.remove(it)
-                        }
                         val data = HashMap<String, Any>().apply {
                             put("type", type)
                             put("value", currentNativeAd!!)

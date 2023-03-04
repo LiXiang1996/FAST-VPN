@@ -460,8 +460,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         if (AppVariable.cacheDataList?.find { it["type"].toString() == ADType.NATIVE_RESULT.value } == null) {
             //没有缓存去请求native结果页
             AppVariable.nativeResultADList?.let {
-                nativeAdManagerR.refreshAd(activity, null, ADType.NATIVE_RESULT.value, 0, it) {
-                }
+                nativeAdManagerR.refreshAd(activity, null, ADType.NATIVE_RESULT.value, 0, it) {}
             }
         }
     }

@@ -86,6 +86,7 @@ object GetADData {
                         ) { it1 ->
                             val adView = NativeAdView1.getView(activity)
                             manager.populateNativeAdView(it1, adView)
+                            // TODO: 这儿是不是可以整个回调，没有数据的时候不展示
                             adView.bringToFront()
                             container?.removeAllViews()
                             container?.addView(adView)
@@ -146,12 +147,16 @@ object GetADData {
                             if (!AppVariable.isNativeImpression) {
                                 AppVariable.isNativeImpression = false
                                 TimberUtils().printADImpression(type)
-                                AppVariable.cacheDataList?.forEach {
-                                    if (it["type"].toString() ==type)  AppVariable.cacheDataList?.remove(it)
+                                AppVariable.cacheDataList?.let {
+                                    synchronized(it) {
+                                        AppVariable.cacheDataList?.forEach {it1->
+                                            if (it1["type"].toString() == type) AppVariable.cacheDataList?.remove(
+                                                it1
+                                            )
+                                        }
+                                    }
                                 }
-                                CheckADStatus().setShowAndClickCount(
-                                    activity, isShow = true, isClick = false
-                                )
+                                CheckADStatus().setShowAndClickCount(activity, isShow = true, isClick = false)
                                 manager.refreshAd(activity, container, type, 0, adListBean) {}
                             } else AppVariable.isNativeImpression = false
 
