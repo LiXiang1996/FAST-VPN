@@ -1,13 +1,9 @@
 package com.example.test.base.utils
 
-import com.example.test.base.AppConstant
 import com.example.test.ui.activity.ServersListProfile
 import com.google.errorprone.annotations.Keep
 import kotlinx.coroutines.*
-import okhttp3.internal.wait
-import timber.log.Timber
 import java.io.BufferedReader
-import java.io.IOException
 import java.io.InputStreamReader
 
 object NetworkPing {

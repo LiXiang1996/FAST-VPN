@@ -64,8 +64,12 @@ class SeverConnectStateActivity : BaseActivity() {
         StatusBarUtil.setTranslucentStatus(this)
         val country = AppVariable.country
         countryName.text =
-            if (country == AppConstant.DEFAULT || country.isBlank()) getString(R.string.super_fast_server) else country
-        Glide.with(this).load(CountryUtils.getCountrySource(country)).circleCrop().into(countryImg)
+            if (AppVariable.isFast || country.isBlank()) getString(R.string.super_fast_server) else country
+        if (AppVariable.isFast) Glide.with(this).load(R.mipmap.server_default)
+            .circleCrop().into(countryImg)
+        else
+            Glide.with(this).load(CountryUtils.getCountrySource(country)).circleCrop()
+                .into(countryImg)
         nativeAdManager = NativeAdManager()
     }
 
@@ -104,7 +108,8 @@ class SeverConnectStateActivity : BaseActivity() {
                 connectTime.text = AppVariable.connectTotalTime
                 connectText.text = getString(R.string.disconnected)
                 container.setBackgroundResource(R.drawable.server_disconnect_bg)
-                ServersListProfile.getServersList().forEach { it.isChecked = false }
+                ServersListProfile.defaultList.forEach { it.isChecked = false }
+                ServersListProfile.getSmartServersList().forEach { it.isChecked = false }
                 robotImg.setImageDrawable(getDrawable(R.mipmap.server_disconnect_robot_img))
             }
             else -> {}

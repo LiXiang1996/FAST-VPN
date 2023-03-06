@@ -64,7 +64,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
 //        getRemoteConfig()
         var str = " {\"Dallas\",\"aaa\",\"bbb\",\"cccc\"}"
-        getServerSmartDataList2(str)
+        getServerSmartDataList(str)
     }
 
 
@@ -125,10 +125,9 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
             val resultBean: MutableList<RemoteProfile> =
                 gson.fromJson(list, object : TypeToken<List<RemoteProfile?>?>() {}.type)
             if ((resultBean.size) > 0) {
-//                Timber.tag(AppConstant.TAG).e("remoteConfig $list  size:${resultBean.size}")
                 val profileList = mutableListOf<Profile>()
                 resultBean.forEach { profileList.add(ToProfile.remoteProfileToProfile(it)) }
-//                Timber.tag(AppConstant.TAG).e("profileList $profileList  size:${profileList.size}")
+                Timber.tag(AppConstant.TAG).e("profileList $profileList  size:${profileList.size}")
                 if ((profileList.size) > 0) {
                     ServersListProfile.defaultList.clear()
                     profileList.forEach {
@@ -143,40 +142,40 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
         }
     }
 
-    private fun getServerSmartDataList(list: String) {
-        try {
-            val gson = Gson()
-            val resultBean: MutableList<RemoteProfile> =
-                gson.fromJson(list, object : TypeToken<List<RemoteProfile?>?>() {}.type)
-            if ((resultBean.size) > 0) {
-                val profileList = mutableListOf<Profile>()
-                resultBean.forEach { profileList.add(ToProfile.remoteProfileToProfile(it)) }
-                Timber.tag(AppConstant.TAG)
-                    .e("smartProfileList $profileList  size:${profileList.size}")
-                if ((profileList.size) > 0) {
-                    profileList.forEach { it1 ->
-                        val findData = ServersListProfile.getServersList().find { it2 ->
-                            it2.city == it1.city
-                        }
-                        if (findData != null) {
-                            it1.name = findData.name//国家名
-                            it1.host = findData.host//ip
-                            it1.remotePort = findData.remotePort//端口
-                            it1.password = findData.password//密码
-                            it1.method = findData.method
-                        }
-                    }
-                    ServersListProfile.setSmartListProfile(profileList)
-                    Timber.tag(AppConstant.TAG)
-                        .e("smart servers${profileList.size}")
-                }
-            }
-        } catch (e: Exception) {
-            Timber.tag(AppConstant.TAG).e(e)
-        }
-    }
+//    private fun getServerSmartDataList(list: String) {
+//        try {
+//            val gson = Gson()
+//            val resultBean: MutableList<RemoteProfile> =
+//                gson.fromJson(list, object : TypeToken<List<RemoteProfile?>?>() {}.type)
+//            if ((resultBean.size) > 0) {
+//                val profileList = mutableListOf<Profile>()
+//                resultBean.forEach { profileList.add(ToProfile.remoteProfileToProfile(it)) }
+//                Timber.tag(AppConstant.TAG)
+//                    .e("smartProfileList $profileList  size:${profileList.size}")
+//                if ((profileList.size) > 0) {
+//                    profileList.forEach { it1 ->
+//                        val findData = ServersListProfile.getServersList().find { it2 ->
+//                            it2.city == it1.city
+//                        }
+//                        if (findData != null) {
+//                            it1.name = findData.name//国家名
+//                            it1.host = findData.host//ip
+//                            it1.remotePort = findData.remotePort//端口
+//                            it1.password = findData.password//密码
+//                            it1.method = findData.method
+//                        }
+//                    }
+//                    ServersListProfile.setSmartListProfile(profileList)
+//                    Timber.tag(AppConstant.TAG)
+//                        .e("smart servers${profileList.size}")
+//                }
+//            }
+//        } catch (e: Exception) {
+//            Timber.tag(AppConstant.TAG).e(e)
+//        }
+//    }
 
-    private fun getServerSmartDataList2(str: String) {
+    private fun getServerSmartDataList(str: String) {
         val arr: List<String> = str.split(",")
         val list = mutableListOf<String>()
         arr.forEach {
@@ -186,10 +185,14 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
                 .replace("}", "")
                 .replace(" ", "").trim()
             list.add(s)
-            println("lixiang-----$s  ${list.size}")
         }
-
-
+        val smartList: MutableList<Profile> = mutableListOf()
+        list.forEach { it1 ->
+            ServersListProfile.getServersList().forEach { it2 ->
+                if (it1 == it2.city) smartList.add(it2)
+            }
+        }
+        if (smartList.size > 0) ServersListProfile.setSmartListProfile(smartList)
     }
 
     private fun getADList(list: String) {
@@ -214,13 +217,13 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
                 listServerSmart = remoteConfig.getString("robvn_smart")
                 listAD = remoteConfig.getString("robvn_ad")
                 listServer?.let { getServerDataList(it) }
-                listServerSmart?.let { getServerSmartDataList2(it) }
+                listServerSmart?.let { getServerSmartDataList(it) }
                 listAD?.let { getADList(it) }
             }
         }
         if (listServer?.isEmpty() == true && listServer?.isBlank() == true) {
             listServer = remoteConfig.getString("robvn_ser")
-            if (listServer?.isEmpty() == true || listServer?.isBlank() == true) ServersListProfile.getServersList()
+            if (listServer?.isEmpty() == true || listServer?.isBlank() == true)//为空不对本地数据做操作
             else {
                 listServer?.let { getServerDataList(it) }
             }
@@ -229,7 +232,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
             listServerSmart = remoteConfig.getString("robvn_smart")
             if (listServerSmart?.isNotEmpty() == true || listServerSmart?.isNotBlank() == true)
                 listServerSmart?.let {
-                    getServerSmartDataList2(it)
+                    getServerSmartDataList(it)
                 }
         }
 

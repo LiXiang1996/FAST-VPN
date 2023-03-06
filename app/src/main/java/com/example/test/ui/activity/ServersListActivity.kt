@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Adapter
@@ -32,9 +33,11 @@ import com.example.test.base.utils.LinearLayoutDivider
 import com.example.test.base.utils.NetworkUtil
 import com.example.test.base.utils.ScreenSizeUtils
 import com.example.test.ui.activity.ServersListProfile.Companion.getServersList
+import com.example.test.ui.activity.ServersListProfile.Companion.getSmartServerRandom
 import com.example.test.ui.widget.TitleView
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.database.Profile
+import kotlinx.coroutines.*
 
 
 class ServersListActivity : BaseActivity() {
@@ -42,6 +45,7 @@ class ServersListActivity : BaseActivity() {
     private lateinit var serverList: RecyclerView
     private lateinit var serverTitle: TitleView
     private var recyclerViewAdapter: RecyclerViewAdapter? = null
+    private val serversListData: MutableList<Profile> = getServersList()
 
     override var layoutId: Int = R.layout.activity_server_list
     override fun initListener() {
@@ -60,19 +64,39 @@ class ServersListActivity : BaseActivity() {
         decoration.mDividerHeight = DpUtils.dip2px(this, 12F)
         serverList.addItemDecoration(decoration)
         val list = mutableListOf<Profile>()
-        if (AppVariable.isFast && AppVariable.state == BaseService.State.Connected) getServersList()[0].isChecked =
-            true
-        else getServersList().find { it.host == AppVariable.host && AppVariable.state == BaseService.State.Connected }
-            .apply { this?.isChecked = true }
-        list.addAll(getServersList())
-        recyclerViewAdapter?.setData(list)
-        recyclerViewAdapter?.notifyDataSetChanged()
+        GlobalScope.launch {
+            coroutineScope {
+                serversListData.forEach {
+                    list.add(it.apply {
+                        this.isChecked = false
+                    })
+                }
+                if (AppVariable.state == BaseService.State.Connected) {
+                    if (AppVariable.isFast) {
+                        list[0].isChecked = true
+                        for (i in 1 until list.size) {
+                            if (list[i].isChecked) list[i].isChecked =
+                                false
+                        }
+                    } else {
+                        list[0].isChecked =
+                            false//因为第一位smart配置是复制的下面普通配置的数据，可能会有数据isChecked为true
+                        for (i in 1 until list.size) {
+                            if (list[i].host == AppVariable.host) list[i].isChecked =
+                                true
+                        }
+                    }
+                }
+            }
+            recyclerViewAdapter?.setData(list)
+            recyclerViewAdapter?.notifyDataSetChanged()
+        }
     }
 }
 
 
 class RecyclerViewAdapter(context: Context?) : Adapter<RecyclerViewAdapter.MyViewHolder>() {
-    private var data: List<Profile>? = null
+    private var data: MutableList<Profile>? = null
     private val inflater: LayoutInflater
     private var context: Context? = null
 
@@ -81,7 +105,7 @@ class RecyclerViewAdapter(context: Context?) : Adapter<RecyclerViewAdapter.MyVie
         this.context = context
     }
 
-    fun setData(data: List<Profile>) {
+    fun setData(data: MutableList<Profile>) {
         this.data = data
     }
 
@@ -95,11 +119,13 @@ class RecyclerViewAdapter(context: Context?) : Adapter<RecyclerViewAdapter.MyVie
 
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        if (!data?.get(position)?.city.isNullOrBlank() && position != 0) {
+        if (!data?.get(position)?.name.isNullOrBlank() && position != 0) {
             holder.countryText.text = data?.get(position)?.name + "-" + data?.get(position)?.city
-        } else holder.countryText.text = data?.get(position)?.name
+        } else holder.countryText.text = "Super Fast Server"
         context?.let { it ->
-            Glide.with(it).load(data?.get(position)?.let { it1 ->
+            if (position == 0) Glide.with(it).load(R.mipmap.server_default).circleCrop()
+                .into(holder.iconImg)
+            else Glide.with(it).load(data?.get(position)?.let { it1 ->
                 it1.name.let { it2 -> CountryUtils.getCountrySource(it2 ?: "") }
             }).circleCrop().into(holder.iconImg)
         }
@@ -116,7 +142,9 @@ class RecyclerViewAdapter(context: Context?) : Adapter<RecyclerViewAdapter.MyVie
             val isHaveChecked: Int = data?.indexOfFirst { it.isChecked } ?: -1
             if (isHaveChecked > -1) {
                 if (AppVariable.state == BaseService.State.Connected && isHaveChecked == position) return@setOnClickListener
-                showTipsDialog(holder.itemView.context, data?.get(position))
+                showTipsDialog(
+                    holder.itemView.context, data?.get(position), data as MutableList<Profile>
+                )
             } else {
                 val isFastVpn = position == 0
                 toJump(holder.itemView.context, data?.get(position), isFastVpn)
@@ -148,7 +176,9 @@ class RecyclerViewAdapter(context: Context?) : Adapter<RecyclerViewAdapter.MyVie
     }
 
 
-    private fun showTipsDialog(context: Context, data: Profile?) {
+    private fun showTipsDialog(
+        context: Context, data: Profile?, serversListData: MutableList<Profile>
+    ) {
         val dialog = Dialog(context, R.style.NormalDialogStyle)
         val localView = LayoutInflater.from(context)
             .inflate(R.layout.common_global_volume_dialog2, null) //设置自定义的弹窗UI
@@ -167,7 +197,7 @@ class RecyclerViewAdapter(context: Context?) : Adapter<RecyclerViewAdapter.MyVie
             dialog.dismiss()
         }
         confirmTv.setOnClickListener {
-            val find = getServersList().find { it.isChecked }
+            val find = serversListData.find { it.isChecked }
             AppVariable.temporaryProfile = data
             toJump(context, find, false)
             dialog.dismiss()
@@ -176,11 +206,9 @@ class RecyclerViewAdapter(context: Context?) : Adapter<RecyclerViewAdapter.MyVie
     }
 }
 
+
 class ServersListProfile {
     companion object {
-        private val fastProfile = Profile(name = "Fast Super Server")
-        private var smartListProfile = mutableListOf<Profile>()
-
         private val defaultProfile1 = ToProfile.remoteProfileToProfile(
             RemoteProfile(
                 robvn_pwd = "tvX1v#NSFP_LG_bJ",
@@ -191,26 +219,66 @@ class ServersListProfile {
                 robvn_port = 812
             )
         )
+        private val defaultProfile2 = ToProfile.remoteProfileToProfile(
+            RemoteProfile(
+                robvn_pwd = "tvX1v#NSFP_LG_bJ",
+                robvn_account = "chacha20-ietf-poly1305",
+                robvn_city = "Tokyo",
+                robvn_ip = "52.11.255.91",
+                robvn_country = "Japan",
+                robvn_port = 811
+            )
+        )
+        private val defaultProfile3 = ToProfile.remoteProfileToProfile(
+            RemoteProfile(
+                robvn_pwd = "tvX1v#NSFP_LG_bJ",
+                robvn_account = "chacha20-ietf-poly1305",
+                robvn_city = "Tokyo",
+                robvn_ip = "52.11.255.92",
+                robvn_country = "India",
+                robvn_port = 811
+            )
+        )
+        private val defaultSmartProfile1 = ToProfile.remoteProfileToProfile(
+            RemoteProfile(
+                robvn_pwd = "tvX1v#NSFP_LG_bJ",
+                robvn_account = "chacha20-ietf-poly1305",
+                robvn_city = "Dallas",
+                robvn_ip = "52.11.255.98",
+                robvn_country = "United States",
+                robvn_port = 812
+            )
+        )
 
-         var defaultList = mutableListOf(defaultProfile1)
+        //这是默认配置列表，若远程有数据，则更新此列表
+        var defaultList = mutableListOf(defaultProfile1, defaultProfile2, defaultProfile3)
+
+        //这是默认配置smart列表，若远程有数据，则更新此列表
+        private var smartListProfile = mutableListOf(defaultSmartProfile1)
 
         fun getServersList(): MutableList<Profile> {
             val mutableList = mutableListOf<Profile>()
-            mutableList.add(fastProfile)
+            mutableList.add(getSmartServerRandom())
             mutableList.addAll(defaultList)
             return mutableList
         }
 
-         fun  setSmartListProfile(listProfile:MutableList<Profile>){
+        fun setSmartListProfile(listProfile: MutableList<Profile>) {
             this.smartListProfile = listProfile
         }
-        fun getSmartServersList():MutableList<Profile>{
+
+        fun getSmartServersList(): MutableList<Profile> {
             return smartListProfile
         }
 
+        fun getSmartServerRandom(): Profile {
+            return getSmartServersList().take(3).random().copy().apply {
+                this.name = ""
+            }
+        }
 
         fun getServerProfile(host: String): Profile {
-            val list = ArrayList(getServersList()).apply { removeAt(0) }
+            val list = ArrayList(defaultList)
             val data = list.find { it.host == host }
             return if (data == null) list[0] else data
         }

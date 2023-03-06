@@ -79,7 +79,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
     private lateinit var interstitialAdManager: InterstitialAdManager
     private lateinit var nativeAdManager: NativeAdManager
     private lateinit var nativeAdManagerR: NativeAdManager
-     lateinit var nativeAdContainer: NativeFrameLayout
+    lateinit var nativeAdContainer: NativeFrameLayout
 
 
     override fun onCreateView(
@@ -104,7 +104,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         setData()
         if (isUpdateNative) {
             showNativeAD(activity as BaseActivity)
-        }else isUpdateNative = !isUpdateNative
+        } else isUpdateNative = !isUpdateNative
         super.onResume()
     }
 
@@ -200,11 +200,12 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         if (AppVariable.state.canStop) Core.stopService()
         else {
             lifecycleScope.launch {
-                if (AppVariable.isFast) launch {
-                    NetworkPing.toFastToggle { ip ->
-                        AppVariable.host = ip
-                    }
-                }
+//                if (AppVariable.isFast)
+//                    launch {
+//                    NetworkPing.toFastToggle { ip ->
+//                        AppVariable.host = ip
+//                    }
+//                }
                 permission.launch(null)
             }
         }
@@ -354,12 +355,12 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                     Toast.makeText(activity, "Connecting", Toast.LENGTH_SHORT).show()
                 }
                 lifecycleScope.launch {
-                    if (isToConnect && AppVariable.isFast)
-                        launch {
-                            NetworkPing.toFastToggle { ip ->
-                                AppVariable.host = ip
-                            }
-                        }
+//                    if (isToConnect && AppVariable.isFast)
+//                        launch {
+//                            NetworkPing.toFastToggle { ip ->
+//                                AppVariable.host = ip
+//                            }
+//                        }
                     launch {
                         if (activity is MainActivity) {
                             if (CheckADStatus().canShowAD(activity as MainActivity)) {
@@ -413,20 +414,18 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
             AppVariable.country = AppVariable.temporaryProfile?.name ?: AppConstant.DEFAULT
             AppVariable.temporaryProfile = null
         }
+        //当没有选中的节点时，主页默认给一个smart配置
+        if ((AppVariable.host.isBlank() || AppVariable.host.isEmpty())&&AppVariable.isFast) {
+            AppVariable.host = ServersListProfile.getSmartServerRandom().host
+        }
         countryName.text =
-            if (AppVariable.country == AppConstant.DEFAULT || AppVariable.country.isBlank()) "Super Fast Server" else AppVariable.country
-        Glide.with(this).load(
-            CountryUtils.getCountrySource(
-                AppVariable.country
-            )
-        ).circleCrop()
+            if (AppVariable.isFast || AppVariable.country.isBlank()) "Super Fast Server" else AppVariable.country
+        if (AppVariable.isFast) Glide.with(this).load(R.mipmap.server_default).circleCrop()
+            .into(countryIcon)
+        else Glide.with(this).load(CountryUtils.getCountrySource(AppVariable.country)).circleCrop()
             .into(countryIcon)
     }
 
-    override fun onStop() {
-//        countDownTimer?.cancel()
-        super.onStop()
-    }
 
     private fun showNativeAD(activity: BaseActivity) {
         AppVariable.nativeHomeADList?.let {
