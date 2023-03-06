@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import com.example.test.ad.data.ADListBean
+import com.example.test.ad.data.ADLoading
 import com.example.test.ad.data.ADType
 import com.example.test.ad.data.CheckADStatus
 import com.example.test.base.AppConstant
@@ -54,7 +55,11 @@ class AppOpenAdManager {
         if (isLoadingAd) {
             return
         }
+        if(ADLoading.OPEN.isLoading){
+            return
+        }
         TimberUtils().printADLoadLog(type, AppConstant.LOADING, openData)
+        ADLoading.OPEN.isLoading = true
         isLoadingAd = true
         val request = AdRequest.Builder().build()
         AppOpenAd.load(context,
@@ -64,6 +69,7 @@ class AppOpenAdManager {
                 override fun onAdLoaded(ad: AppOpenAd) {
                     appOpenAd = ad
                     isLoadingAd = false
+                    ADLoading.OPEN.isLoading = false
                     loadTime = Date().time
                     TimberUtils().printADLoadLog(type, AppConstant.LOAD_SUC, openData)
                     result.invoke(true, true)
@@ -85,6 +91,7 @@ class AppOpenAdManager {
                 @SuppressLint("BinaryOperationInTimber")
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                     isLoadingAd = false
+                    ADLoading.OPEN.isLoading = false
                     if (context is BaseActivity) {
                         if (!context.canJump) return
                     }

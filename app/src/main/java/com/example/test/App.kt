@@ -20,6 +20,7 @@ import com.example.test.ui.activity.ServersListProfile
 import com.example.test.ui.activity.SplashActivity
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.database.Profile
+import com.google.android.gms.ads.AdActivity
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.RequestConfiguration
 import com.google.firebase.ktx.Firebase
@@ -36,6 +37,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
 
     private var activityCount = 0
     private var currentActivity: Activity? = null
+    private var activityList = mutableListOf<Activity>()
 
     companion object {
         @SuppressLint("StaticFieldLeak")
@@ -80,19 +82,33 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
 
 
     /** ActivityLifecycleCallback methods. */
-    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
+    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
+        Timber.tag(AppConstant.TAG).e("create ${activity.localClassName}")
+        activityList.add(activity)
+    }
 
     override fun onActivityStarted(activity: Activity) {
+        Timber.tag(AppConstant.TAG).e("start ${activity.localClassName}")
         if (AppVariable.isBackGround) {
             AppVariable.isBackGround = false
-//            Timber.tag(AppConstant.TAG).e("${(System.currentTimeMillis() - AppVariable.exitAppTime) / 1000}")
             if ((System.currentTimeMillis() - AppVariable.exitAppTime) / 1000 > 3) {
                 Timber.tag(AppConstant.TAG).e("从后台切回前台")
+
+                activityList.forEach {
+                    if (it is AdActivity) {
+                        Timber.tag(AppConstant.TAG).e("finish and remove ${it.localClassName}")
+                        it.finish()
+                        activityList.remove(it)
+                    }
+                }
+
                 if (activity !is SplashActivity) {//不在启屏页做重复跳转
                     AppVariable.isBackGroundToSplash = true
                     val intent = Intent(activity, SplashActivity::class.java)
+                    Timber.tag(AppConstant.TAG).e("intent ${activity.localClassName}")
                     activity.startActivity(intent)
                 }
+
             }
         }
         activityCount++
@@ -100,7 +116,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
 
     @SuppressLint("BinaryOperationInTimber")
     override fun onActivityResumed(activity: Activity) {
-        Timber.tag(AppConstant.TAG).e(activity.localClassName)
+        Timber.tag(AppConstant.TAG).e("resume ${activity.localClassName}")
         currentActivity = activity
     }
 
@@ -109,7 +125,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
     }
 
     override fun onActivityStopped(activity: Activity) {
-        Timber.tag(AppConstant.TAG).e(activity.localClassName)
+        Timber.tag(AppConstant.TAG).e("stop ${activity.localClassName}")
         currentActivity = activity
         activityCount--
         if (activityCount == 0) {
@@ -120,7 +136,10 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
 
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
 
-    override fun onActivityDestroyed(activity: Activity) {}
+    override fun onActivityDestroyed(activity: Activity) {
+        Timber.tag(AppConstant.TAG).e("destroy ${activity.localClassName}")
+        activityList.remove(activity)
+    }
 
 
     private fun getServerDataList(list: String) {

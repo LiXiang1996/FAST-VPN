@@ -9,6 +9,8 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import com.example.test.R
 import com.example.test.ad.data.ADListBean
+import com.example.test.ad.data.ADLoading
+import com.example.test.ad.data.ADType
 import com.example.test.ad.data.CheckADStatus
 import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
@@ -112,10 +114,20 @@ class NativeAdManager {
         nativeListAD: MutableList<ADListBean.ADBean>,
         result: (NativeAd) -> Unit
     ) {
-        TimberUtils().printADLoadLog(type, AppConstant.LOADING, nativeListAD[position])
         if (isLoadingAD||activity.isFinishing||activity.isDestroyed) return
+        if (ADLoading.NATIVE_HOME.isLoading && type ==ADType.NATIVE_HOME.value) {
+            Timber.tag(AppConstant.TAG).e("home原生广告还没load完，不load了")
+            return
+        }
+        if (ADLoading.NATIVE_RESULT.isLoading && type ==ADType.NATIVE_RESULT.value){
+            Timber.tag(AppConstant.TAG).e("home原生广告还没load完，不load了")
+            return
+        }
+        TimberUtils().printADLoadLog(type, AppConstant.LOADING, nativeListAD[position])
         if (position < nativeListAD.size) {
             isLoadingAD = true
+            if (type ==ADType.NATIVE_HOME.value)ADLoading.NATIVE_HOME.isLoading = true
+            if (type ==ADType.NATIVE_RESULT.value)ADLoading.NATIVE_RESULT.isLoading = true
             val builder = AdLoader.Builder(activity, nativeListAD[position].robvn_id)
             val videoOptions = VideoOptions.Builder().setStartMuted(true).build()
             val adOptions = NativeAdOptions.Builder()
@@ -147,6 +159,8 @@ class NativeAdManager {
                     }
 
                     override fun onAdLoaded() {
+                        if (type ==ADType.NATIVE_HOME.value)ADLoading.NATIVE_HOME.isLoading = false
+                        if (type ==ADType.NATIVE_RESULT.value)ADLoading.NATIVE_RESULT.isLoading = false
                         isLoadingAD = false
                         TimberUtils().printADLoadLog(
                             type,
@@ -181,6 +195,8 @@ class NativeAdManager {
                     }
 
                     override fun onAdFailedToLoad(loadAdError: LoadAdError) {
+                        if (type ==ADType.NATIVE_HOME.value)ADLoading.NATIVE_HOME.isLoading = false
+                        if (type ==ADType.NATIVE_RESULT.value)ADLoading.NATIVE_RESULT.isLoading = false
                         isLoadingAD = false
                         TimberUtils().printADLoadLog(
                             type,

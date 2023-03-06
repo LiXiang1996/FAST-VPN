@@ -93,6 +93,7 @@ class SplashActivity : BaseActivity() {
                 }
             }
 
+
             MainScope().launch {
                 countDownADTimer?.start()
                 Timber.tag(AppConstant.TAG).e("是否从后台切回前台: ${AppVariable.isBackGroundToSplash}")
@@ -247,10 +248,6 @@ class SplashActivity : BaseActivity() {
 
     }
 
-    override fun onStop() {
-        countDownADTimer?.cancel()
-        super.onStop()
-    }
 
     override fun onDestroy() {
         countDownTimer.cancel()

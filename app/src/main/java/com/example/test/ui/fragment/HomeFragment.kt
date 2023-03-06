@@ -71,6 +71,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
     var countDownTimer: CountDownTimer? = null
     var isShowGuideDialog = false
     var isUpdateNative = true
+    var isCanToJump = false
 
     private lateinit var interstitialAdManager: InterstitialAdManager
     private lateinit var nativeAdManager: NativeAdManager
@@ -97,6 +98,10 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
 
     override fun onResume() {
         isToConnect = AppVariable.state == BaseService.State.Stopped
+        if (isCanToJump){
+            isCanToJump = false
+            result()
+        }
         setData()
         if (isUpdateNative) {
             showNativeAD(activity as BaseActivity)
@@ -178,9 +183,8 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
 
     private fun toggle2Permission(result: (Boolean) -> Unit) {
         isJump = true
-        GlobalScope.launch {
-            coroutineScope { permission.launch(null) }
-        }
+        permission.launch(null)
+
     }
 
     private val permission = registerForActivityResult(StartService()) {
@@ -226,7 +230,9 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
 
 
     fun toggleToConnect() {
-        if (AppVariable.state.canStop) Core.stopService()
+        if (AppVariable.state.canStop) {
+            Core.stopService()
+        }
         else {
             val data = ServersListProfile.getServerProfile(AppVariable.host).copy()
             val find = ProfileManager.getAllProfiles()?.find { it1 -> it1.host == AppVariable.host }
@@ -364,7 +370,6 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         MainScope().launch {
             delay(1000)//延迟一秒后再执行下面代码
         }
-        countDownTimer = null
         countDownTimer = object : CountDownTimer(9000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
             }
@@ -377,16 +382,19 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                 }
             }
         }
-        showInterAD(activity, type)
         countDownTimer?.start()
+
+        showInterAD(activity, type)
     }
 
 
     private fun result() {
-        if (activity is MainActivity) {
+        if (activity is MainActivity && (activity as MainActivity).canJump) {//如果是因为切到后台导致界面不能跳转，则保存一个变量，如何此activity没被杀死，下一次展示此界面的时候跳转
             (activity as MainActivity).frameLayout.visibility = View.GONE
             val intent = Intent(activity, SeverConnectStateActivity::class.java)
             activity?.startActivity(intent)
+        }else{
+            isCanToJump = true
         }
     }
 
@@ -452,3 +460,4 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
 
 
 }
+

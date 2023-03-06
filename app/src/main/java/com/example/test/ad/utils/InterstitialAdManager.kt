@@ -2,6 +2,7 @@ package com.example.test.ad.utils
 
 import android.content.Context
 import com.example.test.ad.data.ADListBean
+import com.example.test.ad.data.ADLoading
 import com.example.test.ad.data.ADType
 import com.example.test.ad.data.CheckADStatus
 import com.example.test.base.AppConstant
@@ -14,6 +15,7 @@ import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
+import timber.log.Timber
 import java.util.*
 
 class InterstitialAdManager {
@@ -59,6 +61,7 @@ class InterstitialAdManager {
             override fun onAdDismissedFullScreenContent() {
                 TimberUtils().printAdDismissedFullScreenContent(type)
                 interstitialAd = null
+                adIsImpression = false
                 onShowAdCompleteListener.onShowAdComplete()
             }
 
@@ -68,20 +71,8 @@ class InterstitialAdManager {
                     if (it["type"].toString() ==type)  AppVariable.cacheDataList?.remove(it)
                 }
                 interstitialAd = null
+                adIsImpression = false
                 loadAd(context, interListAD, 0, type) { it1, _ ->
-//                    if (it1) {
-//                        val cacheData =
-//                            AppVariable.cacheDataList?.find { it["type"].toString() == type }
-//                        cacheData?.let {
-//                            if (it["value"] is InterstitialAd) showInterstitialWithData(
-//                                context,
-//                                interListAD,
-//                                it["value"] as InterstitialAd,
-//                                type,
-//                                onShowAdCompleteListener
-//                            )
-//                        }
-//                    }
                 }
             }
 
@@ -136,25 +127,12 @@ class InterstitialAdManager {
                     if (it["type"].toString() ==type)  AppVariable.cacheDataList?.remove(it)
                 }
                 interstitialAd = null
+                adIsImpression = false
                 loadAd(context, interListAD, 0, type) { it1, _ ->
-//                    if (it1) {
-//                        val cacheData =
-//                            AppVariable.cacheDataList?.find { it["type"].toString() == type }
-//                        cacheData?.let {
-//                            if (it["value"] is InterstitialAd) showInterstitialWithData(
-//                                context,
-//                                interListAD,
-//                                it["value"] as InterstitialAd,
-//                                type,
-//                                onShowAdCompleteListener
-//                            )
-//                        }
-//                    }
                 }
             }
 
             override fun onAdShowedFullScreenContent() {
-//                TimberUtils().printAdShowedFullScreenContent(type)
             }
         }
         interstitialAd?.show(context)
@@ -168,11 +146,16 @@ class InterstitialAdManager {
         result: (Boolean, Boolean) -> Unit
     ) {
         if (position < interListAd.size) {
-            TimberUtils().printADLoadLog(type, AppConstant.LOADING, interListAd[position])
             if (adIsLoading || interstitialAd != null) {
                 return
             }
+            if (ADLoading.INTER.isLoading) {
+                Timber.tag(AppConstant.TAG).e("inter广告还没load完，不load了")
+                return
+            }
+            TimberUtils().printADLoadLog(type, AppConstant.LOADING, interListAd[position])
             adIsLoading = true
+            ADLoading.INTER.isLoading = true
             val adRequest = AdRequest.Builder().build()
             InterstitialAd.load(context,
                 interListAd[position].robvn_id,
@@ -181,6 +164,7 @@ class InterstitialAdManager {
                     override fun onAdFailedToLoad(adError: LoadAdError) {
                         interstitialAd = null
                         adIsLoading = false
+                        ADLoading.INTER.isLoading = false
                         TimberUtils().printADLoadLog(
                             type,
                             AppConstant.LOAD_FAIL,
@@ -209,6 +193,7 @@ class InterstitialAdManager {
                             AppConstant.LOAD_SUC,
                             interListAd[position]
                         )
+                        ADLoading.INTER.isLoading = false
                         interstitialAd = ad
                         loadTime = Date().time
                         val cacheData =
