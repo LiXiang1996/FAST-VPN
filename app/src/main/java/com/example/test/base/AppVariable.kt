@@ -30,6 +30,7 @@ object AppVariable {
     var dateClick: String =
         SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()) + "click"
     var isNativeImpression = false
+    var isHaveVpnPermission = false
 
 }
 

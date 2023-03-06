@@ -176,7 +176,7 @@ class NativeAdManager {
                         CheckADStatus().setShowAndClickCount(
                             activity, isShow = true, isClick = false
                         )
-                        refreshAd(activity, frameLayout, type, position, nativeListAD) {}
+                        refreshAd(activity, frameLayout, type, 0, nativeListAD) {}
                         super.onAdImpression()
                     }
 

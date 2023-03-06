@@ -195,7 +195,7 @@ class InterstitialAdManager {
                             loadAd(
                                 context, interListAd, position + 1, type
                             ) { it, _ ->
-//                                if (it) result.invoke(true, true)
+                                if (it) result.invoke(true, true)// TODO:
                             }
                         } else {
                             result(false, false)

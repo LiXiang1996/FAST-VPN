@@ -65,7 +65,7 @@ object GetADData {
                 ADType.INTER_SERVER.value, ADType.INTER_CONNECT.value -> {
                     if (manager is InterstitialAdManager) {
                         manager.loadAd(context, adListBean, 0, type) { it1, it2 ->
-                            if (it1 && activity.canJump) {
+                            if (it1 && activity.canJump&&!activity.isFinishing&&!activity.isDestroyed) {
                                 manager.showInterstitial(
                                     activity,
                                     adListBean,

@@ -87,6 +87,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
             AppVariable.isBackGround = false
 //            Timber.tag(AppConstant.TAG).e("${(System.currentTimeMillis() - AppVariable.exitAppTime) / 1000}")
             if ((System.currentTimeMillis() - AppVariable.exitAppTime) / 1000 > 3) {
+                Timber.tag(AppConstant.TAG).e("从后台切回前台")
                 if (activity !is SplashActivity) {//不在启屏页做重复跳转
                     AppVariable.isBackGroundToSplash = true
                     val intent = Intent(activity, SplashActivity::class.java)
@@ -97,7 +98,9 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
         activityCount++
     }
 
+    @SuppressLint("BinaryOperationInTimber")
     override fun onActivityResumed(activity: Activity) {
+        Timber.tag(AppConstant.TAG).e(activity.localClassName)
         currentActivity = activity
     }
 
@@ -106,6 +109,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
     }
 
     override fun onActivityStopped(activity: Activity) {
+        Timber.tag(AppConstant.TAG).e(activity.localClassName)
         currentActivity = activity
         activityCount--
         if (activityCount == 0) {

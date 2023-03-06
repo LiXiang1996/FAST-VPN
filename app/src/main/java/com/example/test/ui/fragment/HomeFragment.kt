@@ -9,7 +9,6 @@ import android.os.CountDownTimer
 import android.os.RemoteException
 import android.os.SystemClock
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
@@ -34,7 +33,6 @@ import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
 import com.example.test.base.BaseActivity
 import com.example.test.base.data.CountryUtils
-import com.example.test.base.utils.NetworkPing
 import com.example.test.base.utils.NetworkUtil
 import com.example.test.ui.activity.MainActivity
 import com.example.test.ui.activity.ServersListActivity
@@ -48,9 +46,7 @@ import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.utils.StartService
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.*
@@ -128,12 +124,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         connectClickGuideLottie.loop(true)
         connectClickGuideLottie.playAnimation()
         animationRotate = RotateAnimation(
-            0f,
-            360f,
-            Animation.RELATIVE_TO_SELF,
-            0.5f,
-            Animation.RELATIVE_TO_SELF,
-            0.5f
+            0f, 360f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f
         )
         animationRotate?.interpolator = object : LinearInterpolator() {}
         animationRotate?.repeatCount = Animation.INFINITE
@@ -166,17 +157,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                 }
             }
             if (NetworkUtil.get().isNetworkAvailable || NetworkUtil.isNetSystemUsable(activity)) {
-                if (activity is MainActivity) {
-                    if (CheckADStatus().canShowAD(activity as MainActivity))
-                        activity?.let { it1 -> loadInterAd(it1, ADType.INTER_CONNECT.value) }
-                    else {
-                        (activity as MainActivity).frameLayout.visibility = View.VISIBLE//不可点击
-                        MainScope().launch {
-                            delay(3000)
-                            toggle()
-                        }
-                    }
-                }
+                toggle2Permission {}
             } else Toast.makeText(activity, getString(R.string.network_error), Toast.LENGTH_LONG)
                 .show()
         }
@@ -195,42 +176,58 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         }
     }
 
-    private fun toggle() {
+    private fun toggle2Permission(result: (Boolean) -> Unit) {
         isJump = true
-        if (AppVariable.state.canStop) Core.stopService()
-        else {
-            lifecycleScope.launch {
-//                if (AppVariable.isFast)
-//                    launch {
-//                    NetworkPing.toFastToggle { ip ->
-//                        AppVariable.host = ip
-//                    }
-//                }
-                permission.launch(null)
+        GlobalScope.launch {
+            coroutineScope { permission.launch(null) }
+        }
+    }
+
+    private val permission = registerForActivityResult(StartService()) {
+        if (it) {
+            permissionDeny()
+        } else {
+            AppVariable.isHaveVpnPermission = true
+            //检测权限 无 取消弹窗 有 展示广告-跳转页面
+            if (activity is MainActivity) {
+                if (CheckADStatus().canShowAD(activity as MainActivity))
+                    activity?.let { it1 -> loadInterAd(it1, ADType.INTER_CONNECT.value) }
+                else {
+                    (activity as MainActivity).frameLayout.visibility = View.VISIBLE//不可点击
+                    MainScope().launch {
+                        delay(3000)
+                        toggleToConnect()
+                    }
+                }
             }
         }
     }
 
-    private val permission = registerForActivityResult(StartService()) { it ->
-        if (it) {
-            Toast.makeText(
-                context,
-                getString(com.github.shadowsocks.core.R.string.vpn_permission_denied),
-                Toast.LENGTH_LONG
-            ).show()
-            (activity as MainActivity)?.let { it2 -> it2.frameLayout.visibility = View.GONE }
-            connectRobotImg.visibility = View.VISIBLE
-            lottieAnimationView.visibility = View.INVISIBLE
-            lottieAnimationView.clearAnimation()
-            animationRotate?.cancel()
-            connectClickBtn.setBackgroundResource(R.mipmap.main_btn_stop_bg)
-            connectStateImg.setImageDrawable(
-                ContextCompat.getDrawable(
-                    context, R.mipmap.home_toggle_btn_close
-                )
+    private fun permissionDeny() {
+        Toast.makeText(
+            context,
+            getString(com.github.shadowsocks.core.R.string.vpn_permission_denied),
+            Toast.LENGTH_LONG
+        ).show()
+        (activity as MainActivity)?.let { it2 -> it2.frameLayout.visibility = View.GONE }
+        connectRobotImg.visibility = View.VISIBLE
+        lottieAnimationView.visibility = View.INVISIBLE
+        lottieAnimationView.clearAnimation()
+        animationRotate?.cancel()
+        connectClickBtn.setBackgroundResource(R.mipmap.main_btn_stop_bg)
+        connectStateImg.setImageDrawable(
+            ContextCompat.getDrawable(
+                context, R.mipmap.home_toggle_btn_close
             )
-            connectRobotImg.setImageDrawable(context.getDrawable(R.mipmap.home_robot_disconnect))
-        } else {
+        )
+        connectRobotImg.setImageDrawable(context.getDrawable(R.mipmap.home_robot_disconnect))
+        AppVariable.isHaveVpnPermission = false
+    }
+
+
+    fun toggleToConnect() {
+        if (AppVariable.state.canStop) Core.stopService()
+        else {
             val data = ServersListProfile.getServerProfile(AppVariable.host).copy()
             val find = ProfileManager.getAllProfiles()?.find { it1 -> it1.host == AppVariable.host }
                 ?: Profile()
@@ -246,6 +243,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
             Core.startService()
         }
     }
+
 
     override fun stateChanged(state: BaseService.State, profileName: String?, msg: String?) {
         changeState(state, profileName)
@@ -355,23 +353,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                     Toast.makeText(activity, "Connecting", Toast.LENGTH_SHORT).show()
                 }
                 lifecycleScope.launch {
-//                    if (isToConnect && AppVariable.isFast)
-//                        launch {
-//                            NetworkPing.toFastToggle { ip ->
-//                                AppVariable.host = ip
-//                            }
-//                        }
-                    launch {
-                        if (activity is MainActivity) {
-                            if (CheckADStatus().canShowAD(activity as MainActivity)) {
-//                                loadInterAd(activity as Activity, ADType.INTER_SERVER.value)
-                                loadInterAd(activity as Activity, ADType.INTER_CONNECT.value)
-                            } else {
-                                delay(3000)
-                                toggle()
-                            }
-                        }
-                    }
+                    toggle2Permission {}
                 }
             }
         }
@@ -383,7 +365,6 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
             delay(1000)//延迟一秒后再执行下面代码
         }
         countDownTimer = null
-        showInterAD(activity, type)
         countDownTimer = object : CountDownTimer(9000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
             }
@@ -392,10 +373,11 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                 //这儿用是否展示广告来判断倒计时结束时是否跳转
                 if (!interstitialAdManager.adIsImpression) {
                     interstitialAdManager.interstitialAd = null
-                    toggle()
+                    toggleToConnect()
                 }
             }
         }
+        showInterAD(activity, type)
         countDownTimer?.start()
     }
 
@@ -415,7 +397,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
             AppVariable.temporaryProfile = null
         }
         //当没有选中的节点时，主页默认给一个smart配置
-        if ((AppVariable.host.isBlank() || AppVariable.host.isEmpty())&&AppVariable.isFast) {
+        if ((AppVariable.host.isBlank() || AppVariable.host.isEmpty()) && AppVariable.isFast) {
             AppVariable.host = ServersListProfile.getSmartServerRandom().host
         }
         countryName.text =
@@ -429,8 +411,13 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
 
     private fun showNativeAD(activity: BaseActivity) {
         AppVariable.nativeHomeADList?.let {
-            GetADData.getFindData(activity, context, ADType.NATIVE_HOME.value, nativeAdManager,
-                it, nativeAdContainer, object : OnShowAdCompleteListener {
+            GetADData.getFindData(activity,
+                context,
+                ADType.NATIVE_HOME.value,
+                nativeAdManager,
+                it,
+                nativeAdContainer,
+                object : OnShowAdCompleteListener {
                     override fun onShowAdComplete() {
                     }
                 })
@@ -440,8 +427,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
 
     private fun showInterAD(activity: BaseActivity, type: String) {
         AppVariable.interADList?.let { data ->
-            GetADData.getFindData(
-                activity,
+            GetADData.getFindData(activity,
                 context,
                 type,
                 interstitialAdManager,
@@ -451,7 +437,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                     override fun onShowAdComplete() {
                         isUpdateNative = false
                         countDownTimer?.cancel()
-                        toggle()
+                        toggleToConnect()
                     }
                 })
         }
