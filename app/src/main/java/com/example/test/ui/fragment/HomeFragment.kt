@@ -73,7 +73,6 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
     var isShowGuideDialog = false
     var isUpdateNative = true
     var isCanToJump = false
-    var isBackToMain = false
 
     private lateinit var interstitialAdManager: InterstitialAdManager
     private lateinit var nativeAdManager: NativeAdManager
@@ -100,20 +99,23 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
 
     override fun onResume() {
         isToConnect = AppVariable.state == BaseService.State.Stopped
-        if (isCanToJump){
-            isCanToJump = false
-            result()
+        lifecycleScope.launch {
+            if (isCanToJump) {//延迟执行，因为可能会后台切前台跳转splash
+                delay(300)
+                isCanToJump = false
+                result()
+            }
         }
         setData()
-        if (AppVariable.isBackGroundToMain){
+        if (isUpdateNative) {
             lifecycleScope.launch {
                 delay(200)
-                if (activity != null && (activity as MainActivity).canJump){
+                if (activity != null && (activity as MainActivity).canJump) {
                     AppVariable.isBackGroundToMain = false
                     showNativeAD(activity as BaseActivity)
                 }
             }
-        }
+        } else isUpdateNative = true
         super.onResume()
     }
 
@@ -173,6 +175,18 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
             } else Toast.makeText(activity, getString(R.string.network_error), Toast.LENGTH_LONG)
                 .show()
         }
+        connectRobotImg.setOnClickListener {
+            if (!isShowGuideDialog) {
+                if (NetworkUtil.get().isNetworkAvailable || NetworkUtil.isNetSystemUsable(activity)) {
+                    toggle2Permission {}
+                } else Toast.makeText(
+                    activity,
+                    getString(R.string.network_error),
+                    Toast.LENGTH_LONG
+                )
+                    .show()
+            }
+        }
         serversContainer.setOnClickListener {
             if (!isShowGuideDialog) {
                 val intent = Intent(activity, ServersListActivity::class.java)
@@ -195,6 +209,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
     }
 
     private val permission = registerForActivityResult(StartService()) {
+        isUpdateNative = false
         if (it) {
             permissionDeny()
         } else {
@@ -240,8 +255,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
     fun toggleToConnect() {
         if (AppVariable.state.canStop) {
             Core.stopService()
-        }
-        else {
+        } else {
             val data = ServersListProfile.getServerProfile(AppVariable.host).copy()
             val find = ProfileManager.getAllProfiles()?.find { it1 -> it1.host == AppVariable.host }
                 ?: Profile()
@@ -389,16 +403,17 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
             }
         }
         countDownTimer?.start()
-        if (activity is MainActivity) showInterAD(activity , type)
+        if (activity is MainActivity) showInterAD(activity, type)
     }
 
 
     private fun result() {
-        if (activity is MainActivity && (activity as MainActivity).canJump) {//如果是因为切到后台导致界面不能跳转，则保存一个变量，如何此activity没被杀死，下一次展示此界面的时候跳转
+        if (activity is MainActivity && (activity as MainActivity).canJump) {
+            //如果是因为切到后台导致界面不能跳转，则保存一个变量，如何此activity没被杀死，下一次展示此界面的时候跳转
             (activity as MainActivity).frameLayout.visibility = View.GONE
             val intent = Intent(activity, SeverConnectStateActivity::class.java)
             activity?.startActivity(intent)
-        }else{
+        } else {
             isCanToJump = true
         }
     }
@@ -455,7 +470,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                 })
         }
 
-        if (AppVariable.cacheDataList?.find { it["type"].toString() == ADType.NATIVE_RESULT.value } == null&&!ADLoading.NATIVE_RESULT.isLoading){
+        if (AppVariable.cacheDataList?.find { it["type"].toString() == ADType.NATIVE_RESULT.value } == null && !ADLoading.NATIVE_RESULT.isLoading) {
             //没有缓存去请求native结果页
             AppVariable.nativeResultADList?.let {
                 nativeAdManagerR.refreshAd(activity, null, ADType.NATIVE_RESULT.value, 0, it) {}

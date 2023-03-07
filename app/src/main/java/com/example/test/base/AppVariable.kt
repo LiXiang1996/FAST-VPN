@@ -9,6 +9,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.collections.HashMap
 
 object AppVariable {
+    var isHomeBack: Boolean =false
     var host: String = "" //执行操作的host
     var state = BaseService.State.Idle
     var country: String = ""
@@ -20,7 +21,7 @@ object AppVariable {
     var exitAppTime = 0L
     var isBackGroundToSplash = false
     var isBackGroundToMain = true
-    var isBackGroundToResult = true
+    var isBackGroundToResult = false
     var openADList: MutableList<ADListBean.ADBean>? = null
     var interADList: MutableList<ADListBean.ADBean>? = null
     var nativeHomeADList: MutableList<ADListBean.ADBean>? = null

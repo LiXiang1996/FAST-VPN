@@ -87,7 +87,7 @@ class InterstitialAdManager {
         type: String,
         onShowAdCompleteListener: OnShowAdCompleteListener
     ) {
-        if (context.isFinishing || context.isDestroyed || !context.canJump) return
+        if (context.isFinishing || context.isDestroyed ) return
         adIsImpression = false
         interstitialAd = interstitialAdCache
         interstitialAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
@@ -205,11 +205,11 @@ class InterstitialAdManager {
                         else ADLoading.INTER_OPEN.isLoading = false
                         interstitialAd = ad
                         loadTime = Date().time
-                        val cacheData =
-                            AppVariable.cacheDataList?.find { it["type"].toString() == type }
-                        if (cacheData != null) {
-                            AppVariable.cacheDataList?.remove(cacheData)
-                        }
+//                        val cacheData =
+//                            AppVariable.cacheDataList?.find { it["type"].toString() == type }
+//                        if (cacheData != null) {
+//                            AppVariable.cacheDataList?.remove(cacheData)
+//                        }
                         val data = HashMap<String, Any>().apply {
                             put("type", type)
                             put("value", interstitialAd!!)

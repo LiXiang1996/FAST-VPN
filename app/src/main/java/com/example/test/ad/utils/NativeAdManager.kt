@@ -20,12 +20,8 @@ import com.google.android.gms.ads.nativead.MediaView
 import com.google.android.gms.ads.nativead.NativeAd
 import com.google.android.gms.ads.nativead.NativeAdOptions
 import com.google.android.gms.ads.nativead.NativeAdView
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.internal.synchronized
-import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.*
-import kotlin.collections.HashMap
 
 
 object NativeAdView1 {
@@ -116,19 +112,19 @@ class NativeAdManager {
         nativeListAD: MutableList<ADListBean.ADBean>,
         result: (NativeAd) -> Unit
     ) {
-        if (isLoadingAD) return
-//        if (isLoadingAD || activity.isFinishing || activity.isDestroyed) return
-        if (ADLoading.NATIVE_HOME.isLoading && type == ADType.NATIVE_HOME.value) {
-            Timber.tag(AppConstant.TAG).e("home原生广告还没load完，不发起新的一轮请求")
-            return
-        }
-        if (ADLoading.NATIVE_RESULT.isLoading && type == ADType.NATIVE_RESULT.value) {
-            Timber.tag(AppConstant.TAG).e("result原生广告还没load完，不发起新的一轮请求")
-            return
-        }
-        TimberUtils().printADLoadLog(type, AppConstant.LOADING, nativeListAD[position])
         if (position < nativeListAD.size) {
+//            if (isLoadingAD) return
+//        if (isLoadingAD || activity.isFinishing || activity.isDestroyed) return
+            if (ADLoading.NATIVE_HOME.isLoading && type == ADType.NATIVE_HOME.value) {
+                Timber.tag(AppConstant.TAG).e("home原生广告还没load完，不发起新的一轮请求")
+                return
+            }
+            if (ADLoading.NATIVE_RESULT.isLoading && type == ADType.NATIVE_RESULT.value) {
+                Timber.tag(AppConstant.TAG).e("result原生广告还没load完，不发起新的一轮请求")
+                return
+            }
             isLoadingAD = true
+            TimberUtils().printADLoadLog(type, AppConstant.LOADING, nativeListAD[position])
             if (type == ADType.NATIVE_HOME.value) ADLoading.NATIVE_HOME.isLoading = true
             if (type == ADType.NATIVE_RESULT.value) ADLoading.NATIVE_RESULT.isLoading = true
             val builder = AdLoader.Builder(activity, nativeListAD[position].robvn_id)

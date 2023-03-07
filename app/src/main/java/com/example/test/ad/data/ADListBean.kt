@@ -61,6 +61,7 @@ object GetADData {
         if (!CheckADStatus().canShowAD(activity)) return
         val data = AppVariable.cacheDataList?.find { it["type"].toString() == type }
         if (data == null) {
+            Timber.tag(AppConstant.TAG).e("no cache")
             when (type) {
                 ADType.INTER_SERVER.value, ADType.INTER_CONNECT.value -> {
                     if (manager is InterstitialAdManager) {
@@ -92,9 +93,7 @@ object GetADData {
                         }
 
                 }
-//                ADType.OPEN.value -> {
-//                    getOpenData(activity, manager, onShowAdCompleteListener)
-//                }
+
             }
         } else {
             when (type) {
@@ -103,7 +102,7 @@ object GetADData {
                         if (CheckADStatus().wasLoadTimeLessThanNHoursAgo(
                                 1,
                                 (data[AppConstant.LOAD_TIME] as Long)
-                            ) && activity.canJump
+                            )
                         ) {
                             manager.showInterstitialWithData(
                                 activity,
@@ -142,45 +141,21 @@ object GetADData {
                             adView.bringToFront()
                             container?.removeAllViews()
                             container?.addView(adView)
-                            if (!AppVariable.isNativeResultImpression && type == ADType.NATIVE_RESULT.value) {
-                                AppVariable.isNativeResultImpression = false
-                                TimberUtils().printADImpression(type)
-                                AppVariable.cacheDataList?.let {
-                                    AppVariable.cacheDataList?.forEach { it1 ->
-                                        if (it1["type"].toString() == type) AppVariable.cacheDataList?.remove(
-                                            it1
-                                        )
-                                    }
+                            TimberUtils().printADImpression(type)
+                            AppVariable.cacheDataList?.let {
+                                AppVariable.cacheDataList?.forEach { it1 ->
+                                    if (it1["type"].toString() == type) AppVariable.cacheDataList?.remove(
+                                        it1
+                                    )
+                                }
 
-                                }
-                                CheckADStatus().setShowAndClickCount(
-                                    activity,
-                                    isShow = true,
-                                    isClick = false
-                                )
-                                manager.refreshAd(activity, container, type, 0, adListBean) {}
-                            } else if (!AppVariable.isNativeHomeImpression && type == ADType.NATIVE_HOME.value) {
-                                AppVariable.isNativeResultImpression = false
-                                TimberUtils().printADImpression(type)
-                                AppVariable.cacheDataList?.let {
-                                    synchronized(it) {
-                                        AppVariable.cacheDataList?.forEach { it1 ->
-                                            if (it1["type"].toString() == type) AppVariable.cacheDataList?.remove(
-                                                it1
-                                            )
-                                        }
-                                    }
-                                }
-                                CheckADStatus().setShowAndClickCount(
-                                    activity,
-                                    isShow = true,
-                                    isClick = false
-                                )
-                                manager.refreshAd(activity, container, type, 0, adListBean) {}
-                            } else {
-                                AppVariable.isNativeHomeImpression = false
-                                AppVariable.isNativeHomeImpression = false
                             }
+                            CheckADStatus().setShowAndClickCount(
+                                activity,
+                                isShow = true,
+                                isClick = false
+                            )
+                            manager.refreshAd(activity, container, type, 0, adListBean) {}
                         } else {
                             //过期 删除缓存
                             val data =
@@ -198,39 +173,6 @@ object GetADData {
                         }
                     }
                 }
-//                ADType.OPEN.value -> {
-//                    if (data[AppConstant.LOAD_TIME] is Long) {
-//                        if (CheckADStatus().wasLoadTimeLessThanNHoursAgo(
-//                                1,
-//                                (data[AppConstant.LOAD_TIME] as Long)
-//                            )
-//                        ) {
-//                            if (AppVariable.cacheSplashADData?.robvn_l == ADType.OPEN.value && data["value"] is AppOpenAd) {
-//                                if (manager is AppOpenAdManager) manager.showAdIfAvailableWithData(
-//                                    activity,
-//                                    type,
-//                                    AppVariable.cacheSplashADData!!,
-//                                    data["value"] as AppOpenAd,
-//                                    onShowAdCompleteListener
-//                                ) { it1, it2 ->
-//                                    if (!it1) getOpenData(
-//                                        activity, manager, onShowAdCompleteListener
-//                                    )
-//                                }
-//                            } else if (AppVariable.cacheSplashADData?.robvn_l == ADType.INTER.value && data["value"] is InterstitialAd) {
-//                                if (manager is InterstitialAdManager) manager.showInterstitialWithData(
-//                                    activity,
-//                                    mutableListOf(AppVariable.cacheSplashADData!!),
-//                                    data["value"] as InterstitialAd,
-//                                    ADType.INTER_OPEN.value,
-//                                    onShowAdCompleteListener
-//                                )
-//                            }
-//                        }
-//                    } else {
-//                        getOpenData(activity, manager, onShowAdCompleteListener)
-//                    }
-//                }
             }
         }
     }
@@ -249,7 +191,7 @@ object GetADData {
             if (type == ADType.OPEN.value) {
                 Timber.tag(AppConstant.TAG + "Open").e("开屏类型为open $position")
                 if (managerOpen is AppOpenAdManager) AppVariable.openADList?.get(position)?.let {
-                    managerOpen.loadAd(activity, type,it,position) { it1, it2 ->
+                    managerOpen.loadAd(activity, type, it, position) { it1, it2 ->
                         if (it1) {
                             managerOpen.appOpenAd?.let { it3 ->
                                 managerOpen.showAdIfAvailableWithData(

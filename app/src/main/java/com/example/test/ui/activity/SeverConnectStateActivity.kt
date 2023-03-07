@@ -72,6 +72,7 @@ class SeverConnectStateActivity : BaseActivity() {
             Glide.with(this).load(CountryUtils.getCountrySource(country)).circleCrop()
                 .into(countryImg)
         nativeAdManager = NativeAdManager()
+        AppVariable.isBackGroundToResult = true
     }
 
     override fun onResume() {
@@ -79,7 +80,7 @@ class SeverConnectStateActivity : BaseActivity() {
             lifecycleScope.launch {
                 delay(200)
                 if (canJump) {
-                    AppVariable.isBackGroundToMain = false
+                    AppVariable.isBackGroundToResult = false
                     showNativeAD()
                 }
             }
