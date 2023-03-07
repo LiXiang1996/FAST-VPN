@@ -188,7 +188,8 @@ class NativeAdManager {
                     }
 
                     override fun onAdImpression() {
-                        AppVariable.isNativeImpression = true
+                        if(type ==ADType.NATIVE_RESULT.value)AppVariable.isNativeResultImpression = true
+                        if(type ==ADType.NATIVE_HOME.value)AppVariable.isNativeHomeImpression = true
                         TimberUtils().printADImpression(type)
                         AppVariable.cacheDataList?.forEach {
                             if (it["type"].toString() == type) AppVariable.cacheDataList?.remove(it)

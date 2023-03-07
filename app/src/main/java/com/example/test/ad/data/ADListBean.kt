@@ -65,7 +65,7 @@ object GetADData {
                 ADType.INTER_SERVER.value, ADType.INTER_CONNECT.value -> {
                     if (manager is InterstitialAdManager) {
                         manager.loadAd(context, adListBean, 0, type) { it1, it2 ->
-                            if (it1 && activity.canJump&&!activity.isFinishing&&!activity.isDestroyed) {
+                            if (it1 && activity.canJump && !activity.isFinishing && !activity.isDestroyed) {
                                 manager.showInterstitial(
                                     activity,
                                     adListBean,
@@ -142,22 +142,46 @@ object GetADData {
                             adView.bringToFront()
                             container?.removeAllViews()
                             container?.addView(adView)
-                            if (!AppVariable.isNativeImpression) {
-                                AppVariable.isNativeImpression = false
-                                Timber.tag("nativresult").e("Type: $type  广告正在展示")
+                            if (!AppVariable.isNativeResultImpression && type == ADType.NATIVE_RESULT.value) {
+                                AppVariable.isNativeResultImpression = false
+                                TimberUtils().printADImpression(type)
                                 AppVariable.cacheDataList?.let {
                                     synchronized(it) {
-                                        AppVariable.cacheDataList?.forEach {it1->
+                                        AppVariable.cacheDataList?.forEach { it1 ->
                                             if (it1["type"].toString() == type) AppVariable.cacheDataList?.remove(
                                                 it1
                                             )
                                         }
                                     }
                                 }
-                                CheckADStatus().setShowAndClickCount(activity, isShow = true, isClick = false)
+                                CheckADStatus().setShowAndClickCount(
+                                    activity,
+                                    isShow = true,
+                                    isClick = false
+                                )
                                 manager.refreshAd(activity, container, type, 0, adListBean) {}
-                            } else AppVariable.isNativeImpression = false
-
+                            } else if (!AppVariable.isNativeHomeImpression && type == ADType.NATIVE_HOME.value) {
+                                AppVariable.isNativeResultImpression = false
+                                TimberUtils().printADImpression(type)
+                                AppVariable.cacheDataList?.let {
+                                    synchronized(it) {
+                                        AppVariable.cacheDataList?.forEach { it1 ->
+                                            if (it1["type"].toString() == type) AppVariable.cacheDataList?.remove(
+                                                it1
+                                            )
+                                        }
+                                    }
+                                }
+                                CheckADStatus().setShowAndClickCount(
+                                    activity,
+                                    isShow = true,
+                                    isClick = false
+                                )
+                                manager.refreshAd(activity, container, type, 0, adListBean) {}
+                            }else{
+                                AppVariable.isNativeHomeImpression = false
+                                AppVariable.isNativeHomeImpression = false
+                            }
                         } else {
                             //过期 删除缓存
                             val data =
