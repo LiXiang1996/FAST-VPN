@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.example.test.R
 import com.example.test.ad.data.ADType
@@ -74,7 +75,15 @@ class SeverConnectStateActivity : BaseActivity() {
     }
 
     override fun onResume() {
-        showNativeAD()
+        if (AppVariable.isBackGroundToResult) {
+            lifecycleScope.launch {
+                delay(200)
+                if (canJump) {
+                    AppVariable.isBackGroundToMain = false
+                    showNativeAD()
+                }
+            }
+        }
         super.onResume()
     }
 

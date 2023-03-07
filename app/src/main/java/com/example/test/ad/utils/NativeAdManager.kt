@@ -139,7 +139,6 @@ class NativeAdManager {
 
             builder.forNativeAd { nativeAd ->
                 if (activity.isDestroyed || activity.isFinishing || activity.isChangingConfigurations) {
-//                    Timber.tag(AppConstant.TAG+"native").e("activity is nonono")
                     nativeAd.destroy()
                     return@forNativeAd
                 }
@@ -168,17 +167,16 @@ class NativeAdManager {
                         if (type == ADType.NATIVE_RESULT.value) ADLoading.NATIVE_RESULT.isLoading =
                             false
                         isLoadingAD = false
+                        AppVariable.cacheDataList?.add(HashMap<String, Any>().apply {
+                            put("type", type)
+                            put("value", currentNativeAd!!)
+                            put(AppConstant.LOAD_TIME, Date().time)
+                        })
                         TimberUtils().printADLoadLog(
                             type,
                             AppConstant.LOAD_SUC,
                             nativeListAD[position]
                         )
-                        val data = HashMap<String, Any>().apply {
-                            put("type", type)
-                            put("value", currentNativeAd!!)
-                            put(AppConstant.LOAD_TIME, Date().time)
-                        }
-                        AppVariable.cacheDataList?.add(data)
                         super.onAdLoaded()
                     }
 

@@ -50,12 +50,14 @@ class AppOpenAdManager {
         context: Context,
         type: String,
         openData: ADListBean.ADBean,
+        position: Int = 0,
         result: (Boolean, Boolean) -> Unit
     ) {
         if (isLoadingAd) {
             return
         }
-        if(ADLoading.OPEN.isLoading){
+        if (ADLoading.OPEN.isLoading) {
+            Timber.tag(AppConstant.TAG).e("正在请求开屏")
             return
         }
         TimberUtils().printADLoadLog(type, AppConstant.LOADING, openData)
@@ -69,17 +71,17 @@ class AppOpenAdManager {
                 override fun onAdLoaded(ad: AppOpenAd) {
                     appOpenAd = ad
                     isLoadingAd = false
+                    ADLoading.INTER_OPEN.isLoading = false
                     ADLoading.OPEN.isLoading = false
                     loadTime = Date().time
                     TimberUtils().printADLoadLog(type, AppConstant.LOAD_SUC, openData)
                     result.invoke(true, true)
                     AppVariable.cacheSplashADData = openData
-
-                    val cacheData =
-                        AppVariable.cacheDataList?.find { it["type"].toString() == type }
-                    if (cacheData != null) {
-                        AppVariable.cacheDataList?.remove(cacheData)
-                    }
+//                    val cacheData =
+//                        AppVariable.cacheDataList?.find { it["type"].toString() == type }
+//                    if (cacheData != null) {
+//                        AppVariable.cacheDataList?.remove(cacheData)
+//                    }
                     val data = HashMap<String, Any>().apply {
                         put("type", type)
                         put("value", appOpenAd!!)
@@ -92,11 +94,15 @@ class AppOpenAdManager {
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                     isLoadingAd = false
                     ADLoading.OPEN.isLoading = false
+                    ADLoading.INTER_OPEN.isLoading = false
+                    TimberUtils().printADLoadLog(type, AppConstant.LOAD_FAIL, openData, loadAdError)
+                    if (position + 1 == AppVariable.openADList?.size) {
+                        return
+                    }
                     if (context is BaseActivity) {
                         if (!context.canJump) return
                     }
                     result.invoke(false, false)
-                    TimberUtils().printADLoadLog(type, AppConstant.LOAD_FAIL, openData, loadAdError)
                 }
             })
     }
@@ -111,7 +117,7 @@ class AppOpenAdManager {
     ) {
         appOpenAd = appOpenAdCache
         if (isShowingAd) {
-//            Timber.tag(TAG).e("The app open ad is already showing.")
+            Timber.tag(TAG).e("The app open ad is already showing.")
             return
         }
         appOpenAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
@@ -126,7 +132,7 @@ class AppOpenAdManager {
             override fun onAdImpression() {
                 TimberUtils().printADImpression(type)
                 AppVariable.cacheDataList?.forEach {
-                    if (it["type"].toString() ==type)  AppVariable.cacheDataList?.remove(it)
+                    if (it["type"].toString() == type) AppVariable.cacheDataList?.remove(it)
                 }
                 CheckADStatus().setShowAndClickCount(
                     activity, isShow = true, isClick = false
@@ -148,14 +154,13 @@ class AppOpenAdManager {
                 appOpenAd = null
                 AppVariable.cacheSplashADData = null
                 isShowingAd = false
-                TimberUtils().printAdFailedToShowFullScreenContent(type,adError)
+                TimberUtils().printAdFailedToShowFullScreenContent(type, adError)
                 result.invoke(false, false)
                 onShowAdCompleteListener.onShowAdComplete()
             }
 
             override fun onAdShowedFullScreenContent() {
                 AppVariable.cacheSplashADData = null
-//                TimberUtils().printAdShowedFullScreenContent(type)
             }
         }
         isShowingAd = true

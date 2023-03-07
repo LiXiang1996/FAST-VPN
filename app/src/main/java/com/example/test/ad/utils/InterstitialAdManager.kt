@@ -153,7 +153,7 @@ class InterstitialAdManager {
                 Timber.tag(AppConstant.TAG).e("inter广告还没请求完，不发起新的一轮请求")
                 return
             }
-            if (ADLoading.INTER_OPEN.isLoading && type == ADType.INTER_OPEN.value) {
+            if ((ADLoading.INTER_OPEN.isLoading) && type == ADType.INTER_OPEN.value) {
                 Timber.tag(AppConstant.TAG).e("inter_open广告还没请求完，不发起新的一轮请求")
                 return
             }
@@ -180,9 +180,9 @@ class InterstitialAdManager {
 //                        if (context is BaseActivity) {
 //                            if (!context.canJump) return
 //                        }
-                        if (position != interListAd.size) {
-                            if (type != ADType.INTER_OPEN.value) ADLoading.INTER.isLoading = false
-                            else ADLoading.INTER_OPEN.isLoading = false
+                        if (type != ADType.INTER_OPEN.value) {
+                            ADLoading.INTER.isLoading = false
+                            result.invoke(false, false)
                         }
                         if (position + 1 < interListAd.size) {
                             loadAd(
@@ -193,7 +193,6 @@ class InterstitialAdManager {
                         } else {
                             result(false, false)
                         }
-                        if (type == ADType.INTER_OPEN.value) result.invoke(false, false)
                     }
 
                     override fun onAdLoaded(ad: InterstitialAd) {

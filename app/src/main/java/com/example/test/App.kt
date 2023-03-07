@@ -17,6 +17,7 @@ import com.example.test.base.data.RemoteProfile
 import com.example.test.base.data.ToProfile
 import com.example.test.ui.activity.MainActivity
 import com.example.test.ui.activity.ServersListProfile
+import com.example.test.ui.activity.SeverConnectStateActivity
 import com.example.test.ui.activity.SplashActivity
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.database.Profile
@@ -83,12 +84,12 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
 
     /** ActivityLifecycleCallback methods. */
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
-        Timber.tag(AppConstant.TAG).e("create ${activity.localClassName}")
+//        Timber.tag(AppConstant.TAG).e("create ${activity.localClassName}")
         activityList.add(activity)
     }
 
     override fun onActivityStarted(activity: Activity) {
-        Timber.tag(AppConstant.TAG).e("start ${activity.localClassName}")
+//        Timber.tag(AppConstant.TAG).e("start ${activity.localClassName}")
         if (AppVariable.isBackGround) {
             AppVariable.isBackGround = false
             if ((System.currentTimeMillis() - AppVariable.exitAppTime) / 1000 > 3) {
@@ -100,10 +101,16 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
                         activityList.remove(it)
                     }
                 }
-
                 if (activity !is SplashActivity) {//不在启屏页做重复跳转
                     AppVariable.isBackGroundToSplash = true
                     if (activity is MainActivity) AppVariable.isBackGroundToMain = true
+                    if (activity is SeverConnectStateActivity) AppVariable.isBackGroundToResult =
+                        true
+                    val intent = Intent(activity, SplashActivity::class.java)
+                    Timber.tag(AppConstant.TAG).e("intent ${activity.localClassName}")
+                    activity.startActivity(intent)
+                } else {
+                    AppVariable.isBackGroundToSplash = true
                     val intent = Intent(activity, SplashActivity::class.java)
                     Timber.tag(AppConstant.TAG).e("intent ${activity.localClassName}")
                     activity.startActivity(intent)
@@ -116,7 +123,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
 
     @SuppressLint("BinaryOperationInTimber")
     override fun onActivityResumed(activity: Activity) {
-        Timber.tag(AppConstant.TAG).e("resume ${activity.localClassName}")
+//        Timber.tag(AppConstant.TAG).e("resume ${activity.localClassName}")
         currentActivity = activity
     }
 
@@ -125,7 +132,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
     }
 
     override fun onActivityStopped(activity: Activity) {
-        Timber.tag(AppConstant.TAG).e("stop ${activity.localClassName}")
+//        Timber.tag(AppConstant.TAG).e("stop ${activity.localClassName}")
         currentActivity = activity
         activityCount--
         if (activityCount == 0) {
@@ -137,7 +144,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
 
     override fun onActivityDestroyed(activity: Activity) {
-        Timber.tag(AppConstant.TAG).e("destroy ${activity.localClassName}")
+//        Timber.tag(AppConstant.TAG).e("destroy ${activity.localClassName}")
         activityList.remove(activity)
     }
 

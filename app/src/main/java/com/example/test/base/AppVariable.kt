@@ -19,7 +19,8 @@ object AppVariable {
     var isBackGround = false
     var exitAppTime = 0L
     var isBackGroundToSplash = false
-    var isBackGroundToMain = false
+    var isBackGroundToMain = true
+    var isBackGroundToResult = true
     var openADList: MutableList<ADListBean.ADBean>? = null
     var interADList: MutableList<ADListBean.ADBean>? = null
     var nativeHomeADList: MutableList<ADListBean.ADBean>? = null

@@ -1,6 +1,6 @@
 {
-    "robvn_sm":50,
-    "robvn_cm":30,
+    "robvn_sm":20,
+    "robvn_cm":3,
     "robvn_o_open":[
         {
             "robvn_s":"admob",

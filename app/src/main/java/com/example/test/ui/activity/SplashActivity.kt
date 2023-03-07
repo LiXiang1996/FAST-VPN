@@ -86,10 +86,11 @@ class SplashActivity : BaseActivity() {
                 }
 
                 override fun onFinish() {
-                    nextTo()
+                    if (AppVariable.isBackGroundToMain)
+                        nextTo()
+                    else finish()
                 }
             }
-
 
             MainScope().launch {
                 countDownADTimer?.start()
@@ -113,8 +114,10 @@ class SplashActivity : BaseActivity() {
                                 finish()
                             }
                         })
-                } else
-                    showAD()
+                } else {
+                    if (!ADLoading.OPEN.isLoading && !ADLoading.INTER_OPEN.isLoading)
+                        showAD()
+                }
             }
         } else {
             countDownTimer = object : CountDownTimer(3000L, 300) {
@@ -123,7 +126,7 @@ class SplashActivity : BaseActivity() {
                 }
 
                 override fun onFinish() {
-                    Timber.tag(AppConstant.TAG+"timer").e("onFinish")
+                    Timber.tag(AppConstant.TAG + "timer").e("onFinish")
                     if (!AppVariable.isBackGroundToSplash) {
                         nextTo()
                     } else finish()
@@ -135,7 +138,7 @@ class SplashActivity : BaseActivity() {
     }
 
     private fun checkCache() {
-        if (AppVariable.cacheDataList?.find { it["type"].toString() == ADType.INTER_CONNECT.value } == null) {
+        if (AppVariable.cacheDataList?.find { it["type"].toString() == ADType.INTER_CONNECT.value } == null && !ADLoading.INTER.isLoading) {
             AppVariable.interADList?.let {
                 interstitialAaManager1.loadAd(
                     applicationContext,
@@ -145,14 +148,14 @@ class SplashActivity : BaseActivity() {
                 ) { _, _ -> }
             }
         }
-        if (AppVariable.cacheDataList?.find { it["type"].toString() == ADType.NATIVE_HOME.value } == null) {
+        if (AppVariable.cacheDataList?.find { it["type"].toString() == ADType.NATIVE_HOME.value } == null && !ADLoading.NATIVE_HOME.isLoading) {
             //native首页
             AppVariable.nativeHomeADList?.let {
                 nativeAdManagerHome.refreshAd(this, null, ADType.NATIVE_HOME.value, 0, it) {
                 }
             }
         }
-        if (AppVariable.cacheDataList?.find { it["type"].toString() == ADType.NATIVE_RESULT.value } == null) {
+        if (AppVariable.cacheDataList?.find { it["type"].toString() == ADType.NATIVE_RESULT.value } == null && !ADLoading.NATIVE_RESULT.isLoading) {
             //native结果页
             AppVariable.nativeResultADList?.let {
                 nativeAdManagerResult.refreshAd(this, null, ADType.NATIVE_RESULT.value, 0, it) {
@@ -180,7 +183,7 @@ class SplashActivity : BaseActivity() {
                             onShowAdCompleteListener
                         ) { it1, it2 ->
                             GetADData.getOpenData(
-                                this, manager, onShowAdCompleteListener, 0
+                                this, manager,null, onShowAdCompleteListener, 0
                             )
                         }
                     } else if (AppVariable.cacheSplashADData?.robvn_l == ADType.INTER.value && data["value"] is InterstitialAd) {
@@ -193,10 +196,8 @@ class SplashActivity : BaseActivity() {
                         )
                     }
                 }
-            } else {
-                GetADData.getOpenData(this, manager, onShowAdCompleteListener)
             }
-        }else{
+        } else {
             showAD()
         }
     }
@@ -254,8 +255,11 @@ class SplashActivity : BaseActivity() {
 
     private fun showAD() {
         AppVariable.openADList?.let {
-            GetADData.getFindData(this, this, ADType.OPEN.value, appOpenAdManager,
-                it, null, object : OnShowAdCompleteListener {
+            GetADData.getOpenData(
+                this,
+                appOpenAdManager,
+                interstitialAaManagerOpen,
+                object : OnShowAdCompleteListener {
                     override fun onShowAdComplete() {
                         countDownADTimer?.cancel()
                         if (!AppVariable.isBackGroundToSplash) {
@@ -265,15 +269,19 @@ class SplashActivity : BaseActivity() {
                         }
                         finish()
                     }
-                })
+                },
+                0
+            )
+
         }
+
     }
 
     fun nextTo() {
         if (AppVariable.isBackGroundToSplash) {
             AppVariable.isBackGroundToSplash = false
         }
-        Timber.tag(AppConstant.TAG+"splash").e("next to")
+        Timber.tag(AppConstant.TAG + "splash").e("next to")
         if (canJump) {
             val intent = Intent(this@SplashActivity, MainActivity::class.java)
             this@SplashActivity.startActivity(intent)

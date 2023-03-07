@@ -92,9 +92,9 @@ object GetADData {
                         }
 
                 }
-                ADType.OPEN.value -> {
-                    getOpenData(activity, manager, onShowAdCompleteListener)
-                }
+//                ADType.OPEN.value -> {
+//                    getOpenData(activity, manager, onShowAdCompleteListener)
+//                }
             }
         } else {
             when (type) {
@@ -112,7 +112,7 @@ object GetADData {
                                 type,
                                 onShowAdCompleteListener
                             )
-                        } else {
+                        } else {//过期移除
                             val data =
                                 AppVariable.cacheDataList?.find { it["type"].toString() == type }
                             AppVariable.cacheDataList?.remove(data)
@@ -146,13 +146,12 @@ object GetADData {
                                 AppVariable.isNativeResultImpression = false
                                 TimberUtils().printADImpression(type)
                                 AppVariable.cacheDataList?.let {
-                                    synchronized(it) {
-                                        AppVariable.cacheDataList?.forEach { it1 ->
-                                            if (it1["type"].toString() == type) AppVariable.cacheDataList?.remove(
-                                                it1
-                                            )
-                                        }
+                                    AppVariable.cacheDataList?.forEach { it1 ->
+                                        if (it1["type"].toString() == type) AppVariable.cacheDataList?.remove(
+                                            it1
+                                        )
                                     }
+
                                 }
                                 CheckADStatus().setShowAndClickCount(
                                     activity,
@@ -178,7 +177,7 @@ object GetADData {
                                     isClick = false
                                 )
                                 manager.refreshAd(activity, container, type, 0, adListBean) {}
-                            }else{
+                            } else {
                                 AppVariable.isNativeHomeImpression = false
                                 AppVariable.isNativeHomeImpression = false
                             }
@@ -199,83 +198,89 @@ object GetADData {
                         }
                     }
                 }
-                ADType.OPEN.value -> {
-                    if (data[AppConstant.LOAD_TIME] is Long) {
-                        if (CheckADStatus().wasLoadTimeLessThanNHoursAgo(
-                                1,
-                                (data[AppConstant.LOAD_TIME] as Long)
-                            )
-                        ) {
-                            if (AppVariable.cacheSplashADData?.robvn_l == ADType.OPEN.value && data["value"] is AppOpenAd) {
-                                if (manager is AppOpenAdManager) manager.showAdIfAvailableWithData(
-                                    activity,
-                                    type,
-                                    AppVariable.cacheSplashADData!!,
-                                    data["value"] as AppOpenAd,
-                                    onShowAdCompleteListener
-                                ) { it1, it2 ->
-                                    getOpenData(
-                                        activity, manager, onShowAdCompleteListener, 0
-                                    )
-                                }
-                            } else if (AppVariable.cacheSplashADData?.robvn_l == ADType.INTER.value && data["value"] is InterstitialAd) {
-                                if (manager is InterstitialAdManager) manager.showInterstitialWithData(
-                                    activity,
-                                    mutableListOf(AppVariable.cacheSplashADData!!),
-                                    data["value"] as InterstitialAd,
-                                    ADType.INTER_OPEN.value,
-                                    onShowAdCompleteListener
-                                )
-                            }
-                        }
-                    } else {
-                        getOpenData(activity, manager, onShowAdCompleteListener)
-                    }
-                }
+//                ADType.OPEN.value -> {
+//                    if (data[AppConstant.LOAD_TIME] is Long) {
+//                        if (CheckADStatus().wasLoadTimeLessThanNHoursAgo(
+//                                1,
+//                                (data[AppConstant.LOAD_TIME] as Long)
+//                            )
+//                        ) {
+//                            if (AppVariable.cacheSplashADData?.robvn_l == ADType.OPEN.value && data["value"] is AppOpenAd) {
+//                                if (manager is AppOpenAdManager) manager.showAdIfAvailableWithData(
+//                                    activity,
+//                                    type,
+//                                    AppVariable.cacheSplashADData!!,
+//                                    data["value"] as AppOpenAd,
+//                                    onShowAdCompleteListener
+//                                ) { it1, it2 ->
+//                                    if (!it1) getOpenData(
+//                                        activity, manager, onShowAdCompleteListener
+//                                    )
+//                                }
+//                            } else if (AppVariable.cacheSplashADData?.robvn_l == ADType.INTER.value && data["value"] is InterstitialAd) {
+//                                if (manager is InterstitialAdManager) manager.showInterstitialWithData(
+//                                    activity,
+//                                    mutableListOf(AppVariable.cacheSplashADData!!),
+//                                    data["value"] as InterstitialAd,
+//                                    ADType.INTER_OPEN.value,
+//                                    onShowAdCompleteListener
+//                                )
+//                            }
+//                        }
+//                    } else {
+//                        getOpenData(activity, manager, onShowAdCompleteListener)
+//                    }
+//                }
             }
         }
     }
 
     fun getOpenData(
         activity: BaseActivity,
-        manager: Any,
+        managerOpen: AppOpenAdManager?,
+        managerInter: InterstitialAdManager?,
         onShowAdCompleteListener: OnShowAdCompleteListener,
         position: Int = 0
     ) {
         if (position < (AppVariable.openADList?.size ?: 0)) {
             val type: String? = AppVariable.openADList?.get(position)?.robvn_l
+            Timber.tag(AppConstant.TAG).e("${AppVariable.openADList?.get(position)?.robvn_id}")
+            AppVariable.openADList?.get(position)
             if (type == ADType.OPEN.value) {
-                Timber.tag(AppConstant.TAG + "Open").e("开屏类型为open")
-                if (manager is AppOpenAdManager) AppVariable.openADList?.get(position)?.let {
-                    manager.loadAd(activity, type, it) { it1, it2 ->
+                Timber.tag(AppConstant.TAG + "Open").e("开屏类型为open $position")
+                if (managerOpen is AppOpenAdManager) AppVariable.openADList?.get(position)?.let {
+                    managerOpen.loadAd(activity, type,it,position) { it1, it2 ->
                         if (it1) {
-                            manager.appOpenAd?.let { it3 ->
-                                manager.showAdIfAvailableWithData(
+                            managerOpen.appOpenAd?.let { it3 ->
+                                managerOpen.showAdIfAvailableWithData(
                                     activity, type,
                                     AppVariable.openADList?.get(position)!!,
                                     it3, onShowAdCompleteListener
                                 ) { it1, it2 ->
-                                    if (!it1 && it2) {
+                                    if (!it1 && !it2) {
                                         getOpenData(
                                             activity,
-                                            manager,
+                                            managerOpen,
+                                            managerInter,
                                             onShowAdCompleteListener,
                                             position + 1
                                         )
                                     }
                                 }
                             }
-                        }
-                        if (!it1 && !it2) getOpenData(
-                            activity, manager, onShowAdCompleteListener, position + 1
+                        } else if (!it2) getOpenData(
+                            activity,
+                            managerOpen,
+                            managerInter,
+                            onShowAdCompleteListener,
+                            position + 1
                         )
                     }
                 }
             } else if (type == ADType.INTER.value) {//这儿是判断广告类别，用INTER
-                val managerInter = InterstitialAdManager()
-                Timber.tag(AppConstant.TAG + "Open").e("开屏类型为inter")
+                Timber.tag(AppConstant.TAG + "Open").e("开屏类型为inter $position")
                 AppVariable.openADList?.get(position)?.let {
-                    managerInter.loadAd(
+                    managerInter?.loadAd(
                         activity,
                         mutableListOf(it),
                         0,
@@ -290,14 +295,22 @@ object GetADData {
                             }
                         } else if (!it2) {
                             getOpenData(
-                                activity, managerInter, onShowAdCompleteListener, position + 1
+                                activity,
+                                managerOpen,
+                                managerInter,
+                                onShowAdCompleteListener,
+                                position + 1
                             )
                         }
                     }
                 }
             }
 
-        } else return
+        } else {
+            ADLoading.OPEN.isLoading = false
+            ADLoading.INTER_OPEN.isLoading = false
+            return
+        }
     }
 
 }

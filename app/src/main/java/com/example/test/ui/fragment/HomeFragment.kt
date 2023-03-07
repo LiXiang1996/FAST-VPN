@@ -25,6 +25,7 @@ import androidx.lifecycle.lifecycleScope
 import com.airbnb.lottie.LottieAnimationView
 import com.bumptech.glide.Glide
 import com.example.test.R
+import com.example.test.ad.data.ADLoading
 import com.example.test.ad.data.ADType
 import com.example.test.ad.data.CheckADStatus
 import com.example.test.ad.data.GetADData
@@ -105,13 +106,13 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         }
         setData()
         if (AppVariable.isBackGroundToMain){
-            isUpdateNative = false
-            AppVariable.isBackGroundToMain = false
-        }
-        if (isUpdateNative) {
-            showNativeAD(activity as BaseActivity)
-        } else {
-            isUpdateNative = true
+            lifecycleScope.launch {
+                delay(200)
+                if (activity != null && (activity as MainActivity).canJump){
+                    AppVariable.isBackGroundToMain = false
+                    showNativeAD(activity as BaseActivity)
+                }
+            }
         }
         super.onResume()
     }
@@ -200,10 +201,11 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
             AppVariable.isHaveVpnPermission = true
             //检测权限 无 取消弹窗 有 展示广告-跳转页面
             if (activity is MainActivity) {
+                (activity as MainActivity).frameLayout.visibility = View.VISIBLE
+                connectingAndStoppingAnimation()
                 if (CheckADStatus().canShowAD(activity as MainActivity))
                     activity?.let { it1 -> loadInterAd(it1, ADType.INTER_CONNECT.value) }
                 else {
-                    (activity as MainActivity).frameLayout.visibility = View.VISIBLE//不可点击
                     MainScope().launch {
                         delay(3000)
                         toggleToConnect()
@@ -371,8 +373,6 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         }
 
     private fun loadInterAd(activity: Activity, type: String) {
-        (activity as MainActivity).frameLayout.visibility = View.VISIBLE
-        connectingAndStoppingAnimation()
         MainScope().launch {
             delay(1000)//延迟一秒后再执行下面代码
         }
@@ -389,8 +389,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
             }
         }
         countDownTimer?.start()
-
-        showInterAD(activity, type)
+        if (activity is MainActivity) showInterAD(activity , type)
     }
 
 
@@ -456,7 +455,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                 })
         }
 
-        if (AppVariable.cacheDataList?.find { it["type"].toString() == ADType.NATIVE_RESULT.value } == null) {
+        if (AppVariable.cacheDataList?.find { it["type"].toString() == ADType.NATIVE_RESULT.value } == null&&!ADLoading.NATIVE_RESULT.isLoading){
             //没有缓存去请求native结果页
             AppVariable.nativeResultADList?.let {
                 nativeAdManagerR.refreshAd(activity, null, ADType.NATIVE_RESULT.value, 0, it) {}
