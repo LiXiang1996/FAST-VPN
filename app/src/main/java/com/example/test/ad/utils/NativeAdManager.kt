@@ -139,7 +139,7 @@ class NativeAdManager {
 
             builder.forNativeAd { nativeAd ->
                 if (activity.isDestroyed || activity.isFinishing || activity.isChangingConfigurations) {
-                    Timber.tag(AppConstant.TAG+"native").e("activity is nonono")
+//                    Timber.tag(AppConstant.TAG+"native").e("activity is nonono")
                     nativeAd.destroy()
                     return@forNativeAd
                 }

@@ -220,7 +220,6 @@ class SplashActivity : BaseActivity() {
         }
 
         //2、按需求开始load所谓位置的广告
-
         //连接页面  服务器列表页面跳转首页 todo 3.2日  测试提出现在的需求 共用广告 只缓存一个
         AppVariable.interADList?.let {
             interstitialAaManager1.loadAd(
