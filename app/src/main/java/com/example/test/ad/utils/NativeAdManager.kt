@@ -62,11 +62,13 @@ class NativeAdManager {
             NativeAdView1.adMedia?.setMediaContent(it)
         }
 
-        if (nativeAdView.mediaView?.mediaContent==null){
+        if (nativeAdView.mediaView?.mediaContent == null) {
             Timber.tag(AppConstant.TAG).e("nativeAdView.mediaView?.mediaContent 为空")
-        }else{
-            Timber.tag(AppConstant.TAG).e("mediaContent ${nativeAdView.mediaView?.mediaContent}  body是否为空 ${nativeAd.body.isNullOrEmpty()}" +
-                    " nativeAd callToAction ${nativeAd.callToAction.toString()} nativeAd icon  ${nativeAd.icon}   ")
+        } else {
+            Timber.tag(AppConstant.TAG).e(
+                "mediaContent ${nativeAdView.mediaView?.mediaContent}  body是否为空 ${nativeAd.body.isNullOrEmpty()}" +
+                        " nativeAd callToAction ${nativeAd.callToAction.toString()} nativeAd icon  ${nativeAd.icon}   "
+            )
         }
         if (nativeAd.body == null) {
             NativeAdView1.adBody?.visibility = View.INVISIBLE
@@ -114,20 +116,21 @@ class NativeAdManager {
         nativeListAD: MutableList<ADListBean.ADBean>,
         result: (NativeAd) -> Unit
     ) {
-        if (isLoadingAD||activity.isFinishing||activity.isDestroyed) return
-        if (ADLoading.NATIVE_HOME.isLoading && type ==ADType.NATIVE_HOME.value) {
-            Timber.tag(AppConstant.TAG).e("home原生广告还没load完，不load了")
+        if (isLoadingAD) return
+//        if (isLoadingAD || activity.isFinishing || activity.isDestroyed) return
+        if (ADLoading.NATIVE_HOME.isLoading && type == ADType.NATIVE_HOME.value) {
+            Timber.tag(AppConstant.TAG).e("home原生广告还没load完，不发起新的一轮请求")
             return
         }
-        if (ADLoading.NATIVE_RESULT.isLoading && type ==ADType.NATIVE_RESULT.value){
-            Timber.tag(AppConstant.TAG).e("home原生广告还没load完，不load了")
+        if (ADLoading.NATIVE_RESULT.isLoading && type == ADType.NATIVE_RESULT.value) {
+            Timber.tag(AppConstant.TAG).e("result原生广告还没load完，不发起新的一轮请求")
             return
         }
         TimberUtils().printADLoadLog(type, AppConstant.LOADING, nativeListAD[position])
         if (position < nativeListAD.size) {
             isLoadingAD = true
-            if (type ==ADType.NATIVE_HOME.value)ADLoading.NATIVE_HOME.isLoading = true
-            if (type ==ADType.NATIVE_RESULT.value)ADLoading.NATIVE_RESULT.isLoading = true
+            if (type == ADType.NATIVE_HOME.value) ADLoading.NATIVE_HOME.isLoading = true
+            if (type == ADType.NATIVE_RESULT.value) ADLoading.NATIVE_RESULT.isLoading = true
             val builder = AdLoader.Builder(activity, nativeListAD[position].robvn_id)
             val videoOptions = VideoOptions.Builder().setStartMuted(true).build()
             val adOptions = NativeAdOptions.Builder()
@@ -136,6 +139,7 @@ class NativeAdManager {
 
             builder.forNativeAd { nativeAd ->
                 if (activity.isDestroyed || activity.isFinishing || activity.isChangingConfigurations) {
+                    Timber.tag(AppConstant.TAG+"native").e("activity is nonono")
                     nativeAd.destroy()
                     return@forNativeAd
                 }
@@ -159,8 +163,10 @@ class NativeAdManager {
                     }
 
                     override fun onAdLoaded() {
-                        if (type ==ADType.NATIVE_HOME.value)ADLoading.NATIVE_HOME.isLoading = false
-                        if (type ==ADType.NATIVE_RESULT.value)ADLoading.NATIVE_RESULT.isLoading = false
+                        if (type == ADType.NATIVE_HOME.value) ADLoading.NATIVE_HOME.isLoading =
+                            false
+                        if (type == ADType.NATIVE_RESULT.value) ADLoading.NATIVE_RESULT.isLoading =
+                            false
                         isLoadingAD = false
                         TimberUtils().printADLoadLog(
                             type,
@@ -185,7 +191,7 @@ class NativeAdManager {
                         AppVariable.isNativeImpression = true
                         TimberUtils().printADImpression(type)
                         AppVariable.cacheDataList?.forEach {
-                            if (it["type"].toString() ==type)  AppVariable.cacheDataList?.remove(it)
+                            if (it["type"].toString() == type) AppVariable.cacheDataList?.remove(it)
                         }
                         CheckADStatus().setShowAndClickCount(
                             activity, isShow = true, isClick = false
@@ -195,8 +201,10 @@ class NativeAdManager {
                     }
 
                     override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                        if (type ==ADType.NATIVE_HOME.value)ADLoading.NATIVE_HOME.isLoading = false
-                        if (type ==ADType.NATIVE_RESULT.value)ADLoading.NATIVE_RESULT.isLoading = false
+                        if (type == ADType.NATIVE_HOME.value && position != nativeListAD.size) ADLoading.NATIVE_HOME.isLoading =
+                            false
+                        if (type == ADType.NATIVE_RESULT.value && position != nativeListAD.size) ADLoading.NATIVE_RESULT.isLoading =
+                            false
                         isLoadingAD = false
                         TimberUtils().printADLoadLog(
                             type,

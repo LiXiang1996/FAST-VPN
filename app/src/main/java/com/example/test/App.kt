@@ -93,7 +93,6 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
             AppVariable.isBackGround = false
             if ((System.currentTimeMillis() - AppVariable.exitAppTime) / 1000 > 3) {
                 Timber.tag(AppConstant.TAG).e("从后台切回前台")
-
                 activityList.forEach {
                     if (it is AdActivity) {
                         Timber.tag(AppConstant.TAG).e("finish and remove ${it.localClassName}")
@@ -104,6 +103,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
 
                 if (activity !is SplashActivity) {//不在启屏页做重复跳转
                     AppVariable.isBackGroundToSplash = true
+                    if (activity is MainActivity) AppVariable.isBackGroundToMain = true
                     val intent = Intent(activity, SplashActivity::class.java)
                     Timber.tag(AppConstant.TAG).e("intent ${activity.localClassName}")
                     activity.startActivity(intent)

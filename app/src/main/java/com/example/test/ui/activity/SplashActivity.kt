@@ -86,10 +86,7 @@ class SplashActivity : BaseActivity() {
                 }
 
                 override fun onFinish() {
-                    if (!AppVariable.isBackGroundToSplash) {
-                        nextTo()
-                    }
-                    finish()
+                    nextTo()
                 }
             }
 
@@ -126,6 +123,7 @@ class SplashActivity : BaseActivity() {
                 }
 
                 override fun onFinish() {
+                    Timber.tag(AppConstant.TAG+"timer").e("onFinish")
                     if (!AppVariable.isBackGroundToSplash) {
                         nextTo()
                     } else finish()
@@ -276,6 +274,7 @@ class SplashActivity : BaseActivity() {
         if (AppVariable.isBackGroundToSplash) {
             AppVariable.isBackGroundToSplash = false
         }
+        Timber.tag(AppConstant.TAG+"splash").e("next to")
         if (canJump) {
             val intent = Intent(this@SplashActivity, MainActivity::class.java)
             this@SplashActivity.startActivity(intent)

@@ -72,6 +72,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
     var isShowGuideDialog = false
     var isUpdateNative = true
     var isCanToJump = false
+    var isBackToMain = false
 
     private lateinit var interstitialAdManager: InterstitialAdManager
     private lateinit var nativeAdManager: NativeAdManager
@@ -103,9 +104,15 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
             result()
         }
         setData()
+        if (AppVariable.isBackGroundToMain){
+            isUpdateNative = false
+            AppVariable.isBackGroundToMain = false
+        }
         if (isUpdateNative) {
             showNativeAD(activity as BaseActivity)
-        } else isUpdateNative = !isUpdateNative
+        } else {
+            isUpdateNative = true
+        }
         super.onResume()
     }
 
@@ -147,7 +154,6 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initListener() {
-
         connectClickBtn.setOnClickListener {
             if (isShowGuideDialog) {
                 //引导页消失操作

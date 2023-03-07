@@ -86,7 +86,6 @@ object GetADData {
                         ) { it1 ->
                             val adView = NativeAdView1.getView(activity)
                             manager.populateNativeAdView(it1, adView)
-                            // TODO: 这儿是不是可以整个回调，没有数据的时候不展示
                             adView.bringToFront()
                             container?.removeAllViews()
                             container?.addView(adView)
@@ -143,10 +142,9 @@ object GetADData {
                             adView.bringToFront()
                             container?.removeAllViews()
                             container?.addView(adView)
-
                             if (!AppVariable.isNativeImpression) {
                                 AppVariable.isNativeImpression = false
-                                TimberUtils().printADImpression(type)
+                                Timber.tag("nativresult").e("Type: $type  广告正在展示")
                                 AppVariable.cacheDataList?.let {
                                     synchronized(it) {
                                         AppVariable.cacheDataList?.forEach {it1->
@@ -263,7 +261,7 @@ object GetADData {
                             managerInter.interstitialAd?.let { it3 ->
                                 managerInter.showInterstitialWithData(
                                     activity, mutableListOf(AppVariable.openADList!!.get(position)),
-                                    it3, type, onShowAdCompleteListener
+                                    it3, ADType.INTER_OPEN.value, onShowAdCompleteListener
                                 )
                             }
                         } else if (!it2) {

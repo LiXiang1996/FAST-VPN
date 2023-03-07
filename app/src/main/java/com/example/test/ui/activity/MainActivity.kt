@@ -146,7 +146,7 @@ class MainActivity : BaseActivity() {
                 }
                 return true
             }
-            moveTaskToBack(false)
+            moveTaskToBack(true)
             return true
         }
         return super.onKeyDown(keyCode, event)
