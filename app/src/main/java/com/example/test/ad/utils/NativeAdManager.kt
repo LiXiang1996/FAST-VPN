@@ -124,9 +124,9 @@ class NativeAdManager {
                 return
             }
             isLoadingAD = true
-            TimberUtils().printADLoadLog(type, AppConstant.LOADING, nativeListAD[position])
             if (type == ADType.NATIVE_HOME.value) ADLoading.NATIVE_HOME.isLoading = true
             if (type == ADType.NATIVE_RESULT.value) ADLoading.NATIVE_RESULT.isLoading = true
+            TimberUtils().printADLoadLog(type, AppConstant.LOADING, nativeListAD[position])
             val builder = AdLoader.Builder(activity, nativeListAD[position].robvn_id)
             val videoOptions = VideoOptions.Builder().setStartMuted(true).build()
             val adOptions = NativeAdOptions.Builder()
@@ -182,8 +182,10 @@ class NativeAdManager {
                     }
 
                     override fun onAdImpression() {
-                        if(type ==ADType.NATIVE_RESULT.value)AppVariable.isNativeResultImpression = true
-                        if(type ==ADType.NATIVE_HOME.value)AppVariable.isNativeHomeImpression = true
+                        if (type == ADType.NATIVE_RESULT.value) AppVariable.isNativeResultImpression =
+                            true
+                        if (type == ADType.NATIVE_HOME.value) AppVariable.isNativeHomeImpression =
+                            true
                         TimberUtils().printADImpression(type)
                         AppVariable.cacheDataList?.forEach {
                             if (it["type"].toString() == type) AppVariable.cacheDataList?.remove(it)
@@ -206,7 +208,7 @@ class NativeAdManager {
                             AppConstant.LOAD_FAIL,
                             nativeListAD[position], loadAdError
                         )
-                        if (position + 1 < nativeListAD.size) {
+                        if (position < nativeListAD.size) {
                             refreshAd(activity, frameLayout, type, position + 1, nativeListAD) {
                                 result.invoke(it)
                             }

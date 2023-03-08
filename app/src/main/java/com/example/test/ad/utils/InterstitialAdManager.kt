@@ -210,14 +210,12 @@ class InterstitialAdManager {
 //                        if (cacheData != null) {
 //                            AppVariable.cacheDataList?.remove(cacheData)
 //                        }
-                        val data = HashMap<String, Any>().apply {
+                        if (type == ADType.INTER_OPEN.value) AppVariable.cacheSplashADData = interListAd[position]
+                        AppVariable.cacheDataList?.add(HashMap<String, Any>().apply {
                             put("type", type)
                             put("value", interstitialAd!!)
                             put(AppConstant.LOAD_TIME, Date().time)
-                        }
-                        AppVariable.cacheDataList?.add(data)
-                        if (type == ADType.INTER_OPEN.value) AppVariable.cacheSplashADData =
-                            interListAd[position]
+                        })
                         adIsLoading = false
                         result.invoke(true, true)
                     }

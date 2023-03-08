@@ -72,7 +72,7 @@ class SplashActivity : BaseActivity() {
             //progress
             countDownTimer = object : CountDownTimer(3000L, 300) {
                 override fun onTick(p0: Long) {
-                    progress.progress = ((3000 - p0) / 30).toInt() + 1
+//                    progress.progress = ((3000 - p0) / 30).toInt() + 1
                 }
 
                 override fun onFinish() {
@@ -83,6 +83,7 @@ class SplashActivity : BaseActivity() {
             //ad Timer
             countDownADTimer = object : CountDownTimer(10000L, 1000) {
                 override fun onTick(p0: Long) {
+                    progress.progress = ((10000 - p0) / 100).toInt() + 1
                 }
 
                 override fun onFinish() {
@@ -100,24 +101,10 @@ class SplashActivity : BaseActivity() {
                 else {
                     checkCache()
                 }
-                //检测本地开屏缓存
-                if (AppVariable.cacheSplashADData != null && AppVariable.cacheSplashADData?.robvn_l != null) {
-                    showDataAD(AppVariable.cacheSplashADData?.robvn_l.toString(),
-                        object : OnShowAdCompleteListener {
-                            override fun onShowAdComplete() {
-                                countDownADTimer?.cancel()
-                                if (!AppVariable.isBackGroundToSplash) {
-                                    val intent =
-                                        Intent(this@SplashActivity, MainActivity::class.java)
-                                    this@SplashActivity.startActivity(intent)
-                                }
-                                finish()
-                            }
-                        })
-                } else {
-                    if (!ADLoading.OPEN.isLoading && !ADLoading.INTER_OPEN.isLoading)
-                        showAD()
-                }
+                if (!ADLoading.INTER_OPEN.isLoading && !ADLoading.OPEN.isLoading) loadOpenAD()
+                else Timber.tag(AppConstant.TAG + "splash")
+                    .e("${ADLoading.INTER_OPEN.isLoading}-----${ADLoading.OPEN.isLoading}")
+
             }
         } else {
             countDownTimer = object : CountDownTimer(3000L, 300) {
@@ -135,6 +122,67 @@ class SplashActivity : BaseActivity() {
             countDownTimer.start()
         }
         super.initData()
+    }
+
+    private fun loadOpenAD() {
+        Timber.tag(AppConstant.TAG + "splash").e("1")
+        val dataOpenOpen =
+            AppVariable.cacheDataList?.find { it["type"].toString() == ADType.OPEN.value }
+        val dataOpenInter =
+            AppVariable.cacheDataList?.find { it["type"].toString() == ADType.INTER_OPEN.value }
+        //检测本地开屏缓存
+        if (dataOpenOpen != null || dataOpenInter != null) {
+            Timber.tag(AppConstant.TAG + "splash").e("3")
+            if (dataOpenOpen != null) {
+                showDataAD(dataOpenOpen["type"].toString(),
+                    object : OnShowAdCompleteListener {
+                        override fun onShowAdComplete() {
+                            countDownADTimer?.cancel()
+                            if (!AppVariable.isBackGroundToSplash) {
+                                val intent =
+                                    Intent(this@SplashActivity, MainActivity::class.java)
+                                this@SplashActivity.startActivity(intent)
+                            }
+                            finish()
+                        }
+
+                    })
+            } else if (dataOpenInter != null) {
+                showDataAD(dataOpenInter["type"].toString(),
+                    object : OnShowAdCompleteListener {
+                        override fun onShowAdComplete() {
+                            countDownADTimer?.cancel()
+                            if (!AppVariable.isBackGroundToSplash) {
+                                val intent =
+                                    Intent(this@SplashActivity, MainActivity::class.java)
+                                this@SplashActivity.startActivity(intent)
+                            }
+                            finish()
+                        }
+
+                    })
+            } else {
+                Timber.tag(AppConstant.TAG).e("splash 缓存获取失败")
+            }
+        } else if (AppVariable.cacheSplashADData != null && AppVariable.cacheSplashADData?.robvn_l != null) {
+            Timber.tag(AppConstant.TAG + "splash").e("2")
+            showDataAD(AppVariable.cacheSplashADData?.robvn_l.toString(),
+                object : OnShowAdCompleteListener {
+                    override fun onShowAdComplete() {
+                        countDownADTimer?.cancel()
+                        if (!AppVariable.isBackGroundToSplash) {
+                            val intent =
+                                Intent(this@SplashActivity, MainActivity::class.java)
+                            this@SplashActivity.startActivity(intent)
+                        }
+                        finish()
+                    }
+
+                })
+        } else {
+            Timber.tag(AppConstant.TAG + "splash").e("4 无缓存")
+            showAD()
+        }
     }
 
     private fun checkCache() {
@@ -166,8 +214,12 @@ class SplashActivity : BaseActivity() {
 
     private fun showDataAD(type: String, onShowAdCompleteListener: OnShowAdCompleteListener) {
         val manager = if (type == ADType.OPEN.value) appOpenAdManager else interstitialAaManagerOpen
-        val data = AppVariable.cacheDataList?.find { it["type"].toString() == type }
+        Timber.tag(AppConstant.TAG + "splash").e(" 有缓存1")
+        val openType =
+            if (type == ADType.INTER.value || type == ADType.INTER_OPEN.value) ADType.INTER_OPEN.value else ADType.OPEN.value
+        val data = AppVariable.cacheDataList?.find { it["type"].toString() == openType }
         if (data != null) {
+            Timber.tag(AppConstant.TAG + "splash").e(" 有缓存2")
             if (data[AppConstant.LOAD_TIME] is Long) {
                 if (CheckADStatus().wasLoadTimeLessThanNHoursAgo(
                         1,
@@ -183,7 +235,7 @@ class SplashActivity : BaseActivity() {
                             onShowAdCompleteListener
                         ) { it1, it2 ->
                             GetADData.getOpenData(
-                                this, manager,null, onShowAdCompleteListener, 0
+                                this, manager, null, onShowAdCompleteListener, 0
                             )
                         }
                     } else if (AppVariable.cacheSplashADData?.robvn_l == ADType.INTER.value && data["value"] is InterstitialAd) {
@@ -197,7 +249,11 @@ class SplashActivity : BaseActivity() {
                     }
                 }
             }
-        } else {
+        }
+//        else if(){
+//
+//        }
+        else {
             showAD()
         }
     }
@@ -248,7 +304,7 @@ class SplashActivity : BaseActivity() {
 
 
     override fun onDestroy() {
-        countDownTimer.cancel()
+        countDownTimer?.cancel()
         countDownADTimer?.cancel()
         super.onDestroy()
     }

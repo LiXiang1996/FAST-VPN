@@ -76,18 +76,17 @@ class AppOpenAdManager {
                     loadTime = Date().time
                     TimberUtils().printADLoadLog(type, AppConstant.LOAD_SUC, openData)
                     result.invoke(true, true)
-                    AppVariable.cacheSplashADData = openData
 //                    val cacheData =
 //                        AppVariable.cacheDataList?.find { it["type"].toString() == type }
 //                    if (cacheData != null) {
 //                        AppVariable.cacheDataList?.remove(cacheData)
 //                    }
-                    val data = HashMap<String, Any>().apply {
+                    AppVariable.cacheSplashADData = openData
+                    AppVariable.cacheDataList?.add( HashMap<String, Any>().apply {
                         put("type", type)
                         put("value", appOpenAd!!)
                         put(AppConstant.LOAD_TIME, Date().time)
-                    }
-                    AppVariable.cacheDataList?.add(data)
+                    })
                 }
 
                 @SuppressLint("BinaryOperationInTimber")
