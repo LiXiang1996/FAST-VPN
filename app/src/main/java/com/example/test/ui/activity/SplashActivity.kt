@@ -350,4 +350,5 @@ class SplashActivity : BaseActivity() {
     }
 
 
+
 }

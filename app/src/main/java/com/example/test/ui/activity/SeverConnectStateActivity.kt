@@ -35,6 +35,7 @@ import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.utils.StartService
+import com.google.android.gms.ads.nativead.NativeAd
 import kotlinx.coroutines.*
 import timber.log.Timber
 import java.text.SimpleDateFormat
@@ -82,8 +83,8 @@ class SeverConnectStateActivity : BaseActivity() {
                 delay(200)
                 if (canJump) {
                     AppVariable.isBackGroundToResult = false
-                    if(!ADLoading.NATIVE_RESULT.isLoading) showNativeAD()
-                    else Timber.tag(AppConstant.TAG+"severConnect").e("result 正在loading")
+                    if (!ADLoading.NATIVE_RESULT.isLoading) showNativeAD()
+                    else Timber.tag(AppConstant.TAG + "severConnect").e("result 正在loading")
                 }
             }
         }
@@ -137,13 +138,17 @@ class SeverConnectStateActivity : BaseActivity() {
     }
 
 
+    private var nativeAd: NativeAd? = null
+
     private fun showNativeAD() {
         AppVariable.nativeResultADList?.let {
             GetADData.getFindData(this, this, ADType.NATIVE_RESULT.value, nativeAdManager,
                 it, nativeAdContainer, object : OnShowAdCompleteListener {
                     override fun onShowAdComplete() {
                     }
-                })
+                },
+                nativeDestroyBlock = { nativeAd?.destroy() },
+                nativeAdBlock = { ad -> nativeAd = ad })
         }
     }
 }

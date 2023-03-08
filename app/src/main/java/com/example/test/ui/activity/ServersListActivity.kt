@@ -229,16 +229,6 @@ class ServersListProfile {
                 robvn_port = 811
             )
         )
-        private val defaultProfile3 = ToProfile.remoteProfileToProfile(
-            RemoteProfile(
-                robvn_pwd = "tvX1v#NSFP_LG_bJ",
-                robvn_account = "chacha20-ietf-poly1305",
-                robvn_city = "Tokyo",
-                robvn_ip = "52.11.255.92",
-                robvn_country = "India",
-                robvn_port = 811
-            )
-        )
         private val defaultSmartProfile1 = ToProfile.remoteProfileToProfile(
             RemoteProfile(
                 robvn_pwd = "tvX1v#NSFP_LG_bJ",
@@ -251,7 +241,7 @@ class ServersListProfile {
         )
 
         //这是默认配置列表，若远程有数据，则更新此列表
-        var defaultList = mutableListOf(defaultProfile1, defaultProfile2, defaultProfile3)
+        var defaultList = mutableListOf(defaultProfile1, defaultProfile2)
 
         //这是默认配置smart列表，若远程有数据，则更新此列表
         private var smartListProfile = mutableListOf(defaultSmartProfile1)

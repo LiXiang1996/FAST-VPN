@@ -56,7 +56,9 @@ object GetADData {
         manager: Any,
         adListBean: MutableList<ADListBean.ADBean>,
         container: FrameLayout?,//native的承载对象
-        onShowAdCompleteListener: OnShowAdCompleteListener
+        onShowAdCompleteListener: OnShowAdCompleteListener,
+        nativeDestroyBlock:()->Unit ={},
+        nativeAdBlock:(NativeAd)->Unit ={},
     ) {
         if (!CheckADStatus().canShowAD(activity)) return
         val data = AppVariable.cacheDataList?.find { it[AppConstant.AD_TYPE].toString() == type }
@@ -85,8 +87,10 @@ object GetADData {
                         manager.refreshAd(
                             activity, container, type, 0, adListBean
                         ) { it1 ->
+                            nativeDestroyBlock()
+                            nativeAdBlock(it1)
                             val adView = NativeAdView1.getView(activity)
-                            manager.populateNativeAdView(it1, adView)
+                            manager.populateNativeAdView(it1, adView,type)
                             adView.bringToFront()
                             container?.removeAllViews()
                             container?.addView(adView)
@@ -136,27 +140,15 @@ object GetADData {
                                 (data[AppConstant.LOAD_TIME] as Long)
                             )
                         ) {
+                            nativeDestroyBlock()
+                            nativeAdBlock(data["value"] as NativeAd)
                             val adView = NativeAdView1.getView(activity)
-                            manager.populateNativeAdView(data["value"] as NativeAd, adView)
+                            manager.populateNativeAdView(data["value"] as NativeAd, adView,type)
                             adView.bringToFront()
                             container?.removeAllViews()
                             container?.addView(adView)
 
-                            TimberUtils().printADImpression(type)
-                            AppVariable.cacheDataList?.let {
-                                AppVariable.cacheDataList?.forEach { it1 ->
-                                    if (it1[AppConstant.AD_TYPE].toString() == type) AppVariable.cacheDataList?.remove(
-                                        it1
-                                    )
-                                }
 
-                            }
-                            CheckADStatus().setShowAndClickCount(
-                                activity,
-                                isShow = true,
-                                isClick = false
-                            )
-                            manager.refreshAd(activity, container, type, 0, adListBean) {}
                         } else {
                             //过期 删除缓存
                             val data =
@@ -165,8 +157,10 @@ object GetADData {
                             manager.refreshAd(
                                 activity, container, type, 0, adListBean
                             ) { it1 ->
+                                nativeDestroyBlock()
+                                nativeAdBlock(it1)
                                 val adView = NativeAdView1.getView(activity)
-                                manager.populateNativeAdView(it1, adView)
+                                manager.populateNativeAdView(it1, adView,type)
                                 adView.bringToFront()
                                 container?.removeAllViews()
                                 container?.addView(adView)

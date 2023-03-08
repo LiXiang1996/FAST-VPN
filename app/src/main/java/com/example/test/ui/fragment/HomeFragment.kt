@@ -47,6 +47,7 @@ import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.utils.StartService
+import com.google.android.gms.ads.nativead.NativeAd
 import kotlinx.coroutines.*
 import timber.log.Timber
 import java.text.SimpleDateFormat
@@ -180,11 +181,8 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                 if (NetworkUtil.get().isNetworkAvailable || NetworkUtil.isNetSystemUsable(activity)) {
                     toggle2Permission {}
                 } else Toast.makeText(
-                    activity,
-                    getString(R.string.network_error),
-                    Toast.LENGTH_LONG
-                )
-                    .show()
+                    activity, getString(R.string.network_error), Toast.LENGTH_LONG
+                ).show()
             }
         }
         serversContainer.setOnClickListener {
@@ -218,8 +216,11 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
             if (activity is MainActivity) {
                 (activity as MainActivity).frameLayout.visibility = View.VISIBLE
                 connectingAndStoppingAnimation()
-                if (CheckADStatus().canShowAD(activity as MainActivity))
-                    activity?.let { it1 -> loadInterAd(it1, ADType.INTER_CONNECT.value) }
+                if (CheckADStatus().canShowAD(activity as MainActivity)) activity?.let { it1 ->
+                    loadInterAd(
+                        it1, ADType.INTER_CONNECT.value
+                    )
+                }
                 else {
                     MainScope().launch {
                         delay(3000)
@@ -436,6 +437,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
             .into(countryIcon)
     }
 
+    private var nativeAd: NativeAd? = null
 
     private fun showNativeAD(activity: BaseActivity) {
         AppVariable.nativeHomeADList?.let {
@@ -448,9 +450,16 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                 object : OnShowAdCompleteListener {
                     override fun onShowAdComplete() {
                     }
-                })
+                },
+                nativeDestroyBlock = { nativeAd?.destroy() },
+                nativeAdBlock = {ad-> nativeAd = ad })
         }
 
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        nativeAd?.destroy()
     }
 
     private fun showInterAD(activity: BaseActivity, type: String) {
