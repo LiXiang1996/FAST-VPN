@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.FrameLayout
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import com.example.test.R
 import com.example.test.ad.data.ADListBean
 import com.example.test.ad.data.ADLoading
@@ -15,6 +16,7 @@ import com.example.test.ad.data.CheckADStatus
 import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
 import com.example.test.base.utils.TimberUtils
+import com.example.test.ui.activity.MainActivity
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.nativead.MediaView
 import com.google.android.gms.ads.nativead.NativeAd
@@ -44,8 +46,16 @@ object NativeAdView1 {
 
 class NativeAdManager {
 
-    fun populateNativeAdView(nativeAd: NativeAd, adView: View,type: String) {
+    fun populateNativeAdView(activity: Activity,nativeAd: NativeAd, adView: View,type: String) {
         val nativeAdView: NativeAdView = adView.rootView as NativeAdView
+//        if (activity is MainActivity){
+//            val h = AppVariable.connectClBottom-50
+//            Timber.tag(AppConstant.TAG).e("${AppVariable.connectClBottom-50}")
+//            val lp = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT,h)
+//            lp.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+//            lp.topToTop = ConstraintLayout.LayoutParams.PARENT_ID
+//            NativeAdView1.adMedia?.layoutParams = lp
+//        }
         NativeAdView1.headLine?.text = nativeAd.headline ?: ""
         NativeAdView1.adBody?.text = nativeAd.body ?: ""
         nativeAd.mediaContent?.let { NativeAdView1.adMedia?.setMediaContent(it) }

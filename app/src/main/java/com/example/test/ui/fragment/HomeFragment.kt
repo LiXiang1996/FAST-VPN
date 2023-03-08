@@ -19,6 +19,7 @@ import android.widget.Chronometer.OnChronometerTickListener
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -40,6 +41,7 @@ import com.example.test.ui.activity.ServersListActivity
 import com.example.test.ui.activity.ServersListProfile
 import com.example.test.ui.activity.SeverConnectStateActivity
 import com.example.test.ui.widget.NativeFrameLayout
+import com.example.test.ui.widget.guideview.DimenUtil
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.ShadowsocksConnection
@@ -79,6 +81,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
     private lateinit var nativeAdManager: NativeAdManager
     private lateinit var nativeAdManagerR: NativeAdManager
     lateinit var nativeAdContainer: NativeFrameLayout
+    lateinit var connectCl: ConstraintLayout
 
 
     override fun onCreateView(
@@ -121,6 +124,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
     }
 
     private fun initView(view: View) {
+        connectCl = view.findViewById(R.id.home_connect_cl)
         nativeAdContainer = view.findViewById(R.id.main_native_ad_frame)
         connectClickBtn = view.findViewById(R.id.main_connection_toggle_btn)
         connectClickGuideLottie = view.findViewById(R.id.main_connection_toggle_bg)
@@ -154,6 +158,22 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         interstitialAdManager = InterstitialAdManager()
         nativeAdManager = NativeAdManager()
         nativeAdManagerR = NativeAdManager()
+//        connectCl.post {
+//            AppVariable.connectClBottom = connectCl.bottom - 55
+//        }
+//        val layoutParams =
+//            ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, 0)
+//        layoutParams.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+//        layoutParams.topToBottom = connectCl.id
+//        layoutParams.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
+//        layoutParams.setMargins(
+//            DimenUtil.dp2px(activity, 16f),
+//            DimenUtil.dp2px(activity, 8f),
+//            DimenUtil.dp2px(activity, 16f), 55
+//        )
+//        layoutParams.verticalBias = 0f
+//        nativeAdContainer.layoutParams = layoutParams
+
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -452,7 +472,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                     }
                 },
                 nativeDestroyBlock = { nativeAd?.destroy() },
-                nativeAdBlock = {ad-> nativeAd = ad })
+                nativeAdBlock = { ad -> nativeAd = ad })
         }
 
     }

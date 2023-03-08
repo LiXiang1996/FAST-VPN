@@ -2,7 +2,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:maxHeight="276dp"
+    android:maxHeight="220dp"
     android:layout_height="wrap_content">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -14,7 +14,7 @@
         <com.google.android.gms.ads.nativead.MediaView
             android:id="@+id/native_ad_media"
             android:layout_width="match_parent"
-            android:layout_height="210dp"
+            android:layout_height="170dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0" />
@@ -26,6 +26,7 @@
             android:layout_marginStart="11.5dp"
             android:layout_marginTop="9.1dp"
             android:layout_marginBottom="12.5dp"
+            android:background="#4D000000"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/native_ad_media"
@@ -74,7 +75,6 @@
             android:gravity="center"
             android:textColor="@color/white"
             android:textSize="12sp"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toEndOf="@id/ad_title1"

@@ -20,14 +20,14 @@
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/nav_tab_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:layout_alignParentBottom="true"
         android:background="@color/tab_color"
         app:layout_constraintBottom_toBottomOf="parent"
         app:tabMode="fixed"
         android:alpha="1"
         app:tabRippleColor="@android:color/transparent"
-        tools:layout_height="50dp" />
+         />
 
     <FrameLayout
         android:layout_width="match_parent"

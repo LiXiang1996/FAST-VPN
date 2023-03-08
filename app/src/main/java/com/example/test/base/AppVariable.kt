@@ -9,6 +9,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.collections.HashMap
 
 object AppVariable {
+    var connectClBottom: Int = 0
     var isHomeBack: Boolean =false
     var host: String = "" //执行操作的host
     var state = BaseService.State.Idle
