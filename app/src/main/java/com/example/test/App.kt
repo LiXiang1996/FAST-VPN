@@ -36,15 +36,18 @@ import java.util.*
 
 class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObserver {
 
-    private var activityCount = 0
-    private var currentActivity: Activity? = null
-    private var activityList = mutableListOf<Activity>()
 
     companion object {
         @SuppressLint("StaticFieldLeak")
         var context: Context? = null
             private set
         var remoteADListData: ADListBean? = null
+        var activityCount = 0
+
+        @SuppressLint("StaticFieldLeak")
+        var currentActivity: Activity? = null
+        var activityList = mutableListOf<Activity>()
+
     }
 
 
@@ -65,7 +68,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
         context = applicationContext
         Core.init(this, MainActivity::class)
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
-        getRemoteConfig()
+//        getRemoteConfig()
     }
 
 
@@ -110,8 +113,8 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
                 activityList.remove(it)
             }
         }
-        if (activity !is SplashActivity) {//不在启屏页做重复跳转
-            AppVariable.isBackGroundToSplash = true
+        AppVariable.isBackGroundToSplash = true
+        if (activity !is SplashActivity) {
             if (activity is MainActivity) AppVariable.isBackGroundToMain = true
             if (activity is SeverConnectStateActivity) AppVariable.isBackGroundToResult =
                 true
@@ -119,7 +122,8 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
             Timber.tag(AppConstant.TAG).e("A ${activity.localClassName}   to SplashActivity")
             activity.startActivity(intent)
         } else {
-            AppVariable.isBackGroundToSplash = true
+            AppVariable.isBackGroundOnlySplash = true
+            Timber.tag(AppConstant.TAG).e("splash ${activity.localClassName}  to SplashActivity")
             val intent = Intent(activity, SplashActivity::class.java)
             Timber.tag(AppConstant.TAG).e("intent ${activity.localClassName}")
             activity.startActivity(intent)

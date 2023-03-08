@@ -14,6 +14,7 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
+import com.example.test.App
 import com.example.test.R
 import com.example.test.ad.data.ADLoading
 import com.example.test.ad.data.ADType
@@ -35,6 +36,7 @@ import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.utils.StartService
+import com.google.android.gms.ads.AdActivity
 import com.google.android.gms.ads.nativead.NativeAd
 import kotlinx.coroutines.*
 import timber.log.Timber
@@ -83,6 +85,13 @@ class SeverConnectStateActivity : BaseActivity() {
                 delay(200)
                 if (canJump) {
                     AppVariable.isBackGroundToResult = false
+//                    App.activityList.forEach {
+//                        if (it is AdActivity) {
+//                            Timber.tag(AppConstant.TAG).e("finish and remove ${it.localClassName}")
+//                            it.finish()
+//                            App.activityList.remove(it)
+//                        }
+//                    }
                     if (!ADLoading.NATIVE_RESULT.isLoading) showNativeAD()
                     else Timber.tag(AppConstant.TAG + "severConnect").e("result 正在loading")
                 }

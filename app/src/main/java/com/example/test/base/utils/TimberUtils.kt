@@ -1,7 +1,9 @@
 package com.example.test.base.utils
 
 import com.example.test.ad.data.ADListBean
+import com.example.test.ad.data.ADType
 import com.example.test.base.AppConstant
+import com.example.test.base.AppVariable
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.LoadAdError
 import timber.log.Timber
@@ -29,6 +31,7 @@ class TimberUtils {
     fun printADImpression(
         type: String
     ) {
+        if (type ==ADType.INTER_OPEN.value||type==ADType.OPEN.value) AppVariable.isOpenIsShowing = true
         Timber.tag(ADTAG).e("Type: $type  广告正在展示")
     }
 
@@ -41,6 +44,7 @@ class TimberUtils {
     fun printAdDismissedFullScreenContent(
         type: String
     ) {
+        if (type ==ADType.INTER_OPEN.value||type==ADType.OPEN.value) AppVariable.isOpenIsShowing = false
         Timber.tag(ADTAG).e("Type: $type  全屏内容消失")
     }
     fun printAdShowedFullScreenContent(

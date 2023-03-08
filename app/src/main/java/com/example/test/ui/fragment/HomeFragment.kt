@@ -236,12 +236,13 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
             if (activity is MainActivity) {
                 (activity as MainActivity).frameLayout.visibility = View.VISIBLE
                 connectingAndStoppingAnimation()
-                if (CheckADStatus().canShowAD(activity as MainActivity)) activity?.let { it1 ->
-                    loadInterAd(
-                        it1, ADType.INTER_CONNECT.value
-                    )
-                }
-                else {
+                if (CheckADStatus().canShowAD(activity as MainActivity)) {
+                    activity?.let { it1 ->
+                        loadInterAd(
+                            it1, ADType.INTER_CONNECT.value
+                        )
+                    }
+                } else {
                     MainScope().launch {
                         delay(3000)
                         toggleToConnect()
@@ -416,7 +417,6 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
             }
 
             override fun onFinish() {
-                //这儿用是否展示广告来判断倒计时结束时是否跳转
                 if (!interstitialAdManager.adIsImpression) {
                     interstitialAdManager.interstitialAd = null
                     toggleToConnect()
@@ -498,6 +498,8 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                     }
                 })
         }
+
+
         val data =
             AppVariable.cacheDataList?.find { it[AppConstant.AD_TYPE].toString() == ADType.NATIVE_RESULT.value }
         if (data == null && !ADLoading.NATIVE_RESULT.isLoading) {

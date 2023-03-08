@@ -76,9 +76,9 @@ object GetADData {
                                     onShowAdCompleteListener
                                 )
                             }
-                            if (!it1 && !it2) {
-                                onShowAdCompleteListener.onShowAdComplete()
-                            }
+//                            if (!it1 && !it2) {//不能回调
+//                                onShowAdCompleteListener.onShowAdComplete()
+//                            }
                         }
                     }
                 }
@@ -125,7 +125,8 @@ object GetADData {
                                         activity, adListBean, type, onShowAdCompleteListener
                                     )
                                 }
-                                if (!it1 && !it2) onShowAdCompleteListener.onShowAdComplete()
+//                                if (!it1 && !it2) //这儿不能回调
+//                                    onShowAdCompleteListener.onShowAdComplete()
                             }
                         }
                     }

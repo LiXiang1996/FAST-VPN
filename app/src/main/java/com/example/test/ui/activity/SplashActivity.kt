@@ -7,6 +7,7 @@ import android.view.KeyEvent
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.ProgressBar
+import com.example.test.App
 import com.example.test.R
 import com.example.test.ad.data.*
 import com.example.test.ad.utils.AppOpenAdManager
@@ -18,8 +19,10 @@ import com.example.test.base.AppVariable
 import com.example.test.base.BaseActivity
 import com.example.test.base.bar.StatusBarUtil
 import com.example.test.base.utils.SharedPreferencesUtils
+import com.google.android.gms.ads.AdActivity
 import com.google.android.gms.ads.appopen.AppOpenAd
 import com.google.android.gms.ads.interstitial.InterstitialAd
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -59,7 +62,6 @@ class SplashActivity : BaseActivity() {
         appOpenAdManager = AppOpenAdManager()
         nativeAdManagerResult = NativeAdManager()
         nativeAdManagerHome = NativeAdManager()
-
     }
 
 
@@ -72,7 +74,6 @@ class SplashActivity : BaseActivity() {
             //progress
             countDownTimer = object : CountDownTimer(3000L, 300) {
                 override fun onTick(p0: Long) {
-//                    progress.progress = ((3000 - p0) / 30).toInt() + 1
                 }
 
                 override fun onFinish() {
@@ -87,8 +88,11 @@ class SplashActivity : BaseActivity() {
                 }
 
                 override fun onFinish() {
-                    if (AppVariable.isBackGroundToMain)
+                    if (!AppVariable.isBackGroundToSplash)
                         nextTo()
+                    else if(AppVariable.isBackGroundToResult && AppVariable.isOpenIsShowing){
+                        return
+                    }
                     else finish()
                 }
             }
@@ -138,12 +142,7 @@ class SplashActivity : BaseActivity() {
                     object : OnShowAdCompleteListener {
                         override fun onShowAdComplete() {
                             countDownADTimer?.cancel()
-                            if (!AppVariable.isBackGroundToSplash) {
-                                val intent =
-                                    Intent(this@SplashActivity, MainActivity::class.java)
-                                this@SplashActivity.startActivity(intent)
-                            }
-                            finish()
+                            jump()
                         }
 
                     })
@@ -152,12 +151,7 @@ class SplashActivity : BaseActivity() {
                     object : OnShowAdCompleteListener {
                         override fun onShowAdComplete() {
                             countDownADTimer?.cancel()
-                            if (!AppVariable.isBackGroundToSplash) {
-                                val intent =
-                                    Intent(this@SplashActivity, MainActivity::class.java)
-                                this@SplashActivity.startActivity(intent)
-                            }
-                            finish()
+                            jump()
                         }
 
                     })
@@ -170,12 +164,7 @@ class SplashActivity : BaseActivity() {
                 object : OnShowAdCompleteListener {
                     override fun onShowAdComplete() {
                         countDownADTimer?.cancel()
-                        if (!AppVariable.isBackGroundToSplash) {
-                            val intent =
-                                Intent(this@SplashActivity, MainActivity::class.java)
-                            this@SplashActivity.startActivity(intent)
-                        }
-                        finish()
+                        jump()
                     }
 
                 })
@@ -217,7 +206,8 @@ class SplashActivity : BaseActivity() {
         Timber.tag(AppConstant.TAG + "splash").e(" 有缓存1")
         val openType =
             if (type == ADType.INTER.value || type == ADType.INTER_OPEN.value) ADType.INTER_OPEN.value else ADType.OPEN.value
-        val data = AppVariable.cacheDataList?.find { it[AppConstant.AD_TYPE].toString() == openType }
+        val data =
+            AppVariable.cacheDataList?.find { it[AppConstant.AD_TYPE].toString() == openType }
         if (data != null) {
             Timber.tag(AppConstant.TAG + "splash").e(" 有缓存2")
             if (data[AppConstant.LOAD_TIME] is Long) {
@@ -314,12 +304,7 @@ class SplashActivity : BaseActivity() {
                 object : OnShowAdCompleteListener {
                     override fun onShowAdComplete() {
                         countDownADTimer?.cancel()
-                        if (!AppVariable.isBackGroundToSplash) {
-                            val intent =
-                                Intent(this@SplashActivity, MainActivity::class.java)
-                            this@SplashActivity.startActivity(intent)
-                        }
-                        finish()
+                        jump()
                     }
                 },
                 0
@@ -328,6 +313,18 @@ class SplashActivity : BaseActivity() {
         }
 
     }
+
+    fun jump() {
+        if (!AppVariable.isBackGroundToSplash) {//如果不是后台切前台，跳转关掉自身
+            val intent =
+                Intent(this@SplashActivity, MainActivity::class.java)
+            this@SplashActivity.startActivity(intent)
+        } else {
+            AppVariable.isBackGroundToSplash = false
+            finish()
+        }
+    }
+
 
     fun nextTo() {
         if (AppVariable.isBackGroundToSplash) {
@@ -348,7 +345,6 @@ class SplashActivity : BaseActivity() {
         }
         return super.onKeyDown(keyCode, event)
     }
-
 
 
 }

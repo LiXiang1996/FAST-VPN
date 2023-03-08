@@ -9,7 +9,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.collections.HashMap
 
 object AppVariable {
-    var connectClBottom: Int = 0
+    var isOpenIsShowing: Boolean = false
     var isHomeBack: Boolean =false
     var host: String = "" //执行操作的host
     var state = BaseService.State.Idle
@@ -21,6 +21,7 @@ object AppVariable {
     var isBackGround = false
     var exitAppTime = 0L
     var isBackGroundToSplash = false
+    var isBackGroundOnlySplash = false
     var isBackGroundToMain = true
     var isBackGroundToResult = false
     var openADList: MutableList<ADListBean.ADBean>? = null
