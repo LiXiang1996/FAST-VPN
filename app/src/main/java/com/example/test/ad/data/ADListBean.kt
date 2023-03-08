@@ -59,7 +59,7 @@ object GetADData {
         onShowAdCompleteListener: OnShowAdCompleteListener
     ) {
         if (!CheckADStatus().canShowAD(activity)) return
-        val data = AppVariable.cacheDataList?.find { it["type"].toString() == type }
+        val data = AppVariable.cacheDataList?.find { it[AppConstant.AD_TYPE].toString() == type }
         if (data == null) {
             Timber.tag(AppConstant.TAG).e("no cache")
             when (type) {
@@ -113,7 +113,7 @@ object GetADData {
                             )
                         } else {//过期移除
                             val data =
-                                AppVariable.cacheDataList?.find { it["type"].toString() == type }
+                                AppVariable.cacheDataList?.find { it[AppConstant.AD_TYPE].toString() == type }
                             AppVariable.cacheDataList?.remove(data)
                             manager.loadAd(context, adListBean, 0, type) { it1, it2 ->
                                 if (it1 && activity.canJump) {
@@ -141,10 +141,11 @@ object GetADData {
                             adView.bringToFront()
                             container?.removeAllViews()
                             container?.addView(adView)
+
                             TimberUtils().printADImpression(type)
                             AppVariable.cacheDataList?.let {
                                 AppVariable.cacheDataList?.forEach { it1 ->
-                                    if (it1["type"].toString() == type) AppVariable.cacheDataList?.remove(
+                                    if (it1[AppConstant.AD_TYPE].toString() == type) AppVariable.cacheDataList?.remove(
                                         it1
                                     )
                                 }
@@ -159,7 +160,7 @@ object GetADData {
                         } else {
                             //过期 删除缓存
                             val data =
-                                AppVariable.cacheDataList?.find { it["type"].toString() == type }
+                                AppVariable.cacheDataList?.find { it[AppConstant.AD_TYPE].toString() == type }
                             AppVariable.cacheDataList?.remove(data)
                             manager.refreshAd(
                                 activity, container, type, 0, adListBean

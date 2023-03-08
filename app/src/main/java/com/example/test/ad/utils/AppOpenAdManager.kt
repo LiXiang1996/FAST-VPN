@@ -77,13 +77,13 @@ class AppOpenAdManager {
                     TimberUtils().printADLoadLog(type, AppConstant.LOAD_SUC, openData)
                     result.invoke(true, true)
 //                    val cacheData =
-//                        AppVariable.cacheDataList?.find { it["type"].toString() == type }
+//                        AppVariable.cacheDataList?.find { it[AppConstant.AD_TYPE].toString() == type }
 //                    if (cacheData != null) {
 //                        AppVariable.cacheDataList?.remove(cacheData)
 //                    }
                     AppVariable.cacheSplashADData = openData
                     AppVariable.cacheDataList?.add( HashMap<String, Any>().apply {
-                        put("type", type)
+                        put(AppConstant.AD_TYPE, type)
                         put("value", appOpenAd!!)
                         put(AppConstant.LOAD_TIME, Date().time)
                     })
@@ -131,7 +131,7 @@ class AppOpenAdManager {
             override fun onAdImpression() {
                 TimberUtils().printADImpression(type)
                 AppVariable.cacheDataList?.forEach {
-                    if (it["type"].toString() == type) AppVariable.cacheDataList?.remove(it)
+                    if (it[AppConstant.AD_TYPE].toString() == type) AppVariable.cacheDataList?.remove(it)
                 }
                 CheckADStatus().setShowAndClickCount(
                     activity, isShow = true, isClick = false

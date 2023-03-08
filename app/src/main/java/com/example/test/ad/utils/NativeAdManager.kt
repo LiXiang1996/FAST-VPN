@@ -125,7 +125,11 @@ class NativeAdManager {
             }
             isLoadingAD = true
             if (type == ADType.NATIVE_HOME.value) ADLoading.NATIVE_HOME.isLoading = true
-            if (type == ADType.NATIVE_RESULT.value) ADLoading.NATIVE_RESULT.isLoading = true
+            if (type == ADType.NATIVE_RESULT.value) {
+                ADLoading.NATIVE_RESULT.isLoading = true
+                Timber.tag(AppConstant.TAG + "nativeloading")
+                    .e(" loading loading ${ADLoading.NATIVE_RESULT.isLoading}")
+            }
             TimberUtils().printADLoadLog(type, AppConstant.LOADING, nativeListAD[position])
             val builder = AdLoader.Builder(activity, nativeListAD[position].robvn_id)
             val videoOptions = VideoOptions.Builder().setStartMuted(true).build()
@@ -158,13 +162,8 @@ class NativeAdManager {
                     }
 
                     override fun onAdLoaded() {
-                        if (type == ADType.NATIVE_HOME.value) ADLoading.NATIVE_HOME.isLoading =
-                            false
-                        if (type == ADType.NATIVE_RESULT.value) ADLoading.NATIVE_RESULT.isLoading =
-                            false
-                        isLoadingAD = false
                         AppVariable.cacheDataList?.add(HashMap<String, Any>().apply {
-                            put("type", type)
+                            put(AppConstant.AD_TYPE, type)
                             put("value", currentNativeAd!!)
                             put(AppConstant.LOAD_TIME, Date().time)
                         })
@@ -173,6 +172,13 @@ class NativeAdManager {
                             AppConstant.LOAD_SUC,
                             nativeListAD[position]
                         )
+                        if (type == ADType.NATIVE_HOME.value) {
+                            ADLoading.NATIVE_HOME.isLoading = false
+                        }
+                        if (type == ADType.NATIVE_RESULT.value) {
+                            ADLoading.NATIVE_RESULT.isLoading = false
+                        }
+                        isLoadingAD = false
                         super.onAdLoaded()
                     }
 
@@ -188,7 +194,7 @@ class NativeAdManager {
                             true
                         TimberUtils().printADImpression(type)
                         AppVariable.cacheDataList?.forEach {
-                            if (it["type"].toString() == type) AppVariable.cacheDataList?.remove(it)
+                            if (it[AppConstant.AD_TYPE].toString() == type) AppVariable.cacheDataList?.remove(it)
                         }
                         CheckADStatus().setShowAndClickCount(
                             activity, isShow = true, isClick = false
@@ -198,16 +204,19 @@ class NativeAdManager {
                     }
 
                     override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                        if (type == ADType.NATIVE_HOME.value && position != nativeListAD.size) ADLoading.NATIVE_HOME.isLoading =
-                            false
-                        if (type == ADType.NATIVE_RESULT.value && position != nativeListAD.size) ADLoading.NATIVE_RESULT.isLoading =
-                            false
-                        isLoadingAD = false
                         TimberUtils().printADLoadLog(
                             type,
                             AppConstant.LOAD_FAIL,
                             nativeListAD[position], loadAdError
                         )
+                        if (type == ADType.NATIVE_HOME.value) ADLoading.NATIVE_HOME.isLoading =
+                            false
+                        if (type == ADType.NATIVE_RESULT.value) {
+                            ADLoading.NATIVE_RESULT.isLoading = false
+                            Timber.tag(AppConstant.TAG + "nativeloading")
+                                .e(" failed loading ${ADLoading.NATIVE_RESULT.isLoading}")
+                        }
+                        isLoadingAD = false
                         if (position < nativeListAD.size) {
                             refreshAd(activity, frameLayout, type, position + 1, nativeListAD) {
                                 result.invoke(it)

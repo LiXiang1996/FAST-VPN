@@ -127,14 +127,14 @@ class SplashActivity : BaseActivity() {
     private fun loadOpenAD() {
         Timber.tag(AppConstant.TAG + "splash").e("1")
         val dataOpenOpen =
-            AppVariable.cacheDataList?.find { it["type"].toString() == ADType.OPEN.value }
+            AppVariable.cacheDataList?.find { it[AppConstant.AD_TYPE].toString() == ADType.OPEN.value }
         val dataOpenInter =
-            AppVariable.cacheDataList?.find { it["type"].toString() == ADType.INTER_OPEN.value }
+            AppVariable.cacheDataList?.find { it[AppConstant.AD_TYPE].toString() == ADType.INTER_OPEN.value }
         //检测本地开屏缓存
         if (dataOpenOpen != null || dataOpenInter != null) {
             Timber.tag(AppConstant.TAG + "splash").e("3")
             if (dataOpenOpen != null) {
-                showDataAD(dataOpenOpen["type"].toString(),
+                showDataAD(dataOpenOpen[AppConstant.AD_TYPE].toString(),
                     object : OnShowAdCompleteListener {
                         override fun onShowAdComplete() {
                             countDownADTimer?.cancel()
@@ -148,7 +148,7 @@ class SplashActivity : BaseActivity() {
 
                     })
             } else if (dataOpenInter != null) {
-                showDataAD(dataOpenInter["type"].toString(),
+                showDataAD(dataOpenInter[AppConstant.AD_TYPE].toString(),
                     object : OnShowAdCompleteListener {
                         override fun onShowAdComplete() {
                             countDownADTimer?.cancel()
@@ -186,7 +186,7 @@ class SplashActivity : BaseActivity() {
     }
 
     private fun checkCache() {
-        if (AppVariable.cacheDataList?.find { it["type"].toString() == ADType.INTER_CONNECT.value } == null && !ADLoading.INTER.isLoading) {
+        if (AppVariable.cacheDataList?.find { it[AppConstant.AD_TYPE].toString() == ADType.INTER_CONNECT.value } == null && !ADLoading.INTER.isLoading) {
             AppVariable.interADList?.let {
                 interstitialAaManager1.loadAd(
                     applicationContext,
@@ -196,14 +196,14 @@ class SplashActivity : BaseActivity() {
                 ) { _, _ -> }
             }
         }
-        if (AppVariable.cacheDataList?.find { it["type"].toString() == ADType.NATIVE_HOME.value } == null && !ADLoading.NATIVE_HOME.isLoading) {
+        if (AppVariable.cacheDataList?.find { it[AppConstant.AD_TYPE].toString() == ADType.NATIVE_HOME.value } == null && !ADLoading.NATIVE_HOME.isLoading) {
             //native首页
             AppVariable.nativeHomeADList?.let {
                 nativeAdManagerHome.refreshAd(this, null, ADType.NATIVE_HOME.value, 0, it) {
                 }
             }
         }
-        if (AppVariable.cacheDataList?.find { it["type"].toString() == ADType.NATIVE_RESULT.value } == null && !ADLoading.NATIVE_RESULT.isLoading) {
+        if (AppVariable.cacheDataList?.find { it[AppConstant.AD_TYPE].toString() == ADType.NATIVE_RESULT.value } == null && !ADLoading.NATIVE_RESULT.isLoading) {
             //native结果页
             AppVariable.nativeResultADList?.let {
                 nativeAdManagerResult.refreshAd(this, null, ADType.NATIVE_RESULT.value, 0, it) {
@@ -217,7 +217,7 @@ class SplashActivity : BaseActivity() {
         Timber.tag(AppConstant.TAG + "splash").e(" 有缓存1")
         val openType =
             if (type == ADType.INTER.value || type == ADType.INTER_OPEN.value) ADType.INTER_OPEN.value else ADType.OPEN.value
-        val data = AppVariable.cacheDataList?.find { it["type"].toString() == openType }
+        val data = AppVariable.cacheDataList?.find { it[AppConstant.AD_TYPE].toString() == openType }
         if (data != null) {
             Timber.tag(AppConstant.TAG + "splash").e(" 有缓存2")
             if (data[AppConstant.LOAD_TIME] is Long) {
@@ -249,11 +249,7 @@ class SplashActivity : BaseActivity() {
                     }
                 }
             }
-        }
-//        else if(){
-//
-//        }
-        else {
+        } else {
             showAD()
         }
     }

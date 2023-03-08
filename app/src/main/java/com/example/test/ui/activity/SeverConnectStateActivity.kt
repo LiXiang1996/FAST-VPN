@@ -15,6 +15,7 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.example.test.R
+import com.example.test.ad.data.ADLoading
 import com.example.test.ad.data.ADType
 import com.example.test.ad.data.GetADData
 import com.example.test.ad.utils.NativeAdManager
@@ -81,7 +82,8 @@ class SeverConnectStateActivity : BaseActivity() {
                 delay(200)
                 if (canJump) {
                     AppVariable.isBackGroundToResult = false
-                    showNativeAD()
+                    if(!ADLoading.NATIVE_RESULT.isLoading) showNativeAD()
+                    else Timber.tag(AppConstant.TAG+"severConnect").e("result 正在loading")
                 }
             }
         }
