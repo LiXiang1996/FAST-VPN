@@ -19,6 +19,7 @@ import com.example.test.base.AppVariable
 import com.example.test.base.BaseActivity
 import com.example.test.base.bar.StatusBarUtil
 import com.example.test.base.utils.SharedPreferencesUtils
+import com.example.test.ui.widget.CheckIPUtils
 import com.google.android.gms.ads.AdActivity
 import com.google.android.gms.ads.appopen.AppOpenAd
 import com.google.android.gms.ads.interstitial.InterstitialAd
@@ -55,8 +56,7 @@ class SplashActivity : BaseActivity() {
                 this, AppConstant.COUNTRY_CODE, Locale.getDefault().country
             )
         }
-        AppVariable.isShowBanedIpDialog =
-            countryCode.lowercase() == "ir" || Locale.getDefault().country.lowercase() == "irn"
+        AppVariable.isShowBanedIpDialog = CheckIPUtils.checkIpIsOK(countryCode.lowercase())
         interstitialAaManager1 = InterstitialAdManager()
         interstitialAaManagerOpen = InterstitialAdManager()
         appOpenAdManager = AppOpenAdManager()
@@ -88,7 +88,7 @@ class SplashActivity : BaseActivity() {
                 }
 
                 override fun onFinish() {
-                    if (!AppVariable.isBackGroundToSplash)
+                    if (!AppVariable.isBackGroundToSplash)//如果不是从后台切前台，就进入主页
                         nextTo()
                     else if (AppVariable.isOpenIsShowing) {//有广告展示时不做关闭操作，因为会导致部分手机卡一下界面
                         return
@@ -109,7 +109,7 @@ class SplashActivity : BaseActivity() {
                 }
                 if (!ADLoading.INTER_OPEN.isLoading && !ADLoading.OPEN.isLoading) loadOpenAD()
                 else Timber.tag(AppConstant.TAG + "splash")
-                    .e("${ADLoading.INTER_OPEN.isLoading}-----${ADLoading.OPEN.isLoading}")
+                    .e("开屏广告还没请求完 inter ${ADLoading.INTER_OPEN.isLoading}-----open ${ADLoading.OPEN.isLoading}")
 
             }
         } else {
@@ -170,7 +170,7 @@ class SplashActivity : BaseActivity() {
         if (AppVariable.cacheDataList?.find { it[AppConstant.AD_TYPE].toString() == ADType.INTER_CONNECT.value } == null && !ADLoading.INTER.isLoading) {
             AppVariable.interADList?.let {
                 interstitialAaManager1.loadAd(
-                    applicationContext,
+                    this,
                     it,
                     0,
                     type = ADType.INTER_CONNECT.value
@@ -254,7 +254,7 @@ class SplashActivity : BaseActivity() {
         //连接页面  服务器列表页面跳转首页 todo 3.2日  测试提出现在的需求 共用广告 只缓存一个
         AppVariable.interADList?.let {
             interstitialAaManager1.loadAd(
-                applicationContext,
+                this,
                 it,
                 0,
                 type = ADType.INTER_CONNECT.value
@@ -313,7 +313,7 @@ class SplashActivity : BaseActivity() {
 //                Intent(this@SplashActivity, MainActivity::class.java)
 //            this@SplashActivity.startActivity(intent)
 //        }
-        else  {
+        else {
             AppVariable.isBackGroundToSplash = false
             finish()
         }

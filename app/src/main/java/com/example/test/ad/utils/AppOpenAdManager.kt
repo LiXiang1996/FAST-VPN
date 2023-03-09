@@ -47,7 +47,7 @@ class AppOpenAdManager {
      */
 
     fun loadAd(
-        context: Context,
+        context: BaseActivity,
         type: String,
         openData: ADListBean.ADBean,
         position: Int = 0,
@@ -77,17 +77,16 @@ class AppOpenAdManager {
                         put("value", appOpenAd!!)
                         put(AppConstant.LOAD_TIME, Date().time)
                     })
-//                    ADLoading.INTER_OPEN.isLoading = false
                     ADLoading.OPEN.isLoading = false
                     TimberUtils().printADLoadLog(type, AppConstant.LOAD_SUC, openData)
-                    result.invoke(true, true)
+                    if (context.isDestroyed||context.isFinishing) return
+                    else result.invoke(true, true)
                 }
 
                 @SuppressLint("BinaryOperationInTimber")
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                     isLoadingAd = false
                     ADLoading.OPEN.isLoading = false
-//                    ADLoading.INTER_OPEN.isLoading = false
                     TimberUtils().printADLoadLog(type, AppConstant.LOAD_FAIL, openData, loadAdError)
                     result.invoke(false, false)
                 }

@@ -1,5 +1,6 @@
 package com.example.test.ad.utils
 
+import android.app.Activity
 import android.content.Context
 import com.example.test.ad.data.ADListBean
 import com.example.test.ad.data.ADLoading
@@ -46,7 +47,9 @@ class InterstitialAdManager {
                 TimberUtils().printADImpression(type)
                 adIsImpression = true
                 AppVariable.cacheDataList?.forEach {
-                    if (it[AppConstant.AD_TYPE].toString() == type) AppVariable.cacheDataList?.remove(it)
+                    if (it[AppConstant.AD_TYPE].toString() == type) AppVariable.cacheDataList?.remove(
+                        it
+                    )
                 }
                 CheckADStatus().setShowAndClickCount(
                     context, isShow = true, isClick = false
@@ -68,7 +71,9 @@ class InterstitialAdManager {
             override fun onAdFailedToShowFullScreenContent(adError: AdError) {
                 TimberUtils().printAdFailedToShowFullScreenContent(type, adError)
                 AppVariable.cacheDataList?.forEach {
-                    if (it[AppConstant.AD_TYPE].toString() == type) AppVariable.cacheDataList?.remove(it)
+                    if (it[AppConstant.AD_TYPE].toString() == type) AppVariable.cacheDataList?.remove(
+                        it
+                    )
                 }
                 interstitialAd = null
                 adIsImpression = false
@@ -87,7 +92,7 @@ class InterstitialAdManager {
         type: String,
         onShowAdCompleteListener: OnShowAdCompleteListener
     ) {
-        if (context.isFinishing || context.isDestroyed ) return
+        if (context.isFinishing || context.isDestroyed) return
         adIsImpression = false
         interstitialAd = interstitialAdCache
         interstitialAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
@@ -103,7 +108,9 @@ class InterstitialAdManager {
                 TimberUtils().printADImpression(type)
                 adIsImpression = true
                 AppVariable.cacheDataList?.forEach {
-                    if (it[AppConstant.AD_TYPE].toString() == type) AppVariable.cacheDataList?.remove(it)
+                    if (it[AppConstant.AD_TYPE].toString() == type) AppVariable.cacheDataList?.remove(
+                        it
+                    )
                 }
                 CheckADStatus().setShowAndClickCount(
                     context, isShow = true, isClick = false
@@ -124,7 +131,9 @@ class InterstitialAdManager {
             override fun onAdFailedToShowFullScreenContent(adError: AdError) {
                 TimberUtils().printAdFailedToShowFullScreenContent(type, adError)
                 AppVariable.cacheDataList?.forEach {
-                    if (it[AppConstant.AD_TYPE].toString() == type) AppVariable.cacheDataList?.remove(it)
+                    if (it[AppConstant.AD_TYPE].toString() == type) AppVariable.cacheDataList?.remove(
+                        it
+                    )
                 }
                 interstitialAd = null
                 adIsImpression = false
@@ -139,7 +148,7 @@ class InterstitialAdManager {
     }
 
     fun loadAd(
-        context: Context,
+        context: Activity,
         interListAd: MutableList<ADListBean.ADBean>,
         position: Int = 0,
         type: String,
@@ -175,15 +184,11 @@ class InterstitialAdManager {
                             interListAd[position],
                             adError
                         )
-
-                        //如果列表长度足够，则继续去reload，成功就返回true，直到遍历完还是失败，则返回false false
-//                        if (context is BaseActivity) {
-//                            if (!context.canJump) return
-//                        }
-                        if (type != ADType.INTER_OPEN.value) {
-                            ADLoading.INTER.isLoading = false
+                        if (type == ADType.INTER_OPEN.value) {
+                            ADLoading.INTER_OPEN.isLoading = false
                             result.invoke(false, false)
-                        }
+                            return
+                        } else ADLoading.INTER.isLoading = false
                         if (position + 1 < interListAd.size) {
                             loadAd(
                                 context, interListAd, position + 1, type
@@ -204,35 +209,19 @@ class InterstitialAdManager {
                         if (type != ADType.INTER_OPEN.value) ADLoading.INTER.isLoading = false
                         else ADLoading.INTER_OPEN.isLoading = false
                         interstitialAd = ad
-                        loadTime = Date().time
-//                        val cacheData =
-//                            AppVariable.cacheDataList?.find { it[AppConstant.AD_TYPE].toString() == type }
-//                        if (cacheData != null) {
-//                            AppVariable.cacheDataList?.remove(cacheData)
-//                        }
-                        if (type == ADType.INTER_OPEN.value) AppVariable.cacheSplashADData = interListAd[position]
+                        if (type == ADType.INTER_OPEN.value) AppVariable.cacheSplashADData =
+                            interListAd[position]
                         AppVariable.cacheDataList?.add(HashMap<String, Any>().apply {
                             put(AppConstant.AD_TYPE, type)
                             put("value", interstitialAd!!)
                             put(AppConstant.LOAD_TIME, Date().time)
                         })
                         adIsLoading = false
+                        if (context.isDestroyed || context.isFinishing) return
                         result.invoke(true, true)
                     }
                 })
         }
-    }
-
-    private fun isAdAvailable(): Boolean {
-        return interstitialAd != null && wasLoadTimeLessThanNHoursAgo(1)
-    }
-
-    /** 检查广告是否在 n 小时前加载. */
-    private fun wasLoadTimeLessThanNHoursAgo(numHours: Long): Boolean {
-        val dateDifference: Long = Date().time - loadTime
-//        Timber.tag(interADTAG).e("datadiff $dateDifference")
-        val numMilliSecondsPerHour: Long = 3600000
-        return dateDifference < numMilliSecondsPerHour * numHours
     }
 
 }

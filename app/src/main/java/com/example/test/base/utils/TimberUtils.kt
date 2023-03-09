@@ -1,6 +1,7 @@
 package com.example.test.base.utils
 
 import com.example.test.ad.data.ADListBean
+import com.example.test.ad.data.ADLoading
 import com.example.test.ad.data.ADType
 import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
@@ -31,7 +32,11 @@ class TimberUtils {
     fun printADImpression(
         type: String
     ) {
-        if (type ==ADType.INTER_OPEN.value||type==ADType.OPEN.value) AppVariable.isOpenIsShowing = true
+        if (type == ADType.INTER_OPEN.value || type == ADType.OPEN.value) {
+            AppVariable.isOpenIsShowing = true
+            ADLoading.OPEN.isLoading = false
+            ADLoading.INTER_OPEN.isLoading = false
+        }
         Timber.tag(ADTAG).e("Type: $type  广告正在展示")
     }
 
@@ -44,9 +49,14 @@ class TimberUtils {
     fun printAdDismissedFullScreenContent(
         type: String
     ) {
-        if (type ==ADType.INTER_OPEN.value||type==ADType.OPEN.value) AppVariable.isOpenIsShowing = false
+        if (type == ADType.INTER_OPEN.value || type == ADType.OPEN.value) {
+            AppVariable.isOpenIsShowing = false
+            ADLoading.OPEN.isLoading = false
+            ADLoading.INTER_OPEN.isLoading = false
+        }
         Timber.tag(ADTAG).e("Type: $type  全屏内容消失")
     }
+
     fun printAdShowedFullScreenContent(
         type: String
     ) {
@@ -54,7 +64,7 @@ class TimberUtils {
     }
 
     fun printAdFailedToShowFullScreenContent(
-        type: String,adError: AdError
+        type: String, adError: AdError
     ) {
 //        Timber.tag(ADTAG).e("Type: $type  展示失败   错误信息：${adError.message}")
     }

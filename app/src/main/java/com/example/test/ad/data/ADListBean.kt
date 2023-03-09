@@ -67,7 +67,7 @@ object GetADData {
             when (type) {
                 ADType.INTER_SERVER.value, ADType.INTER_CONNECT.value -> {
                     if (manager is InterstitialAdManager) {
-                        manager.loadAd(context, adListBean, 0, type) { it1, it2 ->
+                        manager.loadAd(activity, adListBean, 0, type) { it1, it2 ->
                             if (it1 && activity.canJump && !activity.isFinishing && !activity.isDestroyed) {
                                 manager.showInterstitial(
                                     activity,
@@ -119,7 +119,7 @@ object GetADData {
                             val data =
                                 AppVariable.cacheDataList?.find { it[AppConstant.AD_TYPE].toString() == type }
                             AppVariable.cacheDataList?.remove(data)
-                            manager.loadAd(context, adListBean, 0, type) { it1, it2 ->
+                            manager.loadAd(activity, adListBean, 0, type) { it1, it2 ->
                                 if (it1 && activity.canJump) {
                                     manager.showInterstitial(
                                         activity, adListBean, type, onShowAdCompleteListener
