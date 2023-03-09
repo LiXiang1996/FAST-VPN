@@ -16,6 +16,7 @@ import com.example.test.base.network.NetworkType
 import com.example.test.base.utils.ScreenSizeUtils
 import com.example.test.base.utils.SharedPreferencesUtils
 import com.example.test.ui.activity.SplashActivity
+import com.example.test.ui.widget.CheckIPUtils
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -59,9 +60,7 @@ abstract class BaseActivity : AppCompatActivity(), InitInterface, NetStateChange
                 override fun onResponse(call: Call<IPBean>, response: Response<IPBean>) {
                     if (response.isSuccessful) {
                         val data: IPBean? = response.body()
-//                        Timber.tag(AppConstant.TAG).e("-okhttp- ${data?.country_code}")
-                        AppVariable.isShowBanedIpDialog =
-                            data?.country_code?.lowercase() == "ir" || data?.country_code?.lowercase() == "irn"
+                        AppVariable.isShowBanedIpDialog = CheckIPUtils.checkIpIsOK(data?.country_code?.lowercase())
                         if (AppVariable.isShowBanedIpDialog && this@BaseActivity !is SplashActivity)
                             showTipDialog(context)
                         if (data?.country_code?.isNotBlank() == true)

@@ -19,6 +19,7 @@ import com.example.test.base.AppVariable
 import com.example.test.base.BaseActivity
 import com.example.test.base.bar.StatusBarUtil
 import com.example.test.base.utils.SharedPreferencesUtils
+import com.example.test.ui.widget.CheckIPUtils
 import com.google.android.gms.ads.AdActivity
 import com.google.android.gms.ads.appopen.AppOpenAd
 import com.google.android.gms.ads.interstitial.InterstitialAd
@@ -55,8 +56,7 @@ class SplashActivity : BaseActivity() {
                 this, AppConstant.COUNTRY_CODE, Locale.getDefault().country
             )
         }
-        AppVariable.isShowBanedIpDialog =
-            countryCode.lowercase() == "ir" || Locale.getDefault().country.lowercase() == "irn"
+        AppVariable.isShowBanedIpDialog = CheckIPUtils.checkIpIsOK(countryCode.lowercase())
         interstitialAaManager1 = InterstitialAdManager()
         interstitialAaManagerOpen = InterstitialAdManager()
         appOpenAdManager = AppOpenAdManager()
@@ -313,7 +313,7 @@ class SplashActivity : BaseActivity() {
 //                Intent(this@SplashActivity, MainActivity::class.java)
 //            this@SplashActivity.startActivity(intent)
 //        }
-        else  {
+        else {
             AppVariable.isBackGroundToSplash = false
             finish()
         }
