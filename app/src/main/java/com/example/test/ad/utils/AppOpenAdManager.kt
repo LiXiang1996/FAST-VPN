@@ -71,36 +71,24 @@ class AppOpenAdManager {
                 override fun onAdLoaded(ad: AppOpenAd) {
                     appOpenAd = ad
                     isLoadingAd = false
-                    ADLoading.INTER_OPEN.isLoading = false
-                    ADLoading.OPEN.isLoading = false
-                    loadTime = Date().time
-                    TimberUtils().printADLoadLog(type, AppConstant.LOAD_SUC, openData)
-                    result.invoke(true, true)
-//                    val cacheData =
-//                        AppVariable.cacheDataList?.find { it[AppConstant.AD_TYPE].toString() == type }
-//                    if (cacheData != null) {
-//                        AppVariable.cacheDataList?.remove(cacheData)
-//                    }
                     AppVariable.cacheSplashADData = openData
                     AppVariable.cacheDataList?.add( HashMap<String, Any>().apply {
                         put(AppConstant.AD_TYPE, type)
                         put("value", appOpenAd!!)
                         put(AppConstant.LOAD_TIME, Date().time)
                     })
+//                    ADLoading.INTER_OPEN.isLoading = false
+                    ADLoading.OPEN.isLoading = false
+                    TimberUtils().printADLoadLog(type, AppConstant.LOAD_SUC, openData)
+                    result.invoke(true, true)
                 }
 
                 @SuppressLint("BinaryOperationInTimber")
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                     isLoadingAd = false
                     ADLoading.OPEN.isLoading = false
-                    ADLoading.INTER_OPEN.isLoading = false
+//                    ADLoading.INTER_OPEN.isLoading = false
                     TimberUtils().printADLoadLog(type, AppConstant.LOAD_FAIL, openData, loadAdError)
-                    if (position + 1 == AppVariable.openADList?.size) {
-                        return
-                    }
-                    if (context is BaseActivity) {
-                        if (!context.canJump) return
-                    }
                     result.invoke(false, false)
                 }
             })
@@ -110,7 +98,6 @@ class AppOpenAdManager {
     fun showAdIfAvailableWithData(
         activity: Activity,
         type: String,
-        openADID: ADListBean.ADBean,
         appOpenAdCache: AppOpenAd,
         onShowAdCompleteListener: OnShowAdCompleteListener, result: (Boolean, Boolean) -> Unit
     ) {

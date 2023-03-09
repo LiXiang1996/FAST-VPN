@@ -90,11 +90,11 @@ class SplashActivity : BaseActivity() {
                 override fun onFinish() {
                     if (!AppVariable.isBackGroundToSplash)
                         nextTo()
-//                    else if(AppVariable.isBackGroundToResult && AppVariable.isOpenIsShowing){
-                    else if(AppVariable.isOpenIsShowing){//有广告展示时不做关闭操作，因为会导致部分手机卡一下界面
+                    else if (AppVariable.isOpenIsShowing) {//有广告展示时不做关闭操作，因为会导致部分手机卡一下界面
                         return
-                    }
-                    else finish()
+                    } else if (AppVariable.isBackGroundToSplash && App.activityCount == 1) {
+                        nextTo()
+                    } else finish()
                 }
             }
 
@@ -102,8 +102,9 @@ class SplashActivity : BaseActivity() {
                 countDownADTimer?.start()
                 Timber.tag(AppConstant.TAG).e("是否从后台切回前台: ${AppVariable.isBackGroundToSplash}")
                 delay(1000)
-                if (!AppVariable.isBackGroundToSplash) loadADData()//冷启动请求广告数据
+                if (!AppVariable.isBackGroundToLoadData) loadADData()//冷启动请求广告数据
                 else {
+                    AppVariable.isBackGroundToLoadData = false
                     checkCache()
                 }
                 if (!ADLoading.INTER_OPEN.isLoading && !ADLoading.OPEN.isLoading) loadOpenAD()
@@ -159,16 +160,6 @@ class SplashActivity : BaseActivity() {
             } else {
                 Timber.tag(AppConstant.TAG).e("splash 缓存获取失败")
             }
-        } else if (AppVariable.cacheSplashADData != null && AppVariable.cacheSplashADData?.robvn_l != null) {
-            Timber.tag(AppConstant.TAG + "splash").e("2")
-            showDataAD(AppVariable.cacheSplashADData?.robvn_l.toString(),
-                object : OnShowAdCompleteListener {
-                    override fun onShowAdComplete() {
-                        countDownADTimer?.cancel()
-                        jump()
-                    }
-
-                })
         } else {
             Timber.tag(AppConstant.TAG + "splash").e("4 无缓存")
             showAD()
@@ -217,19 +208,15 @@ class SplashActivity : BaseActivity() {
                         (data[AppConstant.LOAD_TIME] as Long)
                     )
                 ) {
-                    if (AppVariable.cacheSplashADData?.robvn_l == ADType.OPEN.value && data["value"] is AppOpenAd) {
+                    if (data[AppConstant.AD_TYPE] == ADType.OPEN.value && data["value"] is AppOpenAd) {
                         if (manager is AppOpenAdManager) manager.showAdIfAvailableWithData(
                             this,
                             type,
-                            AppVariable.cacheSplashADData!!,
                             data["value"] as AppOpenAd,
                             onShowAdCompleteListener
-                        ) { it1, it2 ->
-                            GetADData.getOpenData(
-                                this, manager, null, onShowAdCompleteListener, 0
-                            )
+                        ) { _, _ ->
                         }
-                    } else if (AppVariable.cacheSplashADData?.robvn_l == ADType.INTER.value && data["value"] is InterstitialAd) {
+                    } else if (data[AppConstant.AD_TYPE] == ADType.INTER.value && data["value"] is InterstitialAd) {
                         if (manager is InterstitialAdManager) manager.showInterstitialWithData(
                             this,
                             mutableListOf(AppVariable.cacheSplashADData!!),
@@ -320,7 +307,13 @@ class SplashActivity : BaseActivity() {
             val intent =
                 Intent(this@SplashActivity, MainActivity::class.java)
             this@SplashActivity.startActivity(intent)
-        } else {
+        }
+//        else if (AppVariable.isBackGroundToSplash&&App.activityCount ==1){
+//            val intent =
+//                Intent(this@SplashActivity, MainActivity::class.java)
+//            this@SplashActivity.startActivity(intent)
+//        }
+        else  {
             AppVariable.isBackGroundToSplash = false
             finish()
         }

@@ -21,7 +21,6 @@ object AppVariable {
     var isBackGround = false
     var exitAppTime = 0L
     var isBackGroundToSplash = false
-    var isBackGroundOnlySplash = false
     var isBackGroundToMain = true
     var isBackGroundToResult = false
     var openADList: MutableList<ADListBean.ADBean>? = null
@@ -37,6 +36,7 @@ object AppVariable {
     var isNativeHomeImpression = false
     var isNativeResultImpression = false
     var isHaveVpnPermission = false
+    var isBackGroundToLoadData = false
 
 }
 

@@ -192,7 +192,6 @@ object GetADData {
                             managerOpen.appOpenAd?.let { it3 ->
                                 managerOpen.showAdIfAvailableWithData(
                                     activity, type,
-                                    AppVariable.openADList?.get(position)!!,
                                     it3, onShowAdCompleteListener
                                 ) { it1, it2 ->
                                     if (!it1 && !it2) {

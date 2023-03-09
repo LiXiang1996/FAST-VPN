@@ -11,16 +11,16 @@
         },
         {
             "robvn_s":"admob",
-            "robvn_p":3,
+            "robvn_p":1,
             "robvn_l":"open",
-            "robvn_id":"ca-app-pub-3940256099942544/3419835294xx",
+            "robvn_id":"ca-app-pub-3940256099942544/3419835294",
             "time":3000
         },
         {
             "robvn_s":"admob",
-            "robvn_p":1,
+            "robvn_p":3,
             "robvn_l":"inter",
-            "robvn_id":"ca-app-pub-3940256099942544/1033173712",
+            "robvn_id":"ca-app-pub-3940256099942544/1033173712xx",
             "time":3000
         }
     ],

@@ -114,6 +114,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
             }
         }
         AppVariable.isBackGroundToSplash = true
+        AppVariable.isBackGroundToLoadData = true
         if (activity !is SplashActivity) {
             if (activity is MainActivity) AppVariable.isBackGroundToMain = true
             if (activity is SeverConnectStateActivity) AppVariable.isBackGroundToResult =
@@ -122,7 +123,6 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
             Timber.tag(AppConstant.TAG).e("A ${activity.localClassName}   to SplashActivity")
             activity.startActivity(intent)
         } else {
-            AppVariable.isBackGroundOnlySplash = true
             Timber.tag(AppConstant.TAG).e("splash ${activity.localClassName}  to SplashActivity")
             val intent = Intent(activity, SplashActivity::class.java)
             Timber.tag(AppConstant.TAG).e("intent ${activity.localClassName}")

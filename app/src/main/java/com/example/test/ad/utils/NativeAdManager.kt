@@ -167,8 +167,6 @@ class NativeAdManager {
                     if (type == ADType.NATIVE_HOME.value) ADLoading.NATIVE_HOME.isLoading = false
                     if (type == ADType.NATIVE_RESULT.value) {
                         ADLoading.NATIVE_RESULT.isLoading = false
-                        Timber.tag(AppConstant.TAG + "nativeloading")
-                            .e(" failed loading ${ADLoading.NATIVE_RESULT.isLoading}")
                     }
                     if (position < nativeListAD.size) {
                         refreshAd(activity, frameLayout, type, position + 1, nativeListAD) {
