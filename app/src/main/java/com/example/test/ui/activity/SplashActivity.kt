@@ -325,7 +325,7 @@ class SplashActivity : BaseActivity() {
             AppVariable.isBackGroundToSplash = false
         }
         Timber.tag(AppConstant.TAG + "splash").e("next to")
-        if (canJump) {
+        if (canJump&&!AppVariable.isOpenIsShowing) {
             val intent = Intent(this@SplashActivity, MainActivity::class.java)
             this@SplashActivity.startActivity(intent)
             finish()

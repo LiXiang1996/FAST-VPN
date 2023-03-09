@@ -9,12 +9,12 @@ object CheckIPUtils {
         Timber.tag(AppConstant.TAG +"IPPPPP").e("$string   -----${Locale.getDefault().country.lowercase()}")
         return if (string.isNullOrEmpty()){
             when(Locale.getDefault().country.lowercase()){
-                "cn","hk","ir","mo"-> true
+                "hk","ir","mo"-> true
                 else -> false
             }
         }else{
             when(string){
-                "cn","hk","ir","mo"-> true
+                "hk","ir","mo"-> true
                 else -> false
             }
         }
