@@ -1,12 +1,22 @@
 package com.example.test.ui.widget
 
+import com.example.test.base.AppConstant
+import timber.log.Timber
 import java.util.Locale
 
 object CheckIPUtils {
     fun checkIpIsOK(string: String?): Boolean {
-        return if (string == "cn" && Locale.getDefault().country.lowercase() == "cn") false
-        else if (string == "hk" && Locale.getDefault().country.lowercase() == "hk") false
-        else if (string == "mo" && Locale.getDefault().country.lowercase() == "mo") false
-        else !(string == "ir" && Locale.getDefault().country.lowercase() == "ir")
+        Timber.tag(AppConstant.TAG +"IPPPPP").e("$string   -----${Locale.getDefault().country.lowercase()}")
+        return if (string.isNullOrEmpty()){
+            when(Locale.getDefault().country.lowercase()){
+                "cn","hk","ir","mo"-> true
+                else -> false
+            }
+        }else{
+            when(string){
+                "cn","hk","ir","mo"-> true
+                else -> false
+            }
+        }
     }
 }
