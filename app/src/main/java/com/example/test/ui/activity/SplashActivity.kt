@@ -90,7 +90,8 @@ class SplashActivity : BaseActivity() {
                 override fun onFinish() {
                     if (!AppVariable.isBackGroundToSplash)
                         nextTo()
-                    else if(AppVariable.isBackGroundToResult && AppVariable.isOpenIsShowing){
+//                    else if(AppVariable.isBackGroundToResult && AppVariable.isOpenIsShowing){
+                    else if(AppVariable.isOpenIsShowing){//有广告展示时不做关闭操作，因为会导致部分手机卡一下界面
                         return
                     }
                     else finish()

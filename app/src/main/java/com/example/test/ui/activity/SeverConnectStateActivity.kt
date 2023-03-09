@@ -85,13 +85,6 @@ class SeverConnectStateActivity : BaseActivity() {
                 delay(200)
                 if (canJump) {
                     AppVariable.isBackGroundToResult = false
-//                    App.activityList.forEach {
-//                        if (it is AdActivity) {
-//                            Timber.tag(AppConstant.TAG).e("finish and remove ${it.localClassName}")
-//                            it.finish()
-//                            App.activityList.remove(it)
-//                        }
-//                    }
                     if (!ADLoading.NATIVE_RESULT.isLoading) showNativeAD()
                     else Timber.tag(AppConstant.TAG + "severConnect").e("result 正在loading")
                 }
