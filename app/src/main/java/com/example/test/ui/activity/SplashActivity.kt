@@ -109,7 +109,7 @@ class SplashActivity : BaseActivity() {
                 }
                 if (!ADLoading.INTER_OPEN.isLoading && !ADLoading.OPEN.isLoading) loadOpenAD()
                 else Timber.tag(AppConstant.TAG + "splash")
-                    .e("${ADLoading.INTER_OPEN.isLoading}-----${ADLoading.OPEN.isLoading}")
+                    .e("开屏广告还没请求完 inter ${ADLoading.INTER_OPEN.isLoading}-----open ${ADLoading.OPEN.isLoading}")
 
             }
         } else {

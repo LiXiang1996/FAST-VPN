@@ -177,13 +177,12 @@ class InterstitialAdManager {
                             adError
                         )
 
-                        //如果列表长度足够，则继续去reload，成功就返回true，直到遍历完还是失败，则返回false false
-//                        if (context is BaseActivity) {
-//                            if (!context.canJump) return
-//                        }
-                        if (type != ADType.INTER_OPEN.value) {
+                        if (type == ADType.INTER.value) {
+                            ADLoading.INTER.isLoading = false
+                        }else if (type ==ADType.INTER_OPEN.value){
                             ADLoading.INTER_OPEN.isLoading = false
-                            result.invoke(false, false)
+                            result.invoke(false,false)
+                            return
                         }
                         if (position + 1 < interListAd.size) {
                             loadAd(

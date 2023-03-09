@@ -87,7 +87,6 @@ class AppOpenAdManager {
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                     isLoadingAd = false
                     ADLoading.OPEN.isLoading = false
-//                    ADLoading.INTER_OPEN.isLoading = false
                     TimberUtils().printADLoadLog(type, AppConstant.LOAD_FAIL, openData, loadAdError)
                     result.invoke(false, false)
                 }
