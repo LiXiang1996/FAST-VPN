@@ -1,6 +1,7 @@
 package com.example.test.base.data
 
-import com.google.errorprone.annotations.Keep
+import androidx.annotation.Keep
+
 
 @Keep
 data class IPBean(

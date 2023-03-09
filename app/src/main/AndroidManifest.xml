@@ -45,6 +45,8 @@
             tools:ignore="LockedOrientationActivity">
         </activity>
         <activity android:name=".ui.activity.WebViewActivity"/>
+        <activity android:name=".ui.activity.RemoteTestActivity" />
+
 
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
@@ -52,7 +54,7 @@
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713"/>
+            android:value="ca-app-pub-5266234616793334~7695355675"/>
     </application>
 
 </manifest>

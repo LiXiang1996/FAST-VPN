@@ -2,8 +2,6 @@ package com.example.test.ui.widget.guideview;
 
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
@@ -16,7 +14,6 @@ public class SimpleComponent implements Component {
         ConstraintLayout ll = (ConstraintLayout) inflater.inflate(R.layout.fragment_home, null);
         ll.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View view) {
-                Toast.makeText(view.getContext(), "引导层被点击了", Toast.LENGTH_SHORT).show();
             }
         });
         return ll;

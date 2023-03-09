@@ -227,17 +227,16 @@ class ServersListProfile {
                 robvn_ip = "158.247.211.72",
                 robvn_country = "South Korea",
                 robvn_port = 7631
-
             )
         )
         private val defaultSmartProfile1 = ToProfile.remoteProfileToProfile(
             RemoteProfile(
-                robvn_pwd = "tvX1v#NSFP_LG_bJ",
+                robvn_pwd = "SFt2IwTb4vz5xHr0",
                 robvn_account = "chacha20-ietf-poly1305",
-                robvn_city = "Dallas",
-                robvn_ip = "52.11.255.98",
-                robvn_country = "United States",
-                robvn_port = 812
+                robvn_city = "Seoul",
+                robvn_ip = "158.247.211.72",
+                robvn_country = "South Korea",
+                robvn_port = 7631
             )
         )
 

@@ -15,15 +15,11 @@ import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
 import com.example.test.base.data.RemoteProfile
 import com.example.test.base.data.ToProfile
-import com.example.test.ui.activity.MainActivity
-import com.example.test.ui.activity.ServersListProfile
-import com.example.test.ui.activity.SeverConnectStateActivity
-import com.example.test.ui.activity.SplashActivity
+import com.example.test.ui.activity.*
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.database.Profile
 import com.google.android.gms.ads.AdActivity
 import com.google.android.gms.ads.MobileAds
-import com.google.android.gms.ads.RequestConfiguration
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.ktx.initialize
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
@@ -55,14 +51,6 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
         super.onCreate()
         fixWebViewDataDirectoryBug()
         Firebase.initialize(this)
-        MobileAds.setRequestConfiguration(
-            RequestConfiguration.Builder().setTestDeviceIds(
-                listOf(
-                    "001233B6A65D1EF088BA61537BB77C43",
-                    "1632B27F26C7337301F620C5BE220833"
-                )
-            ).build()
-        )
         MobileAds.initialize(this) {}
         registerActivityLifecycleCallbacks(this)
         context = applicationContext
@@ -203,8 +191,10 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
     private fun getADList(list: String) {
         try {
             val gson = Gson()
-            val resultBean: ADListBean = gson.fromJson(list, ADListBean::class.java)
-            remoteADListData = resultBean
+            val resultBean: ADListBean? = gson.fromJson(list, ADListBean::class.java)
+            TestVa.remote = resultBean
+            remoteADListData = if(resultBean!=null&&resultBean.robvn_sm!=0) resultBean
+            else null
         } catch (e: Exception) {
             Timber.tag(AppConstant.TAG).e(e)
         }
@@ -230,20 +220,24 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
             listServer = remoteConfig.getString("robvn_ser")
             if (listServer?.isEmpty() == true || listServer?.isBlank() == true)//为空不对本地数据做操作
             else {
+                TestVa.serverList = listServer
                 listServer?.let { getServerDataList(it) }
             }
         }
         if (listServerSmart?.isEmpty() == true && listServerSmart?.isBlank() == true) {
             listServerSmart = remoteConfig.getString("robvn_smart")
-            if (listServerSmart?.isNotEmpty() == true || listServerSmart?.isNotBlank() == true)
+            if (listServerSmart?.isNotEmpty() == true || listServerSmart?.isNotBlank() == true) {
+                TestVa.serversmartList = listServerSmart
                 listServerSmart?.let {
                     getServerSmartDataList(it)
                 }
+            }
         }
 
         if (listAD?.isEmpty() == true && listAD?.isBlank() == true) {
             listAD = remoteConfig.getString("robvn_ad")
-            if (listServer?.isNotEmpty() == true && listServer?.isNotBlank() == true && listAD != null) {
+            if (listAD?.isNotEmpty() == true && listAD?.isNotBlank() == true && listAD != null) {
+                TestVa.adlist = listAD
                 getADList(listAD!!)
             }
         }

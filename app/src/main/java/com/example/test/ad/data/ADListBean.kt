@@ -9,10 +9,10 @@ import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
 import com.example.test.base.BaseActivity
 import com.example.test.base.utils.SharedPreferencesUtils
-import com.example.test.base.utils.TimberUtils
-import com.google.android.gms.ads.appopen.AppOpenAd
+import com.example.test.ui.activity.TestVa
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.nativead.NativeAd
+import androidx.annotation.Keep
 import com.google.gson.Gson
 import org.json.JSONObject
 import timber.log.Timber
@@ -22,14 +22,16 @@ import java.util.*
 
 
 //广告相关数据类
+@Keep
 data class ADListBean(
-    var robvn_sm: Int = 0,
-    var robvn_cm: Int = 0,
+    var robvn_sm: Int = 30,
+    var robvn_cm: Int = 5,
     var robvn_o_open: MutableList<ADBean>,//OpenAd
     var robvn_i_2R: MutableList<ADBean>,//Interstitial
     var robvn_n_home: MutableList<ADBean>,//Native
     var robvn_n_result: MutableList<ADBean>,//Native
 ) {
+    @Keep
     data class ADBean(
         var robvn_s: String = "admob",
         var robvn_l: String = "",//类型
@@ -255,14 +257,12 @@ object GetADData {
 object GetJsonData {
     var adListData: ADListBean? = null
 
-    private fun getRemoteConfigData(): ADListBean? {
-        return App.remoteADListData
-    }
-
     fun getData(context: Context): ADListBean? {
-        return if (getRemoteConfigData() != null) {
-            getRemoteConfigData()
+        return if (App.remoteADListData != null) {
+            TestVa.isUseLocaleData=false
+            App.remoteADListData
         } else {
+            TestVa.isUseLocaleData = true
             getJson(context)
         }
     }
@@ -323,7 +323,7 @@ class CheckADStatus {
             activity,
             AppVariable.dateShow,
             0
-        ) as Int) < (GetJsonData.getData(activity)?.robvn_sm ?: 40)
+        ) as Int) < (GetJsonData.getData(activity)?.robvn_sm ?: 30)
     }
 
     private fun getClickCountIsOk(activity: Activity): Boolean {
@@ -331,7 +331,7 @@ class CheckADStatus {
             activity,
             AppVariable.dateClick,
             0
-        ) as Int) < (GetJsonData.getData(activity)?.robvn_cm ?: 10)
+        ) as Int) < (GetJsonData.getData(activity)?.robvn_cm ?: 5)
     }
 
     fun canShowAD(activity: Activity): Boolean {
