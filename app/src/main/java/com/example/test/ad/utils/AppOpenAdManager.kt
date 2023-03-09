@@ -107,7 +107,6 @@ class AppOpenAdManager {
         }
         appOpenAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
             override fun onAdClicked() {
-                onShowAdCompleteListener.onShowAdComplete()
                 CheckADStatus().setShowAndClickCount(
                     activity, isShow = false, isClick = true
                 )
