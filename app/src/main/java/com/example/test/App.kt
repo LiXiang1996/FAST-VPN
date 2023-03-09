@@ -105,7 +105,6 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
     }
 
     private fun jump(activity: Activity) {
-        Timber.tag(AppConstant.TAG).e("从后台切回前台")
         activityList.forEach {
             if (it is AdActivity) {
                 Timber.tag(AppConstant.TAG).e("finish and remove ${it.localClassName}")

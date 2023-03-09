@@ -1,5 +1,6 @@
 package com.example.test.ad.utils
 
+import android.app.Activity
 import android.content.Context
 import com.example.test.ad.data.ADListBean
 import com.example.test.ad.data.ADLoading
@@ -139,7 +140,7 @@ class InterstitialAdManager {
     }
 
     fun loadAd(
-        context: Context,
+        context: Activity,
         interListAd: MutableList<ADListBean.ADBean>,
         position: Int = 0,
         type: String,
@@ -181,7 +182,7 @@ class InterstitialAdManager {
 //                            if (!context.canJump) return
 //                        }
                         if (type != ADType.INTER_OPEN.value) {
-                            ADLoading.INTER.isLoading = false
+                            ADLoading.INTER_OPEN.isLoading = false
                             result.invoke(false, false)
                         }
                         if (position + 1 < interListAd.size) {
@@ -204,12 +205,6 @@ class InterstitialAdManager {
                         if (type != ADType.INTER_OPEN.value) ADLoading.INTER.isLoading = false
                         else ADLoading.INTER_OPEN.isLoading = false
                         interstitialAd = ad
-                        loadTime = Date().time
-//                        val cacheData =
-//                            AppVariable.cacheDataList?.find { it[AppConstant.AD_TYPE].toString() == type }
-//                        if (cacheData != null) {
-//                            AppVariable.cacheDataList?.remove(cacheData)
-//                        }
                         if (type == ADType.INTER_OPEN.value) AppVariable.cacheSplashADData = interListAd[position]
                         AppVariable.cacheDataList?.add(HashMap<String, Any>().apply {
                             put(AppConstant.AD_TYPE, type)
@@ -217,22 +212,11 @@ class InterstitialAdManager {
                             put(AppConstant.LOAD_TIME, Date().time)
                         })
                         adIsLoading = false
+                        if (context.isDestroyed||context.isFinishing) return
                         result.invoke(true, true)
                     }
                 })
         }
-    }
-
-    private fun isAdAvailable(): Boolean {
-        return interstitialAd != null && wasLoadTimeLessThanNHoursAgo(1)
-    }
-
-    /** 检查广告是否在 n 小时前加载. */
-    private fun wasLoadTimeLessThanNHoursAgo(numHours: Long): Boolean {
-        val dateDifference: Long = Date().time - loadTime
-//        Timber.tag(interADTAG).e("datadiff $dateDifference")
-        val numMilliSecondsPerHour: Long = 3600000
-        return dateDifference < numMilliSecondsPerHour * numHours
     }
 
 }

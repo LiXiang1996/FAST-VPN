@@ -88,7 +88,7 @@ class SplashActivity : BaseActivity() {
                 }
 
                 override fun onFinish() {
-                    if (!AppVariable.isBackGroundToSplash)
+                    if (!AppVariable.isBackGroundToSplash)//如果不是从后台切前台，就进入主页
                         nextTo()
                     else if (AppVariable.isOpenIsShowing) {//有广告展示时不做关闭操作，因为会导致部分手机卡一下界面
                         return
@@ -170,7 +170,7 @@ class SplashActivity : BaseActivity() {
         if (AppVariable.cacheDataList?.find { it[AppConstant.AD_TYPE].toString() == ADType.INTER_CONNECT.value } == null && !ADLoading.INTER.isLoading) {
             AppVariable.interADList?.let {
                 interstitialAaManager1.loadAd(
-                    applicationContext,
+                    this,
                     it,
                     0,
                     type = ADType.INTER_CONNECT.value
@@ -254,7 +254,7 @@ class SplashActivity : BaseActivity() {
         //连接页面  服务器列表页面跳转首页 todo 3.2日  测试提出现在的需求 共用广告 只缓存一个
         AppVariable.interADList?.let {
             interstitialAaManager1.loadAd(
-                applicationContext,
+                this,
                 it,
                 0,
                 type = ADType.INTER_CONNECT.value
