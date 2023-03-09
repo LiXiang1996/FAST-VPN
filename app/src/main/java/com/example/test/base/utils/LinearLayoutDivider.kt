@@ -17,7 +17,6 @@ class LinearLayoutDivider(context: Context, private val mOrientation: Int) : Rec
     private var mDivider: Drawable? = null
     var mDividerHeight = 2
     private val attrs = intArrayOf(android.R.attr.listDivider)
-
     init {
         if (mOrientation != LinearLayoutManager.VERTICAL && mOrientation != LinearLayoutManager.HORIZONTAL) {
             throw IllegalArgumentException("Please Input Current Param！")

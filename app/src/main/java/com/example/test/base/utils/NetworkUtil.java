@@ -99,7 +99,6 @@ public class NetworkUtil {
         if (connMgr != null) {
             connMgr.registerNetworkCallback(request, mNetworkCallback);
         }
-
         refreshIpAddress();
     }
 
@@ -109,7 +108,6 @@ public class NetworkUtil {
         if (connMgr != null) {
             connMgr.unregisterNetworkCallback(mNetworkCallback);
         }
-
         mListenerSet.clear();
     }
 
@@ -153,7 +151,6 @@ public class NetworkUtil {
                 mIpAddress = getLocalIp();
             }
         }
-
         Log.d("TAG", "real ip is " + mIpAddress);
     }
 

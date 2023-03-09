@@ -1,0 +1,90 @@
+<com.google.android.gms.ads.nativead.NativeAdView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:maxHeight="220dp"
+    android:layout_height="wrap_content">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@color/white">
+
+        <com.google.android.gms.ads.nativead.MediaView
+            android:id="@+id/native_ad_media"
+            android:layout_width="match_parent"
+            android:layout_height="170dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/native_ad_header"
+            android:layout_width="41dp"
+            android:layout_height="41dp"
+            android:layout_marginStart="11.5dp"
+            android:layout_marginTop="9.1dp"
+            android:layout_marginBottom="12.5dp"
+            android:background="#4D000000"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/native_ad_media"
+             />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/ad_title1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="9.1dp"
+            android:layout_marginTop="9.1dp"
+            android:layout_marginEnd="10dp"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textColor="#333333"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@id/ad_call_to_action"
+            app:layout_constraintStart_toEndOf="@id/native_ad_header"
+            app:layout_constraintTop_toBottomOf="@id/native_ad_media"
+            tools:text="High School Escape 2 aniefkawejfnaefnajw" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/ad_title2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="12.5dp"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textColor="#797979"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toStartOf="@id/ad_call_to_action"
+            app:layout_constraintStart_toStartOf="@id/ad_title1"
+            app:layout_constraintTop_toBottomOf="@id/ad_title1"
+            tools:text="Press the spacebar and nfasjnafienfaefaefoaenfia" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/ad_call_to_action"
+            android:layout_width="100dp"
+            android:layout_height="41dp"
+            android:layout_marginTop="9.1dp"
+            android:layout_marginEnd="10.3dp"
+            android:layout_marginBottom="12.5dp"
+            android:background="@drawable/native_action_bg"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toEndOf="@id/ad_title1"
+            app:layout_constraintTop_toBottomOf="@id/native_ad_media"
+            app:layout_constraintVertical_bias="0.0"
+            tools:text="install" />
+
+        <TextView
+            style="@style/AdAttribution"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.gms.ads.nativead.NativeAdView>

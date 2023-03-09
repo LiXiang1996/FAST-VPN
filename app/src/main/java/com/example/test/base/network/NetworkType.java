@@ -7,7 +7,6 @@ public enum  NetworkType {
     NETWORK_3G("3G"),
     NETWORK_UNKNOWN("Unknown"),
     NETWORK_NO("No network");
-
     private String desc;
     NetworkType(String desc) {
         this.desc = desc;

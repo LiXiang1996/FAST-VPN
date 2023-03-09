@@ -36,9 +36,13 @@ abstract class BaseActivity : AppCompatActivity(), InitInterface, NetStateChange
         NetStateChangeReceiver.registerReceiver(this)
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onStart() {
         canJump = true
+        super.onStart()
+    }
+    override fun onResume() {
+        canJump = true
+        super.onResume()
     }
 
     override fun onDestroy() {
@@ -48,14 +52,14 @@ abstract class BaseActivity : AppCompatActivity(), InitInterface, NetStateChange
     }
 
     override fun onNetConnected(networkType: NetworkType?, context: Context) {
-        Timber.tag(AppConstant.TAG).e(networkType?.name)
+//        Timber.tag(AppConstant.TAG).e(networkType?.name)
         try {
             val call: Call<IPBean> = RetrofitInstance.api.getIPAddress()
             call.enqueue(object : Callback<IPBean> {
                 override fun onResponse(call: Call<IPBean>, response: Response<IPBean>) {
                     if (response.isSuccessful) {
                         val data: IPBean? = response.body()
-                        Timber.tag(AppConstant.TAG).e("-okhttp- ${data?.country_code}")
+//                        Timber.tag(AppConstant.TAG).e("-okhttp- ${data?.country_code}")
                         AppVariable.isShowBanedIpDialog =
                             data?.country_code?.lowercase() == "ir" || data?.country_code?.lowercase() == "irn"
                         if (AppVariable.isShowBanedIpDialog && this@BaseActivity !is SplashActivity)
@@ -70,12 +74,12 @@ abstract class BaseActivity : AppCompatActivity(), InitInterface, NetStateChange
                 }
 
                 override fun onFailure(call: Call<IPBean>, t: Throwable) {
-                    Timber.tag(AppConstant.TAG).e("-okhttp- ${t.message}")
+//                    Timber.tag(AppConstant.TAG).e("-okhttp- ${t.message}")
                 }
 
             })
         } catch (e: Exception) {
-            Timber.tag(AppConstant.TAG).e("--okhttp--$e")
+//            Timber.tag(AppConstant.TAG).e("--okhttp--$e")
         }
     }
 
@@ -106,13 +110,13 @@ abstract class BaseActivity : AppCompatActivity(), InitInterface, NetStateChange
     }
 
     override fun onPause() {
-        super.onPause()
         canJump = false
+        super.onPause()
     }
 
     override fun onStop() {
-        super.onStop()
         canJump = false
+        super.onStop()
     }
 
     override fun initView() {

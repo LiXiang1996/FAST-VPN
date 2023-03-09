@@ -9,8 +9,6 @@ import android.net.ConnectivityManager;
 import android.util.Log;
 
 
-
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +25,7 @@ public class NetStateChangeReceiver extends BroadcastReceiver {
         if (ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
             NetworkType networkType = NetWorkUtils.getNetworkType(context);
             Log.i("NetStateChangeReceiver", networkType.toString());
-            notifyObservers(networkType,context);
+            notifyObservers(networkType, context);
         }
     }
 
@@ -59,14 +57,14 @@ public class NetStateChangeReceiver extends BroadcastReceiver {
         InstanceHolder.INSTANCE.mObservers.remove(observer);
     }
 
-    private void notifyObservers(NetworkType networkType,Context context) {
+    private void notifyObservers(NetworkType networkType, Context context) {
         if (networkType == NetworkType.NETWORK_NO) {
             for (NetStateChangeObserver observer : mObservers) {
                 observer.onNetDisconnected();
             }
         } else {
             for (NetStateChangeObserver observer : mObservers) {
-                observer.onNetConnected(networkType,context);
+                observer.onNetConnected(networkType, context);
             }
         }
     }

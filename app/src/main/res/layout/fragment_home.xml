@@ -7,164 +7,189 @@
     android:background="@color/primaryColor"
     tools:context=".ui.activity.MainActivity">
 
-
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/main_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="28dp"
-        android:layout_marginTop="18dp"
-        android:text="@string/app_name"
-        android:textColor="@color/white"
-        android:textSize="21sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/main_connection_time_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="60dp"
-        android:text="connection time"
-        android:textColor="@color/white"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Chronometer
-        android:id="@+id/main_connection_time_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:format="00:00:00"
-        android:textColor="@color/white_50"
-        android:textSize="30sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/main_connection_time_title" />
-
-
-    <com.airbnb.lottie.LottieAnimationView
-        android:id="@+id/main_connection_animate_lottie"
-        android:layout_width="180dp"
-        android:layout_height="180dp"
-        android:layout_marginBottom="20dp"
-        app:lottie_fileName="data.json"
-        android:visibility="invisible"
-        app:lottie_loop="true"
-        app:lottie_autoPlay="false"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="@id/main_connection_animate"/>
-
-
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/main_connection_animate"
-        android:layout_width="220dp"
-        android:layout_height="220dp"
-        android:visibility="visible"
-        android:src="@mipmap/home_robot_disconnect"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/main_connection_time_tv" />
-
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="68dp"
-        android:layout_marginTop="48dp"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/main_connection_animate">
+        android:layout_height="match_parent">
 
-        <RelativeLayout
-            android:id="@+id/server_connect_to_servers_container"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/main_connection_toggle_btn"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="12dp"
-            android:layout_weight="1.8"
-            android:background="@drawable/rgb2bffffff_conor_5_bg">
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/service_country_icon"
-                android:layout_width="38dp"
-                android:layout_height="38dp"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="16dp"
-                android:src="@mipmap/icon_country_unitedstates" />
-
-
-            <androidx.appcompat.widget.AppCompatTextView
-                android:ellipsize="marquee"
-                android:focusable="true"
-                android:singleLine="true"
-                android:maxLines="1"
-                android:focusableInTouchMode="true"
-                android:marqueeRepeatLimit="marquee_forever"
-                android:id="@+id/service_country_name"
-                android:layout_width="100dp"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="12dp"
-                android:layout_toEndOf="@id/service_country_icon"
-                android:textColor="@color/white"
-                android:textSize="16sp"
-                tools:text="United States" >
-                <requestFocus/>
-            </androidx.appcompat.widget.AppCompatTextView>
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/service_toggle_img"
-                android:layout_width="22dp"
-                android:layout_height="22dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="21dp"
-                android:src="@mipmap/to_toggle_service" />
-
-        </RelativeLayout>
-
-        <LinearLayout
-            android:id="@+id/main_connection_toggle_btn"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/main_title"
             android:layout_width="wrap_content"
-            android:layout_height="69dp"
-            android:layout_marginEnd="16dp"
-            android:background="@mipmap/main_btn_stop_bg"
-            android:gravity="center">
+            android:layout_height="wrap_content"
+            android:layout_marginStart="28dp"
+            android:layout_marginTop="18dp"
+            android:text="@string/app_name"
+            android:textColor="@color/white"
+            android:textSize="21sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/main_connection_toggle_img"
-                android:layout_width="29dp"
-                android:layout_height="29dp"
-                android:layout_gravity="center"
-                android:src="@mipmap/home_toggle_btn_close" />
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/main_connection_time_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="60dp"
+            android:text="connection time"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        </LinearLayout>
+        <Chronometer
+            android:id="@+id/main_connection_time_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:format="00:00:00"
+            android:textColor="@color/white_50"
+            android:textSize="30sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/main_connection_time_title" />
+
 
         <com.airbnb.lottie.LottieAnimationView
-            android:id="@+id/main_connection_toggle_bg"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="@id/main_connection_toggle_btn"
+            android:id="@+id/main_connection_animate_lottie"
+            android:layout_width="180dp"
+            android:layout_height="180dp"
+            android:layout_marginBottom="20dp"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="@id/main_connection_animate"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_width="wrap_content"
-            android:layout_height="69dp"
-            android:layout_marginEnd="16dp"
-            android:visibility="gone"
-            app:lottie_fileName="guide.json"
-            app:lottie_loop="true"
+            app:layout_constraintStart_toStartOf="parent"
             app:lottie_autoPlay="false"
-            android:gravity="center">
+            app:lottie_fileName="data.json"
+            app:lottie_loop="true" />
 
-        </com.airbnb.lottie.LottieAnimationView>
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/main_connection_animate"
+            android:layout_width="220dp"
+            android:layout_height="220dp"
+            android:src="@mipmap/home_robot_disconnect"
+            android:visibility="visible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/main_connection_time_tv" />
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/home_connect_cl"
+            android:layout_width="match_parent"
+            android:layout_height="68dp"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/main_connection_animate">
+
+            <RelativeLayout
+                android:id="@+id/server_connect_to_servers_container"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="12dp"
+                android:layout_weight="1.8"
+                android:background="@drawable/rgb2bffffff_conor_5_bg"
+                app:layout_constraintEnd_toStartOf="@id/main_connection_toggle_btn"
+                app:layout_constraintStart_toStartOf="parent">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/service_country_icon"
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="16dp"
+                    android:src="@mipmap/icon_country_unitedstates" />
+
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/service_country_name"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="12dp"
+                    android:layout_toEndOf="@id/service_country_icon"
+                    android:ellipsize="marquee"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:maxLines="1"
+                    android:singleLine="true"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    tools:text="United States">
+
+                    <requestFocus />
+                </androidx.appcompat.widget.AppCompatTextView>
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/service_toggle_img"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="21dp"
+                    android:src="@mipmap/to_toggle_service" />
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/main_connection_toggle_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="69dp"
+                android:layout_marginEnd="16dp"
+                android:background="@mipmap/main_btn_stop_bg"
+                android:gravity="center"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/main_connection_toggle_img"
+                    android:layout_width="29dp"
+                    android:layout_height="29dp"
+                    android:layout_gravity="center"
+                    android:src="@mipmap/home_toggle_btn_close" />
+
+            </LinearLayout>
+
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/main_connection_toggle_bg"
+                android:layout_width="wrap_content"
+                android:layout_height="69dp"
+                android:layout_marginEnd="16dp"
+                android:gravity="center"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@id/main_connection_toggle_btn"
+                app:layout_constraintTop_toTopOf="parent"
+                app:lottie_autoPlay="false"
+                app:lottie_fileName="guide.json"
+                app:lottie_loop="true">
+
+            </com.airbnb.lottie.LottieAnimationView>
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <com.example.test.ui.widget.NativeFrameLayout
+            android:id="@+id/main_native_ad_frame"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:maxHeight="246dp"
+            android:layout_marginBottom="55dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/home_connect_cl"
+            app:layout_constraintVertical_bias="0"
+            >
+        </com.example.test.ui.widget.NativeFrameLayout>
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

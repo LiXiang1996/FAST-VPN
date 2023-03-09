@@ -1,36 +1,47 @@
 package com.example.test.ui.fragment
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.os.RemoteException
 import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
-import android.view.animation.AnimationUtils
+import android.view.animation.LinearInterpolator
+import android.view.animation.RotateAnimation
 import android.widget.*
 import android.widget.Chronometer.OnChronometerTickListener
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.airbnb.lottie.LottieAnimationView
 import com.bumptech.glide.Glide
 import com.example.test.R
+import com.example.test.ad.data.ADLoading
+import com.example.test.ad.data.ADType
+import com.example.test.ad.data.CheckADStatus
+import com.example.test.ad.data.GetADData
+import com.example.test.ad.utils.*
 import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
+import com.example.test.base.BaseActivity
 import com.example.test.base.data.CountryUtils
-import com.example.test.base.utils.NetworkPing
 import com.example.test.base.utils.NetworkUtil
 import com.example.test.ui.activity.MainActivity
 import com.example.test.ui.activity.ServersListActivity
 import com.example.test.ui.activity.ServersListProfile
 import com.example.test.ui.activity.SeverConnectStateActivity
+import com.example.test.ui.widget.NativeFrameLayout
+import com.example.test.ui.widget.guideview.DimenUtil
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.ShadowsocksConnection
@@ -38,8 +49,8 @@ import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.utils.StartService
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import com.google.android.gms.ads.nativead.NativeAd
+import kotlinx.coroutines.*
 import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.*
@@ -57,11 +68,20 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
     private lateinit var countryName: AppCompatTextView
     lateinit var connectTimeTv: Chronometer
     private lateinit var context: MainActivity
-    var animationRotate: Animation? = null
+    var animationRotate: RotateAnimation? = null
     private val connection = ShadowsocksConnection(true)
     private var isJump = false
     var isToConnect = false
+    var countDownTimer: CountDownTimer? = null
     var isShowGuideDialog = false
+    var isUpdateNative = true
+    var isCanToJump = false
+
+    private lateinit var interstitialAdManager: InterstitialAdManager
+    private lateinit var nativeAdManager: NativeAdManager
+    private lateinit var nativeAdManagerR: NativeAdManager
+    lateinit var nativeAdContainer: NativeFrameLayout
+    lateinit var connectCl: ConstraintLayout
 
 
     override fun onCreateView(
@@ -82,12 +102,30 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
 
 
     override fun onResume() {
-        super.onResume()
         isToConnect = AppVariable.state == BaseService.State.Stopped
+        lifecycleScope.launch {
+            if (isCanToJump) {//延迟执行，因为可能会后台切前台跳转splash
+                delay(300)
+                isCanToJump = false
+                result()
+            }
+        }
         setData()
+        if (isUpdateNative) {
+            lifecycleScope.launch {
+                delay(200)
+                if (activity != null && (activity as MainActivity).canJump) {
+                    AppVariable.isBackGroundToMain = false
+                    showNativeAD(activity as BaseActivity)
+                }
+            }
+        } else isUpdateNative = true
+        super.onResume()
     }
 
     private fun initView(view: View) {
+        connectCl = view.findViewById(R.id.home_connect_cl)
+        nativeAdContainer = view.findViewById(R.id.main_native_ad_frame)
         connectClickBtn = view.findViewById(R.id.main_connection_toggle_btn)
         connectClickGuideLottie = view.findViewById(R.id.main_connection_toggle_bg)
         serversContainer = view.findViewById(R.id.server_connect_to_servers_container)
@@ -105,18 +143,44 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         connectClickGuideLottie.setAnimation("guide.json")
         connectClickGuideLottie.loop(true)
         connectClickGuideLottie.playAnimation()
-        animationRotate = AnimationUtils.loadAnimation(activity, R.anim.loading_rotate)
+        animationRotate = RotateAnimation(
+            0f, 360f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f
+        )
+        animationRotate?.interpolator = object : LinearInterpolator() {}
         animationRotate?.repeatCount = Animation.INFINITE
+        animationRotate?.duration = 3000
+        animationRotate?.fillBefore = true
+        nativeAdContainer.setHomeFragment(this)
 
         if (isShowGuideDialog && AppVariable.state != BaseService.State.Connected) {
             (activity as MainActivity).showGuideView()
         }
+        interstitialAdManager = InterstitialAdManager()
+        nativeAdManager = NativeAdManager()
+        nativeAdManagerR = NativeAdManager()
+//        connectCl.post {
+//            AppVariable.connectClBottom = connectCl.bottom - 55
+//        }
+//        val layoutParams =
+//            ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, 0)
+//        layoutParams.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+//        layoutParams.topToBottom = connectCl.id
+//        layoutParams.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
+//        layoutParams.setMargins(
+//            DimenUtil.dp2px(activity, 16f),
+//            DimenUtil.dp2px(activity, 8f),
+//            DimenUtil.dp2px(activity, 16f), 55
+//        )
+//        layoutParams.verticalBias = 0f
+//        nativeAdContainer.layoutParams = layoutParams
 
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun initListener() {
         connectClickBtn.setOnClickListener {
             if (isShowGuideDialog) {
+                //引导页消失操作
                 isShowGuideDialog = false
                 connectClickGuideLottie.visibility = View.GONE
                 connectClickGuideLottie.cancelAnimation()
@@ -127,9 +191,19 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                     tabStrip.getChildAt(i).setOnTouchListener { _, _ -> false }
                 }
             }
-            if (NetworkUtil.get().isNetworkAvailable || NetworkUtil.isNetSystemUsable(activity)) toggle()
-            else Toast.makeText(activity, getString(R.string.network_error), Toast.LENGTH_LONG)
+            if (NetworkUtil.get().isNetworkAvailable || NetworkUtil.isNetSystemUsable(activity)) {
+                toggle2Permission {}
+            } else Toast.makeText(activity, getString(R.string.network_error), Toast.LENGTH_LONG)
                 .show()
+        }
+        connectRobotImg.setOnClickListener {
+            if (!isShowGuideDialog) {
+                if (NetworkUtil.get().isNetworkAvailable || NetworkUtil.isNetSystemUsable(activity)) {
+                    toggle2Permission {}
+                } else Toast.makeText(
+                    activity, getString(R.string.network_error), Toast.LENGTH_LONG
+                ).show()
+            }
         }
         serversContainer.setOnClickListener {
             if (!isShowGuideDialog) {
@@ -146,30 +220,63 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
         }
     }
 
-    private fun toggle() {
+    private fun toggle2Permission(result: (Boolean) -> Unit) {
         isJump = true
-        (activity as MainActivity)?.let { it.frameLayout.visibility = View.VISIBLE }
-        if (AppVariable.state.canStop) Core.stopService()
-        else {
-            lifecycleScope.launch {
-                if (AppVariable.isFast) launch {
-                    NetworkPing.toFastToggle { ip ->
-                        AppVariable.host = ip
+        permission.launch(null)
+
+    }
+
+    private val permission = registerForActivityResult(StartService()) {
+        isUpdateNative = false
+        if (it) {
+            permissionDeny()
+        } else {
+            AppVariable.isHaveVpnPermission = true
+            //检测权限 无 取消弹窗 有 展示广告-跳转页面
+            if (activity is MainActivity) {
+                (activity as MainActivity).frameLayout.visibility = View.VISIBLE
+                connectingAndStoppingAnimation()
+                if (CheckADStatus().canShowAD(activity as MainActivity)) {
+                    activity?.let { it1 ->
+                        loadInterAd(
+                            it1, ADType.INTER_CONNECT.value
+                        )
+                    }
+                } else {
+                    MainScope().launch {
+                        delay(3000)
+                        toggleToConnect()
                     }
                 }
-                permission.launch(null)
             }
         }
     }
 
-    private val permission = registerForActivityResult(StartService()) {
-        if (it) {
-            Toast.makeText(
-                context,
-                getString(com.github.shadowsocks.core.R.string.vpn_permission_denied),
-                Toast.LENGTH_LONG
-            ).show()
-            (activity as MainActivity)?.let { it.frameLayout.visibility = View.GONE }
+    private fun permissionDeny() {
+        Toast.makeText(
+            context,
+            getString(com.github.shadowsocks.core.R.string.vpn_permission_denied),
+            Toast.LENGTH_LONG
+        ).show()
+        (activity as MainActivity)?.let { it2 -> it2.frameLayout.visibility = View.GONE }
+        connectRobotImg.visibility = View.VISIBLE
+        lottieAnimationView.visibility = View.INVISIBLE
+        lottieAnimationView.clearAnimation()
+        animationRotate?.cancel()
+        connectClickBtn.setBackgroundResource(R.mipmap.main_btn_stop_bg)
+        connectStateImg.setImageDrawable(
+            ContextCompat.getDrawable(
+                context, R.mipmap.home_toggle_btn_close
+            )
+        )
+        connectRobotImg.setImageDrawable(context.getDrawable(R.mipmap.home_robot_disconnect))
+        AppVariable.isHaveVpnPermission = false
+    }
+
+
+    fun toggleToConnect() {
+        if (AppVariable.state.canStop) {
+            Core.stopService()
         } else {
             val data = ServersListProfile.getServerProfile(AppVariable.host).copy()
             val find = ProfileManager.getAllProfiles()?.find { it1 -> it1.host == AppVariable.host }
@@ -186,6 +293,7 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
             Core.startService()
         }
     }
+
 
     override fun stateChanged(state: BaseService.State, profileName: String?, msg: String?) {
         changeState(state, profileName)
@@ -223,7 +331,6 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                 connectRobotImg.setImageDrawable(context.getDrawable(R.mipmap.home_robot_disconnect))
                 connectedAndStoppedAnimation()
 
-
             }
             BaseService.State.Stopping -> {
                 connectingAndStoppingAnimation()
@@ -243,15 +350,17 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
                 context, R.mipmap.home_toggle_btn_loading
             )
         )
-        connectStateImg.startAnimation(animationRotate)
+        connectStateImg.animation = animationRotate
+        connectStateImg.animation.start()
+        animationRotate?.start()
+
     }
 
     private fun connectedAndStoppedAnimation() {
         connectRobotImg.visibility = View.VISIBLE
         lottieAnimationView.visibility = View.INVISIBLE
-        lottieAnimationView.cancelAnimation()
+        lottieAnimationView.clearAnimation()
         animationRotate?.cancel()
-        connectStateImg.clearAnimation()
         if (isJump) result()
     }
 
@@ -289,30 +398,44 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
             if (it.resultCode == 100) {
                 (activity as MainActivity).frameLayout.visibility = View.VISIBLE
                 if (AppVariable.state == BaseService.State.Connected) {
-                    Toast.makeText(activity, "Disconnecting", Toast.LENGTH_LONG).show()
+                    Toast.makeText(activity, "Disconnecting", Toast.LENGTH_SHORT).show()
                 } else if (AppVariable.state == BaseService.State.Stopped) {
-                    Toast.makeText(activity, "Connecting", Toast.LENGTH_LONG).show()
+                    Toast.makeText(activity, "Connecting", Toast.LENGTH_SHORT).show()
                 }
                 lifecycleScope.launch {
-                    if (isToConnect && AppVariable.isFast) launch {
-                        NetworkPing.toFastToggle { ip ->
-                            AppVariable.host = ip
-                        }
-                    }
-                    launch {
-                        delay(3000)
-                        toggle()
-                    }
+                    toggle2Permission {}
                 }
             }
         }
 
+    private fun loadInterAd(activity: Activity, type: String) {
+        MainScope().launch {
+            delay(1000)//延迟一秒后再执行下面代码
+        }
+        countDownTimer = object : CountDownTimer(9000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+            }
+
+            override fun onFinish() {
+                if (!interstitialAdManager.adIsImpression) {
+                    interstitialAdManager.interstitialAd = null
+                    toggleToConnect()
+                }
+            }
+        }
+        countDownTimer?.start()
+        if (activity is MainActivity) showInterAD(activity, type)
+    }
+
 
     private fun result() {
-        if (activity is MainActivity) {
+        if (activity is MainActivity && (activity as MainActivity).canJump) {
+            //如果是因为切到后台导致界面不能跳转，则保存一个变量，如何此activity没被杀死，下一次展示此界面的时候跳转
             (activity as MainActivity).frameLayout.visibility = View.GONE
             val intent = Intent(activity, SeverConnectStateActivity::class.java)
             activity?.startActivity(intent)
+        } else {
+            isCanToJump = true
         }
     }
 
@@ -322,15 +445,72 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
             AppVariable.country = AppVariable.temporaryProfile?.name ?: AppConstant.DEFAULT
             AppVariable.temporaryProfile = null
         }
+        //当没有选中的节点时，主页默认给一个smart配置
+        if ((AppVariable.host.isBlank() || AppVariable.host.isEmpty()) && AppVariable.isFast) {
+            AppVariable.host = ServersListProfile.getSmartServerRandom().host
+        }
         countryName.text =
-            if (AppVariable.country == AppConstant.DEFAULT || AppVariable.country.isBlank()) "Super Fast Server" else AppVariable.country
-        Glide.with(this).load(
-            CountryUtils.getCountrySource(
-                AppVariable.country
-            )
-        ).circleCrop()
+            if (AppVariable.isFast || AppVariable.country.isBlank()) "Super Fast Server" else AppVariable.country
+        if (AppVariable.isFast) Glide.with(this).load(R.mipmap.server_default).circleCrop()
             .into(countryIcon)
+        else Glide.with(this).load(CountryUtils.getCountrySource(AppVariable.country)).circleCrop()
+            .into(countryIcon)
+    }
+
+    private var nativeAd: NativeAd? = null
+
+    private fun showNativeAD(activity: BaseActivity) {
+        AppVariable.nativeHomeADList?.let {
+            GetADData.getFindData(activity,
+                context,
+                ADType.NATIVE_HOME.value,
+                nativeAdManager,
+                it,
+                nativeAdContainer,
+                object : OnShowAdCompleteListener {
+                    override fun onShowAdComplete() {
+                    }
+                },
+                nativeDestroyBlock = { nativeAd?.destroy() },
+                nativeAdBlock = { ad -> nativeAd = ad })
+        }
+
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        nativeAd?.destroy()
+    }
+
+    private fun showInterAD(activity: BaseActivity, type: String) {
+        AppVariable.interADList?.let { data ->
+            GetADData.getFindData(activity,
+                context,
+                type,
+                interstitialAdManager,
+                data,
+                null,
+                object : OnShowAdCompleteListener {
+                    override fun onShowAdComplete() {
+                        isUpdateNative = false
+                        countDownTimer?.cancel()
+                        toggleToConnect()
+                    }
+                })
+        }
+
+
+        val data =
+            AppVariable.cacheDataList?.find { it[AppConstant.AD_TYPE].toString() == ADType.NATIVE_RESULT.value }
+        if (data == null && !ADLoading.NATIVE_RESULT.isLoading) {
+            //没有缓存去请求native结果页
+            Timber.tag(AppConstant.TAG + "result").e("result缓存为空")
+            AppVariable.nativeResultADList?.let {
+                nativeAdManagerR.refreshAd(activity, null, ADType.NATIVE_RESULT.value, 0, it) {}
+            }
+        }
     }
 
 
 }
+

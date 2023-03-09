@@ -146,7 +146,8 @@ class MainActivity : BaseActivity() {
                 }
                 return true
             }
-            moveTaskToBack(false)
+            moveTaskToBack(true)
+            AppVariable.isHomeBack = true
             return true
         }
         return super.onKeyDown(keyCode, event)

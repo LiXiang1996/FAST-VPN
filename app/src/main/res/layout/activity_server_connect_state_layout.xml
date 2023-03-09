@@ -75,17 +75,17 @@
             android:layout_marginEnd="13.7dp"
             android:id="@+id/server_connect_time_text"/>
 
-<!--        <androidx.appcompat.widget.AppCompatTextView-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_alignParentEnd="true"-->
-<!--            android:layout_centerVertical="true"-->
-<!--            tools:text="00:01:08"-->
-<!--            android:textColor="#7AFFFFFF"-->
-<!--            android:layout_marginEnd="13.7dp"-->
-<!--            android:id="@+id/server_connect_time_text"/>-->
-        
+
+
         
     </RelativeLayout>
+
+    <FrameLayout
+        android:id="@+id/server_connect_state_native_ad_frame"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:layout_height="300dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginVertical="11.5dp"/>
         
 </LinearLayout>
