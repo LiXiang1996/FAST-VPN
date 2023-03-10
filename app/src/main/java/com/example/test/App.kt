@@ -8,6 +8,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.webkit.WebView
+import android.widget.Toast
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.example.test.ad.data.ADListBean
@@ -15,10 +16,7 @@ import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
 import com.example.test.base.data.RemoteProfile
 import com.example.test.base.data.ToProfile
-import com.example.test.ui.activity.MainActivity
-import com.example.test.ui.activity.ServersListProfile
-import com.example.test.ui.activity.SeverConnectStateActivity
-import com.example.test.ui.activity.SplashActivity
+import com.example.test.ui.activity.*
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.database.Profile
 import com.google.android.gms.ads.AdActivity
@@ -203,8 +201,9 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
     private fun getADList(list: String) {
         try {
             val gson = Gson()
-            val resultBean: ADListBean = gson.fromJson(list, ADListBean::class.java)
-            remoteADListData = resultBean
+            val resultBean: ADListBean? = gson.fromJson(list, ADListBean::class.java)
+            TestVa.remote = resultBean
+            if(resultBean!=null) remoteADListData = resultBean
         } catch (e: Exception) {
             Timber.tag(AppConstant.TAG).e(e)
         }
@@ -218,6 +217,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
         var listServerSmart: String? = ""
         remoteConfig.fetchAndActivate().addOnCompleteListener { task ->
             if (task.isSuccessful) {
+                Toast.makeText(context,"远程请求成功",Toast.LENGTH_SHORT).show()
                 listServer = remoteConfig.getString("robvn_ser")
                 listServerSmart = remoteConfig.getString("robvn_smart")
                 listAD = remoteConfig.getString("robvn_ad")
@@ -230,20 +230,27 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
             listServer = remoteConfig.getString("robvn_ser")
             if (listServer?.isEmpty() == true || listServer?.isBlank() == true)//为空不对本地数据做操作
             else {
+                Toast.makeText(context,"远程vpn $listServer",Toast.LENGTH_SHORT).show()
+                TestVa.serverList = listServer
                 listServer?.let { getServerDataList(it) }
             }
         }
         if (listServerSmart?.isEmpty() == true && listServerSmart?.isBlank() == true) {
             listServerSmart = remoteConfig.getString("robvn_smart")
-            if (listServerSmart?.isNotEmpty() == true || listServerSmart?.isNotBlank() == true)
+            if (listServerSmart?.isNotEmpty() == true || listServerSmart?.isNotBlank() == true) {
+                Toast.makeText(context,"远程smart $listServerSmart",Toast.LENGTH_SHORT).show()
+                TestVa.serversmartList = listServerSmart
                 listServerSmart?.let {
                     getServerSmartDataList(it)
                 }
+            }
         }
 
         if (listAD?.isEmpty() == true && listAD?.isBlank() == true) {
             listAD = remoteConfig.getString("robvn_ad")
-            if (listServer?.isNotEmpty() == true && listServer?.isNotBlank() == true && listAD != null) {
+            if (listAD?.isNotEmpty() == true && listAD?.isNotBlank() == true && listAD != null) {
+                TestVa.adlist = listAD
+                Toast.makeText(context,"远程ad $listAD",Toast.LENGTH_SHORT).show()
                 getADList(listAD!!)
             }
         }

@@ -3,14 +3,14 @@ package com.example.test.ad.data
 import android.app.Activity
 import android.content.Context
 import android.widget.FrameLayout
+import android.widget.Toast
+import androidx.annotation.Keep
 import com.example.test.App
 import com.example.test.ad.utils.*
 import com.example.test.base.AppConstant
 import com.example.test.base.AppVariable
 import com.example.test.base.BaseActivity
 import com.example.test.base.utils.SharedPreferencesUtils
-import com.example.test.base.utils.TimberUtils
-import com.google.android.gms.ads.appopen.AppOpenAd
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.nativead.NativeAd
 import com.google.gson.Gson
@@ -22,6 +22,7 @@ import java.util.*
 
 
 //广告相关数据类
+@Keep
 data class ADListBean(
     var robvn_sm: Int = 0,
     var robvn_cm: Int = 0,
@@ -30,6 +31,7 @@ data class ADListBean(
     var robvn_n_home: MutableList<ADBean>,//Native
     var robvn_n_result: MutableList<ADBean>,//Native
 ) {
+    @Keep
     data class ADBean(
         var robvn_s: String = "admob",
         var robvn_l: String = "",//类型
@@ -260,8 +262,8 @@ object GetJsonData {
     }
 
     fun getData(context: Context): ADListBean? {
-        return if (getRemoteConfigData() != null) {
-            getRemoteConfigData()
+        return if (App.remoteADListData != null) {
+            App.remoteADListData
         } else {
             getJson(context)
         }
@@ -308,11 +310,11 @@ class CheckADStatus {
         val dayShow: Int = SharedPreferencesUtils.getParam(activity, AppVariable.dateShow, 0) as Int
         val dayClick: Int =
             SharedPreferencesUtils.getParam(activity, AppVariable.dateClick, 0) as Int
-        if (isShow && dayShow < (GetJsonData.getData(activity)?.robvn_sm ?: 40)) {
+        if (isShow && dayShow < (GetJsonData.getData(activity)?.robvn_sm ?: 30)) {
             SharedPreferencesUtils.setParam(activity, AppVariable.dateShow, dayShow + 1)
 //            Timber.tag(AppConstant.TAG).e("展示次数${dayShow + 1}")
         }
-        if (isClick && dayClick < (GetJsonData.getData(activity)?.robvn_cm ?: 10)) {
+        if (isClick && dayClick < (GetJsonData.getData(activity)?.robvn_cm ?: 5)) {
             SharedPreferencesUtils.setParam(activity, AppVariable.dateClick, dayClick + 1)
 //            Timber.tag(AppConstant.TAG).e("点击次数${dayClick + 1}")
         }
@@ -339,6 +341,7 @@ class CheckADStatus {
                 activity
             )
         ) {
+            Toast.makeText(activity,"广告上限",Toast.LENGTH_SHORT).show()
             Timber.tag(AppConstant.TAG + " AD").e("广告加载已达上限")
         }
         return CheckADStatus().getShowCountIsOk(activity) && CheckADStatus().getClickCountIsOk(

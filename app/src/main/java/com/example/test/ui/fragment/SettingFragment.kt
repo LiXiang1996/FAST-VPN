@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.test.R
 import com.example.test.ui.activity.MainActivity
+import com.example.test.ui.activity.RemoteTestActivity
 import com.example.test.ui.activity.WebViewActivity
 import com.example.test.ui.widget.SettingItemView
 
@@ -43,7 +44,9 @@ class SettingFragment : Fragment() {
             toPrivacyPolicy()
         }
         share.setOnClickListener {
-            toShare()
+            val intent = Intent(activity,RemoteTestActivity::class.java)
+            startActivity(intent)
+//            toShare()
         }
         upgrade.setOnClickListener {
             showMarket()
