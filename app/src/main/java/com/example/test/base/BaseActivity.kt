@@ -37,6 +37,7 @@ abstract class BaseActivity : AppCompatActivity(), InitInterface, NetStateChange
         NetStateChangeReceiver.registerReceiver(this)
     }
 
+
     override fun onStart() {
         canJump = true
         super.onStart()
@@ -61,6 +62,7 @@ abstract class BaseActivity : AppCompatActivity(), InitInterface, NetStateChange
                     if (response.isSuccessful) {
                         val data: IPBean? = response.body()
                         AppVariable.isShowBanedIpDialog = CheckIPUtils.checkIpIsOK(data?.country_code?.lowercase())
+                        Timber.tag(AppConstant.TAG).e("-okhttp- ${data}")
                         if (AppVariable.isShowBanedIpDialog && this@BaseActivity !is SplashActivity)
                             showTipDialog(context)
                         if (data?.country_code?.isNotBlank() == true)
@@ -73,7 +75,7 @@ abstract class BaseActivity : AppCompatActivity(), InitInterface, NetStateChange
                 }
 
                 override fun onFailure(call: Call<IPBean>, t: Throwable) {
-//                    Timber.tag(AppConstant.TAG).e("-okhttp- ${t.message}")
+                    Timber.tag(AppConstant.TAG).e("-okhttp- ${t.message}")
                 }
 
             })

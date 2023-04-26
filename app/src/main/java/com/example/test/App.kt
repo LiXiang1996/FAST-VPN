@@ -52,19 +52,19 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
     override fun onCreate() {
         super.onCreate()
         fixWebViewDataDirectoryBug()
-        Firebase.initialize(this)
-        MobileAds.setRequestConfiguration(
-            RequestConfiguration.Builder().setTestDeviceIds(
-                listOf(
-                    "001233B6A65D1EF088BA61537BB77C43",
-                    "1632B27F26C7337301F620C5BE220833"
-                )
-            ).build()
-        )
-        MobileAds.initialize(this) {}
+//        Firebase.initialize(this)
+//        MobileAds.setRequestConfiguration(
+//            RequestConfiguration.Builder().setTestDeviceIds(
+//                listOf(
+//                    "001233B6A65D1EF088BA61537BB77C43",
+//                    "1632B27F26C7337301F620C5BE220833"
+//                )
+//            ).build()
+//        )
+//        MobileAds.initialize(this) {}
         registerActivityLifecycleCallbacks(this)
         context = applicationContext
-        Core.init(this, MainActivity::class)
+        Core.init(this@App, MainActivity::class)
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
 //        getRemoteConfig()
     }
@@ -170,7 +170,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks, LifecycleObse
                         ServersListProfile.defaultList.add(it)
                     }
                     Timber.tag(AppConstant.TAG)
-                        .e("servers${ServersListProfile.getServersList().size}")
+                        .e("servers default ${profileList.size}")
                 }
             }
         } catch (e: Exception) {

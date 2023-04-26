@@ -1,7 +1,7 @@
 package com.example.test.base.data
 
+import androidx.annotation.Keep
 import com.github.shadowsocks.database.Profile
-import com.google.errorprone.annotations.Keep
 @Keep
 data class RemoteProfile(
     var robvn_pwd: String,

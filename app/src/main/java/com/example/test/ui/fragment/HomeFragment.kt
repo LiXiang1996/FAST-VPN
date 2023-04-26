@@ -223,7 +223,6 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
     private fun toggle2Permission(result: (Boolean) -> Unit) {
         isJump = true
         permission.launch(null)
-
     }
 
     private val permission = registerForActivityResult(StartService()) {
@@ -390,7 +389,6 @@ class HomeFragment : Fragment(), ShadowsocksConnection.Callback {
             }
             else -> {}
         }
-
     }
 
     private val intentResult =

@@ -4,8 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.CountDownTimer
 import android.view.KeyEvent
-import android.view.View
-import android.widget.LinearLayout
 import android.widget.ProgressBar
 import com.example.test.App
 import com.example.test.R
@@ -20,10 +18,8 @@ import com.example.test.base.BaseActivity
 import com.example.test.base.bar.StatusBarUtil
 import com.example.test.base.utils.SharedPreferencesUtils
 import com.example.test.ui.widget.CheckIPUtils
-import com.google.android.gms.ads.AdActivity
 import com.google.android.gms.ads.appopen.AppOpenAd
 import com.google.android.gms.ads.interstitial.InterstitialAd
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

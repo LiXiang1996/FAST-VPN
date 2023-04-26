@@ -1,7 +1,6 @@
 package com.example.test.ui.fragment
 
 import android.content.ActivityNotFoundException
-import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -10,8 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.test.R
-import com.example.test.ui.activity.MainActivity
-import com.example.test.ui.activity.RemoteTestActivity
 import com.example.test.ui.activity.WebViewActivity
 import com.example.test.ui.widget.SettingItemView
 
@@ -44,9 +41,7 @@ class SettingFragment : Fragment() {
             toPrivacyPolicy()
         }
         share.setOnClickListener {
-            val intent = Intent(activity,RemoteTestActivity::class.java)
-            startActivity(intent)
-//            toShare()
+            toShare()
         }
         upgrade.setOnClickListener {
             showMarket()
